@@ -1,0 +1,610 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>7.0</ProjectVersion>
+    <ToolchainName>com.Atmel.ARMGCC.CPP</ToolchainName>
+    <ProjectGuid>dce6c7e3-ee26-4d79-826b-08594b9ad897</ProjectGuid>
+    <avrdevice>ATSAMD21G18A</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>CPP</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <ArduinoProjectType>Sketch</ArduinoProjectType>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <Name>VarioSW</Name>
+    <RootNamespace>VarioSW</RootNamespace>
+    <ArduinoIdeDir>C:\Program Files (x86)\Arduino</ArduinoIdeDir>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <KeepTimersRunning>true</KeepTimersRunning>
+    <OverrideVtor>false</OverrideVtor>
+    <CacheFlash>true</CacheFlash>
+    <ProgFlashFromRam>true</ProgFlashFromRam>
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <UncachedRange />
+    <preserveEEPROM>true</preserveEEPROM>
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
+    <BootSegment>2</BootSegment>
+    <eraseonlaunchrule>1</eraseonlaunchrule>
+    <AssemblyName>VarioSW</AssemblyName>
+    <ResetRule>0</ResetRule>
+    <EraseKey />
+    <avrtool>custom</avrtool>
+    <avrtoolserialnumber />
+    <avrdeviceexpectedsignature>0x10010305</avrdeviceexpectedsignature>
+    <custom>
+      <ToolOptions xmlns="">
+        <InterfaceProperties>
+        </InterfaceProperties>
+      </ToolOptions>
+      <ToolType xmlns="">custom</ToolType>
+      <ToolNumber xmlns="">
+      </ToolNumber>
+      <ToolName xmlns="">Custom Programming Tool</ToolName>
+    </custom>
+    <CustomProgrammingToolCommand>python d://programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
+    <CustomProgrammingToolTimeout>10</CustomProgrammingToolTimeout>
+    <AsfFrameworkConfig>
+      <framework-data xmlns="">
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.40.0" />
+        </dependencies>
+      </framework-data>
+    </AsfFrameworkConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <ArmGccCpp>
+        <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+        <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+        <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+        <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+        <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+        <armgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>NDEBUG</Value>
+            <Value>F_CPU=48000000L</Value>
+            <Value>ARDUINO=10805</Value>
+            <Value>ARDUINO_SAMD_ZERO</Value>
+            <Value>ARDUINO_ARCH_SAMD</Value>
+            <Value>USB_VID=0x2341</Value>
+            <Value>USB_PID=0x804d</Value>
+            <Value>USB_PRODUCT="\"Arduino Zero\""</Value>
+            <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
+            <Value>USBCON</Value>
+            <Value>SAMD_SERIES</Value>
+          </ListValues>
+        </armgcc.compiler.symbols.DefSymbols>
+        <armgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\variants</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\avr</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\USB</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\component</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\instance</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\pio</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\spi</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\wire</Value>
+          </ListValues>
+        </armgcc.compiler.directories.IncludePaths>
+        <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
+        <armgcc.compiler.optimization.OtherFlags>-fno-threadsafe-statics -fno-exceptions</armgcc.compiler.optimization.OtherFlags>
+        <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcc.compiler.optimization.PrepareDataForGarbageCollection>True</armgcc.compiler.optimization.PrepareDataForGarbageCollection>
+        <armgcc.compiler.optimization.EnableLongCalls>False</armgcc.compiler.optimization.EnableLongCalls>
+        <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+        <armgcc.compiler.warnings.InhibitAllWarnings>True</armgcc.compiler.warnings.InhibitAllWarnings>
+        <armgcc.compiler.miscellaneous.OtherFlags>-std=gnu11 --param max-inline-insns-single=500 -nostdlib</armgcc.compiler.miscellaneous.OtherFlags>
+        <armgcccpp.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>NDEBUG</Value>
+            <Value>F_CPU=48000000L</Value>
+            <Value>ARDUINO=10805</Value>
+            <Value>ARDUINO_SAMD_ZERO</Value>
+            <Value>ARDUINO_ARCH_SAMD</Value>
+            <Value>USB_VID=0x2341</Value>
+            <Value>USB_PID=0x804d</Value>
+            <Value>USB_PRODUCT="\"Arduino Zero\""</Value>
+            <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
+            <Value>USBCON</Value>
+            <Value>SAMD_SERIES</Value>
+          </ListValues>
+        </armgcccpp.compiler.symbols.DefSymbols>
+        <armgcccpp.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\variants</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\avr</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\USB</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\component</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\instance</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\pio</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\spi</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\wire</Value>
+            <Value>../src</Value>
+            <Value>../src/lib/GxEPD-master</Value>
+            <Value>../src/lib/Adafruit_GFX</Value>
+            <Value>../src/periph</Value>
+            <Value>../src/periph/BMI160</Value>
+          </ListValues>
+        </armgcccpp.compiler.directories.IncludePaths>
+        <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
+        <armgcccpp.compiler.optimization.OtherFlags>-fno-threadsafe-statics -fno-exceptions</armgcccpp.compiler.optimization.OtherFlags>
+        <armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcccpp.compiler.optimization.PrepareDataForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareDataForGarbageCollection>
+        <armgcccpp.compiler.optimization.EnableLongCalls>False</armgcccpp.compiler.optimization.EnableLongCalls>
+        <armgcccpp.compiler.optimization.DebugLevel>Maximum (-g3)</armgcccpp.compiler.optimization.DebugLevel>
+        <armgcccpp.compiler.warnings.InhibitAllWarnings>True</armgcccpp.compiler.warnings.InhibitAllWarnings>
+        <armgcccpp.compiler.miscellaneous.OtherFlags>-std=gnu++11 --param max-inline-insns-single=500 -nostdlib</armgcccpp.compiler.miscellaneous.OtherFlags>
+        <armgcccpp.linker.general.UseNewlibNano>True</armgcccpp.linker.general.UseNewlibNano>
+        <armgcccpp.linker.general.AdditionalSpecs>Use syscall stubs (--specs=nosys.specs)</armgcccpp.linker.general.AdditionalSpecs>
+        <armgcccpp.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.Libraries>
+        <armgcccpp.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>..\linker_scripts\linker_scripts\gcc</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.LibrarySearchPaths>
+        <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+        <armgcccpp.linker.memorysettings.ExternalRAM />
+        <armgcccpp.linker.miscellaneous.LinkerFlags>-Tflash_with_bootloader.ld -Wl,--cref -Os -Wl,--check-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align</armgcccpp.linker.miscellaneous.LinkerFlags>
+        <armgcccpp.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+          </ListValues>
+        </armgcccpp.assembler.general.IncludePaths>
+        <armgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.assembler.debugging.DebugLevel>
+        <armgcccpp.preprocessingassembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+          </ListValues>
+        </armgcccpp.preprocessingassembler.general.IncludePaths>
+      </ArmGccCpp>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <ArmGccCpp>
+        <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+        <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+        <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+        <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+        <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+        <armgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>DEBUG</Value>
+            <Value>F_CPU=48000000L</Value>
+            <Value>ARDUINO=10805</Value>
+            <Value>ARDUINO_SAMD_ZERO</Value>
+            <Value>ARDUINO_ARCH_SAMD</Value>
+            <Value>USB_VID=0x2341</Value>
+            <Value>USB_PID=0x804d</Value>
+            <Value>USB_PRODUCT="\"Arduino Zero\""</Value>
+            <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
+            <Value>USBCON</Value>
+            <Value>SAMD_SERIES</Value>
+          </ListValues>
+        </armgcc.compiler.symbols.DefSymbols>
+        <armgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\variants</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\avr</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\USB</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\component</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\instance</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\pio</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\spi</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\wire</Value>
+          </ListValues>
+        </armgcc.compiler.directories.IncludePaths>
+        <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
+        <armgcc.compiler.optimization.OtherFlags>-fno-threadsafe-statics -fno-exceptions</armgcc.compiler.optimization.OtherFlags>
+        <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcc.compiler.optimization.PrepareDataForGarbageCollection>True</armgcc.compiler.optimization.PrepareDataForGarbageCollection>
+        <armgcc.compiler.optimization.EnableLongCalls>False</armgcc.compiler.optimization.EnableLongCalls>
+        <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+        <armgcc.compiler.warnings.InhibitAllWarnings>True</armgcc.compiler.warnings.InhibitAllWarnings>
+        <armgcc.compiler.miscellaneous.OtherFlags>-std=gnu11 --param max-inline-insns-single=500 -nostdlib</armgcc.compiler.miscellaneous.OtherFlags>
+        <armgcccpp.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>DEBUG</Value>
+            <Value>F_CPU=48000000L</Value>
+            <Value>ARDUINO=10805</Value>
+            <Value>ARDUINO_SAMD_ZERO</Value>
+            <Value>ARDUINO_ARCH_SAMD</Value>
+            <Value>USB_VID=0x2341</Value>
+            <Value>USB_PID=0x804d</Value>
+            <Value>USB_PRODUCT="\"Arduino Zero\""</Value>
+            <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
+            <Value>USBCON</Value>
+            <Value>SAMD_SERIES</Value>
+          </ListValues>
+        </armgcccpp.compiler.symbols.DefSymbols>
+        <armgcccpp.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\variants</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\avr</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\USB</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\component</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\instance</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\pio</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\spi</Value>
+            <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\wire</Value>
+            <Value>../src</Value>
+            <Value>../src/lib/GxEPD-master</Value>
+            <Value>../src/lib/Adafruit_GFX</Value>
+            <Value>../src/periph</Value>
+            <Value>../src/periph/BMI160</Value>
+          </ListValues>
+        </armgcccpp.compiler.directories.IncludePaths>
+        <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
+        <armgcccpp.compiler.optimization.OtherFlags>-fno-threadsafe-statics -fno-exceptions</armgcccpp.compiler.optimization.OtherFlags>
+        <armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcccpp.compiler.optimization.PrepareDataForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareDataForGarbageCollection>
+        <armgcccpp.compiler.optimization.EnableLongCalls>False</armgcccpp.compiler.optimization.EnableLongCalls>
+        <armgcccpp.compiler.optimization.DebugLevel>Maximum (-g3)</armgcccpp.compiler.optimization.DebugLevel>
+        <armgcccpp.compiler.warnings.InhibitAllWarnings>True</armgcccpp.compiler.warnings.InhibitAllWarnings>
+        <armgcccpp.compiler.miscellaneous.OtherFlags>-std=gnu++11 --param max-inline-insns-single=500 -nostdlib</armgcccpp.compiler.miscellaneous.OtherFlags>
+        <armgcccpp.linker.general.UseNewlibNano>True</armgcccpp.linker.general.UseNewlibNano>
+        <armgcccpp.linker.general.AdditionalSpecs>Use syscall stubs (--specs=nosys.specs)</armgcccpp.linker.general.AdditionalSpecs>
+        <armgcccpp.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.Libraries>
+        <armgcccpp.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>..\linker_scripts\linker_scripts\gcc</Value>
+          </ListValues>
+        </armgcccpp.linker.libraries.LibrarySearchPaths>
+        <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+        <armgcccpp.linker.memorysettings.ExternalRAM />
+        <armgcccpp.linker.miscellaneous.LinkerFlags>-Tflash_with_bootloader.ld -Wl,--cref -Os -Wl,--check-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align</armgcccpp.linker.miscellaneous.LinkerFlags>
+        <armgcccpp.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+          </ListValues>
+        </armgcccpp.assembler.general.IncludePaths>
+        <armgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.assembler.debugging.DebugLevel>
+        <armgcccpp.preprocessingassembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\arm\cmsis\5.0.1\CMSIS\Include\</Value>
+          </ListValues>
+        </armgcccpp.preprocessingassembler.general.IncludePaths>
+        <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
+      </ArmGccCpp>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src\definitions.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Adafruit_GFX.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Adafruit_SPITFT.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Adafruit_SPITFT_Macros.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMono12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMono18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMono24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMono9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBold12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBold18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBold24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBold9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBoldOblique12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBoldOblique18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBoldOblique24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoBoldOblique9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoOblique12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoOblique18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoOblique24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeMonoOblique9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSans12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSans18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSans24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSans9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBold12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBold18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBold24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBold9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBoldOblique12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBoldOblique18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBoldOblique24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansBoldOblique9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansOblique12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansOblique18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansOblique24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSansOblique9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerif12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerif18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerif24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerif9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBold12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBold18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBold24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBold9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBoldItalic12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBoldItalic18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBoldItalic24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifBoldItalic9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifItalic12pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifItalic18pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifItalic24pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\FreeSerifItalic9pt7b.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\Org_01.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\Picopixel.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Fonts\TomThumb.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\gfxfont.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxEPD.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxFont_GFX.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxGDEP015OC1\BitmapExamples.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxGDEP015OC1\GxGDEP015OC1.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxIO\GxIO.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxIO\GxIO_SPI\GxIO_SPI.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\BMI160.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\BMI160Gen.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\CurieIMU.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\internal\ss_spi.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\button_control.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\EEPROM.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\MS5611.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\roundbuff.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\SPI_IRQ.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Adafruit_GFX.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Adafruit_GFX\Adafruit_SPITFT.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxEPD-master\library.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxEPD.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxFont_GFX.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxGDEP015OC1\GxGDEP015OC1.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxIO\GxIO.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD-master\GxIO\GxIO_SPI\GxIO_SPI.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\BMI160.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\BMI160Gen.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\CurieIMU.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160\ss_spi.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\button_control.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\EEPROM.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\MS5611.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\roundbuff.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\SPI_IRQ.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="VarioSW.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Content Include="readme.html">
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArduinoCore\ArduinoCore.cppproj">
+      <Name>ArduinoCore</Name>
+      <Project>83c8c369-4561-4214-95ac-0e301f69d416</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="linker_scripts\" />
+    <Folder Include="linker_scripts\linker_scripts\" />
+    <Folder Include="linker_scripts\linker_scripts\gcc\" />
+    <Folder Include="src" />
+    <Folder Include="src\lib\" />
+    <Folder Include="src\lib\Adafruit_GFX\" />
+    <Folder Include="src\lib\Adafruit_GFX\Fonts\" />
+    <Folder Include="src\lib\GxEPD-master\" />
+    <Folder Include="src\lib\GxEPD-master\examples\" />
+    <Folder Include="src\lib\GxEPD-master\examples\GxEPD_SPI_TestExample\" />
+    <Folder Include="src\lib\GxEPD-master\GxEPD-master\" />
+    <Folder Include="src\lib\GxEPD-master\GxGDEP015OC1\" />
+    <Folder Include="src\lib\GxEPD-master\GxIO\" />
+    <Folder Include="src\lib\GxEPD-master\GxIO\GxIO_SPI\" />
+    <Folder Include="src\lib\GxEPD-master\imglib\" />
+    <Folder Include="src\lib\GxEPD-master\imglib\gridicons_product_downloadable.h\" />
+    <Folder Include="src\periph" />
+    <Folder Include="src\periph\BMI160\" />
+    <Folder Include="src\periph\BMI160\internal\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="linker_scripts\linker_scripts\gcc\flash_without_bootloader.ld">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="linker_scripts\linker_scripts\gcc\flash_with_bootloader.ld">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>
