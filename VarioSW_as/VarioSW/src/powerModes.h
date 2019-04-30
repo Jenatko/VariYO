@@ -11,9 +11,13 @@
 
 void powerOff(void) ;
 void allLow(void);
+void reinitializePins(void);
 void wakeUp(void);
 void massStorageEna(void);
-void massStorageDis(void);
+void GPS_full(void);
+void GPS_low(void);
+void GPS_off(void);
+void GPS_stopped(void);
 
 
 

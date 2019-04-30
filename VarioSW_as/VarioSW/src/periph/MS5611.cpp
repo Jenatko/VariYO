@@ -302,8 +302,10 @@ void MS5611::tempUpdate(int stage) {
 
 
 
+//following portion can probably be only in updating sea level pressure
+
     float a_power = pow(Psea, 0.189573);
-    //      float a_power = 8.9;
+
 
     C0 = (17.6968 * a_power - 153.84) * (TEMP / 100 + 273.15);
     C1 = (-0.000037276 * a_power * (TEMP / 100 + 273.15));

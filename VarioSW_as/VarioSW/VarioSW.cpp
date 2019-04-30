@@ -1,11 +1,8 @@
 ﻿
-#include <Arduino.h>
-#include "SPI.h"
+
 #include "SPI_IRQ.h"
 
-#include "MS5611.h"
 
-#include "BMI160Gen.h"
 
 #include <wiring_private.h>
 
@@ -25,15 +22,24 @@
 
 #include "roundbuff.h"
 
+#include "routine.h"
 
-#include <SD.h>
+#include "kalmanfilter3.h"
+
+#include "MAX17055.h"
+
+#include "EEPROM.h"
+
+#include "Variables.h"
+
+#include "powerModes.h"
+
+#include <Wire.h>
+
+#include "MEMS.h"
 
 
-#include <NMEAGPS.h>
-#include <GPSport.h>
-#include <Streamers.h>
-static NMEAGPS  gps;
-static gps_fix  fix;
+
 
 
 #include <GxEPD.h>
@@ -49,36 +55,110 @@ static gps_fix  fix;
 #include "Interrupt_counter.h"
 
 
-GxIO_Class io(SPI, /*CS=*/ 38, /*DC=*/ 2, /*RST=*/ 5);
-GxEPD_Class display(io, /*RST=*/ 5, /*BUSY=*/ 3);
+GxIO_Class io(SPI, /*CS=*/ DISP_CS, /*DC=*/ DISP_DC, /*RST=*/ DISP_RST);
+GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
 
 
 
-Sd2Card card;
-SdVolume volume;
-SdFile root;
 
-File tracklog;
-int trackloggin = 0;
 
-int th_rise = 30;
-int th_sink = -150;
-double myRealAltitude = 230;
 
-int tracklog_ena = 0;
+int pocitadlo = 0;
 
-volatile float altChange = 0;
+
+void Gauge_update(Gauge *gau);
+void Gauge_enable(Gauge *gau);
+
+
+
+void displayUpdate(void){
+	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+	
+	statVar.varioGauge.value = vario_filter/100;
+	Gauge_enable(&statVar.varioGauge);
+	Gauge_update(&statVar.varioGauge);
+
+	/*display.setCursor(20, 60);
+	display.print("spd:");
+	display.print(fix.speed_kph(),1);
+	display.setCursor(20,80);
+	display.print("hdg:");
+	display.print(fix.heading(),1);
+	*/
+	display.setCursor(10,90);
+	display.print(var_localtime->tm_hour);
+	display.print(":");
+	display.print(var_localtime->tm_min);
+	display.print(":");
+	display.print(var_localtime->tm_sec);
+	display.setCursor(10,110);
+	
+	time_t flighttime_t = rtc.getEpoch() - var_takeofftime;
+	struct tm *flighttime;
+	flighttime = gmtime(&flighttime_t);
+	display.print(flighttime->tm_hour);
+	display.print(":");
+	display.print(flighttime->tm_min);
+	display.print(":");
+	display.print(flighttime->tm_sec);
+	
+	display.setCursor(10,130);
+	//display.print(alt_filter);
+	display.print("wnd:");
+	display.print(wind_speed_mps, 1);
+	display.print("/");
+	display.print(wind_direction, 0);
+	
+	
+	display.setCursor(10,170);
+	display.print("alt:");
+	display.print(alt_filter/100);
+	
+	display.setCursor(10,150);
+	display.print("spd:");
+	display.print(fix.speed_kph(), 1);
+	display.print("/");
+	display.print(fix.heading(), 0);
+
+
+	display.setFont(&FreeMonoBold9pt7b);
+	
+	display.setCursor(5, 190);
+	display.print("temp:");
+	display.print(enviromental_data.temperature/100.0);
+	display.print("degC");
+	
+
+	/*
+	display.setCursor(5, 197);
+	display.print("y:");
+	display.print(yaw, 0);
+	display.setCursor(70, 197);
+	display.print("p:");
+	display.print(pitch, 0);
+	display.setCursor(140, 197);
+	display.print("r:");
+	display.print(roll, 0);
+
+	*/
+	
+	display.setFont(&FreeMonoBold12pt7b);
+	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	redraw = 0;
+}
 
 
 void setup() {
-	
 
-	
+
+
 	rtc.begin();
 	rtc.setTime(23, 59, 40);
 	rtc.setDate(1, 1, 2014);
 	
-	menu_init();
+	pinMode(POWER_ENA, INPUT_PULLDOWN);
+	
+	delay(50);
 	
 	pinMode(BUTTON_LEFT, INPUT_PULLUP);
 	pinMode(BUTTON_RIGHT, INPUT_PULLUP);
@@ -86,8 +166,10 @@ void setup() {
 	pinMode(BUTTON_DOWN, INPUT_PULLUP);
 	pinMode(BUTTON_CENTER, INPUT_PULLUP);
 
+
 	pinMode(EEPROM_CS, OUTPUT);
 	digitalWrite(EEPROM_CS, 1);
+
 
 	pinMode(SRAM_CS, OUTPUT);
 	digitalWrite(SRAM_CS, 1);
@@ -100,69 +182,58 @@ void setup() {
 	pinMode(SD_RST, OUTPUT);
 	digitalWrite(SD_RST, 0);
 
-	pinMode(SD_OE, OUTPUT);
-	digitalWrite(SD_OE, 1);
-
-	pinMode(GPS_PPS, INPUT);
-
-
-
 
 	pinMode(IMU_CS, OUTPUT);
 	digitalWrite(IMU_CS, 1);
 	
-
-
-	pinMode(UNUSED2, OUTPUT);
-	digitalWrite(UNUSED2, 1);
-	pinMode(UNUSED3, OUTPUT);
-	digitalWrite(UNUSED3, 1);
-	pinMode(UNUSED4, OUTPUT);
-	digitalWrite(UNUSED4, 1);
-
+	pinMode(BARO_CS, OUTPUT);
+	digitalWrite(BARO_CS, 1);
 
 	pinMode(GPS_CS, OUTPUT);
 	digitalWrite(GPS_CS, 1);
-	pinMode(GPS_UART_TX, OUTPUT);
-	digitalWrite(GPS_UART_TX, 1);
 
-
-	pinPeripheral(10, PIO_SERCOM);
-	pinPeripheral(11, PIO_SERCOM);
-	pinPeripheral(13, PIO_SERCOM);
-
-
+	pinPeripheral(MOSI_IRQ, PIO_SERCOM);
+	pinPeripheral(MISO_IRQ, PIO_SERCOM);
+	pinPeripheral(SCK_IRQ, PIO_SERCOM);
+	
+	//clk_test();
+	//buzzerEna(1);
+	//delay(10000);
 
 
 	SPI.begin();
-
-	
-	
-	
-	
-
-
-
-	//SerialUSB.begin(9600);
-	
-	ms5611.begin(MS5611_ULTRA_HIGH_RES);
 	
 
 	
+	delay(100);   //wait for EEPROM to power-up
+	
+	
+	
+	eepromRead(0, statVar);
+	
 
-	BMI160.begin(BMI160GenClass::SPI_MODE, IMU_CS);
 
 	
-	BMI160.autoCalibrateGyroOffset();
-	BMI160.setGyroRate(25);
-	BMI160.setAccelerometerRate(25);
-	BMI160.setGyroFIFOEnabled(1);
-	BMI160.setAccelFIFOEnabled(1);
-	BMI160.setFIFOHeaderModeEnabled(0);
-	BMI160.resetFIFO();
+	if(statVar.ena_vector & (1<<ENA_GPS)){
+		if(statVar.ena_vector & (1<<ENA_GPS_LOW_POWER)){
+			GPS_low();
+		}
+		else{
+			GPS_full();
+		}
+	}
+	else{
+		GPS_off();
+	}
 	
-	//   BMI160.suspendAll();
-	
+	menu_init();
+
+
+	analogWrite(DAC, statVar.BuzzerVolume);
+	analogWrite(DAC, 0);	//stfu for debug:-)
+		analogWrite(DAC, 255);	//stfu for debug:-)
+
+
 	display.init(0);
 
 	display.setFont(&FreeMonoBold12pt7b);
@@ -176,241 +247,284 @@ void setup() {
 	display.setTextWrap(0);
 	
 	display.setCursor(100, 170);
+	
 
+	
+	Wire.begin();
 
-	//	SerialUSB.begin(9600);
-	Serial1.begin(9600);
+	max17055.setResistSensor(0.039);
+	
+
+	max17055.setCapacity(500);
+	
+	//	while(!SerialUSB.available());
+	//	SerialUSB.println("wtf");
+
+	IMU_init();
+	BME_init_1ms();
+
+	delay(100);
+	
+
+	int fn = 0;
+
+	/*while (1)
+	{	BME_read();
+	SerialUSB.print(enviromental_data.temperature);
+	if(fn%500 < 250){
+	BME_init_1s();
+	}
+	else{
+	BME_init_1s();
+	}
+	delay(1000);
+	fn++;
+	}*/
 	
 	
 	
-	
+	buzzerInit();
+
 
 	
 	counterInit();
 	
-	buzzerInit();
-	buzzerFreq(1000);
-	buzzerEna(1);
+	delay(1000);
+	
+	
+
+
+
+	kalmanFilter3_configure(1000.0, 10.0, 1.0, myRealAltitude, 0.0 , 0.0);
+	
+	
+	statVar.varioGauge.size_X = 130;
+	statVar.varioGauge.size_Y = 40;
+	statVar.varioGauge.offset_X = 10;
+	statVar.varioGauge.offset_Y = 30;
+	statVar.varioGauge.font = 2;
+	statVar.varioGauge.frame = 1;
+	statVar.varioGauge.decimals = 1;
+	statVar.varioGauge.ena = 1;
+	statVar.varioGauge.value = 1.5;
+	String("Vario").toCharArray(statVar.varioGauge.name_shown, 10);
+	String("m/s").toCharArray(statVar.varioGauge.units, 4);
+	
 
 
 
 }
 
 void loop() {
+	
 
-	if (buttons.getFlag())
-	if (buttons.getButtonPressed() == 4){
-		drawMenu(&topmenu);
-		display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
 
-		display.update();
+
+
+
+	if (buttons.getFlag()){
+		switch (buttons.getButtonPressed()){
+			case PRESS:
+			MenuEntry(&topmenu);
+			display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+			display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
+
+			display.update();
+			break;
+			
+			case DOWN:
+			statVar.BuzzerVolume -=50;
+			if(statVar.BuzzerVolume<0){
+				statVar.BuzzerVolume = 0;
+			}
+			analogWrite(DAC, statVar.BuzzerVolume);
+			SerialUSB.println("down_vol");
+			break;
+			
+			case UP:
+			statVar.BuzzerVolume +=50;
+			if(statVar.BuzzerVolume>255){
+				statVar.BuzzerVolume = 255;
+			}
+			analogWrite(DAC, statVar.BuzzerVolume);
+			SerialUSB.println("up_vol");
+			break;
+		}
+
 	}
 
 
-	
-	//gps test
-	
-	SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-	digitalWrite(GPS_CS, 0);
-	byte fn;
-	do {
-		fn = SPI.transfer( 0xFF );
-		//	SerialUSB.write(fn);
-	} while (gps.handle(fn) != NMEAGPS::DECODE_CHR_INVALID || fn != 0xff );
-	
-	digitalWrite(GPS_CS, 1);
-	if(gps.available()){
-		fix = gps.read();
-		SerialUSB.println("fixupdate");
-		
-		
-		//SerialUSB.println(fix.latitude(), 6);
-		//SerialUSB.print(fix.dateTime.hours);
-		//SerialUSB.print(":");
-		//SerialUSB.print(fix.dateTime.minutes);
-		//SerialUSB.print(":");
-		//SerialUSB.println(fix.dateTime.seconds);
-		
-		display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-		display.setCursor(20, 20);
-		display.print("lat:");
-		display.print(fix.latitude(), 5);
-		display.setCursor(20, 40);
-		display.print("lon:");
-		display.print(fix.longitude(),5);
-		display.setCursor(20, 60);
-		display.print("spd:");
-		display.print(fix.speed_kph(),1);
-		display.setCursor(20,80);
-		display.print("hdg:");
-		display.print(fix.heading(),1);
-		display.setCursor(20,100);
-		display.print(fix.dateTime.hours);
-		display.print(":");
-		display.print(fix.dateTime.minutes);
-		display.print(":");
-		display.print(fix.dateTime.seconds);
-		display.setCursor(20,120);
-		display.print(ms5611.readAltitude(rbuff.getAverage()));
-		
-		if(fix.valid.time){
-			rtc.setTime(fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
-			rtc.setDate(fix.dateTime.date, fix.dateTime.month, fix.dateTime.year);
+	routine();
+
+
+	if(redraw){
+
+		/*
+		Wire.beginTransmission(SI7021_ADDRESS);
+		Wire.write(SI7021_MEASURE_RH);
+		Wire.endTransmission();
+		int byte = 0;
+		delay(15);
+		while(!byte){
+		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
 		}
-		display.setCursor(20, 170);
+		int rh = 0;
+		rh = Wire.read()<<8;
+		rh += Wire.read();
+		SerialUSB.print((125.0*rh/65536.0)-6.0);
+		SerialUSB.print(',');
 		
-		display.print(altChange, 1);
 		
-		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
-
-		if (tracklog_ena == 1)
-		{   SerialUSB.println("opening");
-			
-			char cesta_char[40];
-
-
-			SD.begin(SD_CS);
-			
-			String cesta = ("/Tracks/");
-			cesta.concat(String(rtc.getYear()));
-			cesta.concat("/");
-			cesta.concat(String(rtc.getMonth()));
-			cesta.concat("/");
-			cesta.concat(String(rtc.getDay()));
-	
-			cesta.toCharArray(cesta_char, 40);
-			
-			if(SD.exists(cesta_char))
-				SerialUSB.println("existuje");
-		    else{
-				SerialUSB.println(cesta_char);
-				SD.mkdir(cesta_char);
-				SerialUSB.println("vytvoreno");
-			}
-			
-			cesta.concat("/");
-			cesta.concat(String(rtc.getHours()));
-						cesta.concat(String(rtc.getMinutes()));
-						cesta.concat(String(rtc.getSeconds()));
-						cesta.concat(String(".gpx"));
-						cesta.toCharArray(cesta_char, 40);
-
-			tracklog = SD.open(cesta_char, FILE_WRITE);
-
-			tracklog.println("<gpx>");
-			tracklog.println("  <trk>");
-			tracklog.println("    <trkseg>");
-			tracklog_ena = 2;
-
+		
+		Wire.beginTransmission(SI7021_ADDRESS);
+		Wire.write(SI7021_READ_TEMP_FROM_RH);
+		Wire.endTransmission();
+		byte = 0;
+		delay(15);
+		while(!byte){
+		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
 		}
-		if (tracklog){
-			SerialUSB.println("logging");
-			if(fix.valid.location){
-				//if(1){
-				tracklog.print("      <trkpt lat=\"");
-				tracklog.print(fix.latitude(), 6);
-				tracklog.print("\" lon=\"");
-				tracklog.print(fix.longitude(),5);
-				tracklog.println("\">");
-				
-				tracklog.print("        <ele>");
-				tracklog.print(fix.altitude(), 1);
-				tracklog.println("</ele>");
-				
-				tracklog.print("        <time>");
-				
-				tracklog.print(fix.dateTime.year);
-				tracklog.print("-");
-				tracklog.print(fix.dateTime.month);
-				tracklog.print("-");
-				tracklog.print(fix.dateTime.date);
-				tracklog.print("T");
-				
-				tracklog.print(fix.dateTime.hours);
-				tracklog.print(":");
-				tracklog.print(fix.dateTime.minutes);
-				tracklog.print(":");
-				tracklog.print(fix.dateTime.seconds);
-				
-				tracklog.println("Z</time>");
-				tracklog.println("      </trkpt>");
-			}
-			
-			if(tracklog_ena == 0){
-				SerialUSB.println("closing");
-				tracklog.println("    </trkseg>");
-				tracklog.println("  </trk>");
-				tracklog.println("</gpx>");
-				tracklog.close();
-				
-			}
+		rh = 0;
+		rh = Wire.read()<<8;
+		rh += Wire.read();
+		SerialUSB.println((175.72*rh/65536.0)-46.85);
+		
+		*/
+		
+		//	SerialUSB.println(rtc.getEpoch());
+		//   unsigned long fn = micros();
+		time_t tempTime = rtc.getEpoch();
+		tempTime += 3600 * statVar.TimeZone;
+		var_localtime = gmtime(&tempTime);
+		//	unsigned long fn2 = micros();
+		//	SerialUSB.println(fn2-fn);		//time check, takes around 5ms
+		
+		//	SerialUSB.println(mktime(var_localtime));
+		
+		displayUpdate();
+		
+		if(max17055.getAverageVoltage() < 2.95){
+			powerOff();
 		}
 		
+
+		
+		/*
+		if(pocitadlo % 10 == 0){
+		SerialUSB.println(enviromental_data.temperature);
+		
+		SerialUSB.print("time;");
+		SerialUSB.print(pocitadlo);
+		SerialUSB.print(";Vavg;");
+		SerialUSB.print(max17055.getAverageVoltage(), 3); display.print(" V");
+		SerialUSB.print(";Iavg;");
+		SerialUSB.print(max17055.getAverageCurrent());  display.print(" mA");
+		SerialUSB.print(";SOC;");
+		SerialUSB.print(max17055.getSOC());  display.print(" %");
+		SerialUSB.print(";TTE;");
+		SerialUSB.print(max17055.getTimeToEmpty()); display.print(" hr");
+		SerialUSB.print(";TTF;");
+		SerialUSB.print(max17055.getTimeToFull()); display.print(" hr");
+		SerialUSB.print(";measCap;");
+		SerialUSB.print(max17055.getReportedCapacity()); display.print(" mAH");
+		SerialUSB.print(";remCap;");
+		SerialUSB.println(max17055.getRemainingCapacity()); display.print(" mAH");
+		
+		
+		}*/
+
+		
+		
+
+		//	pocitadlo ++;
 		
 		
 	}
-	else
-	delay(100);
-
-
-
-	
-	
-	
-	//test IMU + baro
-	/*
-	display.fillRect(10, 5, 150, 180, GxEPD_WHITE);
-	display.setCursor(20, 45);
-	display.print(ms5611.readTemperature(), 1);
-	display.print(" degC");
-
-
-
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
-	
-	ms5611.tempUpdate(1);
-	delay(100);
-	ms5611.tempUpdate(2);
-	
-	while (BMI160.getFIFOCount() != 0) {
-
-
-	uint8_t pole[13];
-	
-	BMI160.getFIFOBytes(pole, 12);
-	//   SerialUSB.println(BMI160.getFIFOCount());
-
-	int accel[3];
-	int gyro[3];
-	gyro[0] = pole[0] | ((int8_t)pole[1] << 8);
-	gyro[1] = pole[2] | ((int8_t)pole[3] << 8);
-	gyro[2] = pole[4] | ((int8_t)pole[5] << 8);
-
-	accel[0] = pole[6] | ((int8_t)pole[7] << 8);
-	accel[1] = pole[8] | ((int8_t)pole[9] << 8);
-	accel[2] = pole[10] | ((int8_t)pole[11] << 8);
-	
-	//	for (int i = 0; i < 11; i++) {
-	//		SerialUSB.print(pole[i]);
-	//		SerialUSB.print(";");
-	//	}
-	
-	SerialUSB.print(gyro[0]);
-	SerialUSB.print(";");
-	SerialUSB.print(gyro[1]);
-	SerialUSB.print(";");
-	SerialUSB.print(gyro[2]);
-	SerialUSB.print(";");
-	SerialUSB.print(accel[0]);
-	SerialUSB.print(";");
-	SerialUSB.print(accel[1]);
-	SerialUSB.print(";");
-	SerialUSB.println(accel[2]);
-	
-	
-
+	else{
+		delay(100);
 	}
-	*/
 	
+	
+	
+	
+	
+	
+
 }
+
+
+
+void Gauge_enable(Gauge *gau) {
+	if (gau->ena == 1) {
+		if (gau->frame == 1) {
+			display.drawRect(gau->offset_X, gau->offset_Y, gau->size_X, gau->size_Y, GxEPD_BLACK);
+			//      display.fillRect(0, 0, 199, 199, GxEPD_BLACK);
+			//         display.drawRect(offset_X-1, offset_Y-1, size_X+1, size_Y+1, GxEPD_WHITE);
+		}
+		if (gau->name_shown[0] != '\0') {
+			display.fillRect(gau->offset_X + 5 , gau->offset_Y - 11, strlen(gau->name_shown) * 12, 13, GxEPD_WHITE);
+			display.setCursor(gau->offset_X + 8, gau->offset_Y);
+			display.setFont(&FreeMonoBold9pt7b);
+
+			display.print(gau->name_shown);
+
+			display.setFont(&FreeMonoBold12pt7b);
+
+		}
+		if (gau->units[0] != '\0') {
+			display.setFont(&FreeMonoBold9pt7b);
+			switch (gau->font) {
+				case (0):
+				display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
+				break;
+				case (1):
+				display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
+				break;
+				case (2):
+				display.setCursor(gau->offset_X + 5, gau->offset_Y + 25);
+				break;
+				case (3):
+				display.setCursor(gau->offset_X + 5, gau->offset_Y + 32);
+				break;
+			}
+			display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + gau->size_Y - 17);
+			display.print(gau->units);
+			display.setFont(&FreeMonoBold12pt7b);
+
+		}
+
+
+	}
+}
+
+
+
+
+void Gauge_update(Gauge *gau) {
+	switch (gau->font) {
+		case (0):
+		display.setFont(&FreeMonoBold9pt7b);
+		display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
+		break;
+		case (1):
+		display.setFont(&FreeMonoBold12pt7b);
+		display.setCursor(gau->offset_X + 5, gau->offset_Y + 22);
+		break;
+		case (2):
+		display.setFont(&FreeMonoBold18pt7b);
+		display.setCursor(gau->offset_X + 5, gau->offset_Y + 28);
+		break;
+		case (3):
+		display.setFont(&FreeMonoBold24pt7b);
+		display.setCursor(gau->offset_X + 5, gau->offset_Y + 35);
+		break;
+	}
+	display.fillRect(gau->offset_X + 1, gau->offset_Y + 1, gau->size_X - 2 - strlen(gau->units) * 12, gau->size_Y - 2, GxEPD_WHITE);
+	//display.setCursor(offset_X + 5, offset_Y + 22);
+	if(gau->value >=0)
+	display.print("+");
+	display.print(gau->value, gau->decimals);
+	display.setFont(&FreeMonoBold12pt7b);
+}
+
+

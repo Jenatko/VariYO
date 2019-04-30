@@ -3,10 +3,16 @@
 #include "roundbuff.h"
 
 
+EEPROM eeprom;
 
-int EEPROM::read(int address) {
+
+
+
+int EEPROM::readByte(int address) {
   int i;
   SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+  
+  //check status register
   do {
     digitalWrite(EEPROM_CS, 0);
     SPI.transfer(EEPROM_INSTR_RDSR);
@@ -20,7 +26,7 @@ int EEPROM::read(int address) {
   //  SPI.transfer(i);
   SPI.transfer(EEPROM_INSTR_READ | (i << 3));
   SPI.transfer(address & 0xff);
-  i = SPI.transfer(0) & 1;
+  i = SPI.transfer(0);
   digitalWrite(EEPROM_CS, 1);
 
 
@@ -28,7 +34,7 @@ int EEPROM::read(int address) {
 
 }
 
-void EEPROM::write(int address, int data) {
+void EEPROM::writeByte(int address, int data) {
 
   int i;
 
@@ -59,5 +65,15 @@ void EEPROM::write(int address, int data) {
   digitalWrite(EEPROM_CS, 1);
 
 
+}
+
+
+
+void EEPROM::printAll(){
+	for(int i = 0; i < 512; i++){
+		SerialUSB.print(i, HEX);
+		SerialUSB.print("; 0x");
+		SerialUSB.println(readByte(i), HEX);
+	}
 }
 

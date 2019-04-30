@@ -43,7 +43,7 @@
       </ToolNumber>
       <ToolName xmlns="">Custom Programming Tool</ToolName>
     </custom>
-    <CustomProgrammingToolCommand>python d://programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
+    <CustomProgrammingToolCommand>python D:\Data\Bastelni\Vario\VarioSW_as\programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
     <CustomProgrammingToolTimeout>10</CustomProgrammingToolTimeout>
     <AsfFrameworkConfig>
       <framework-data xmlns="">
@@ -68,7 +68,6 @@
   <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
   <armgcc.compiler.symbols.DefSymbols>
     <ListValues>
-      <Value>NDEBUG</Value>
       <Value>F_CPU=48000000L</Value>
       <Value>ARDUINO=10805</Value>
       <Value>ARDUINO_SAMD_ZERO</Value>
@@ -79,6 +78,7 @@
       <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
       <Value>USBCON</Value>
       <Value>SAMD_SERIES</Value>
+      <Value>NDEBUG</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
@@ -95,6 +95,9 @@
       <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\pio</Value>
       <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\spi</Value>
       <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\wire</Value>
+      <Value>../src/periph/BMI160_bosch_driver</Value>
+      <Value>../src/periph/BMM150_bosch_driver</Value>
+      <Value>../src/periph/BME280_bosch_driver</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -107,7 +110,6 @@
   <armgcc.compiler.miscellaneous.OtherFlags>-std=gnu11 --param max-inline-insns-single=500 -nostdlib</armgcc.compiler.miscellaneous.OtherFlags>
   <armgcccpp.compiler.symbols.DefSymbols>
     <ListValues>
-      <Value>NDEBUG</Value>
       <Value>F_CPU=48000000L</Value>
       <Value>ARDUINO=10805</Value>
       <Value>ARDUINO_SAMD_ZERO</Value>
@@ -118,6 +120,7 @@
       <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
       <Value>USBCON</Value>
       <Value>SAMD_SERIES</Value>
+      <Value>NDEBUG</Value>
     </ListValues>
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
@@ -139,9 +142,15 @@
       <Value>../src/lib/Adafruit_GFX</Value>
       <Value>../src/periph</Value>
       <Value>../src/periph/BMI160</Value>
+      <Value>../src/periph/BMI160_bosch_driver</Value>
       <Value>../src/lib/NeoGPS/src</Value>
       <Value>../../ArduinoCore/src/libraries/SD</Value>
       <Value>../src/lib/RTCZero</Value>
+      <Value>../src/lib/MahonyAHRS</Value>
+      <Value>../src/lib</Value>
+      <Value>../src/periph/BME280_bosch_driver</Value>
+      <Value>../src/lib/CircleFit</Value>
+      <Value>../src/lib/Eigen</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -191,7 +200,6 @@
         <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
         <armgcc.compiler.symbols.DefSymbols>
           <ListValues>
-            <Value>DEBUG</Value>
             <Value>F_CPU=48000000L</Value>
             <Value>ARDUINO=10805</Value>
             <Value>ARDUINO_SAMD_ZERO</Value>
@@ -202,6 +210,7 @@
             <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
             <Value>USBCON</Value>
             <Value>SAMD_SERIES</Value>
+            <Value>DEBUG</Value>
           </ListValues>
         </armgcc.compiler.symbols.DefSymbols>
         <armgcc.compiler.directories.IncludePaths>
@@ -218,6 +227,7 @@
             <Value>%24(ProjectDir)\..\ArduinoCore\include\core\samd21\include\pio</Value>
             <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\spi</Value>
             <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\wire</Value>
+            <Value>../src/periph/BMI160_bosch_driver</Value>
           </ListValues>
         </armgcc.compiler.directories.IncludePaths>
         <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -230,7 +240,6 @@
         <armgcc.compiler.miscellaneous.OtherFlags>-std=gnu11 --param max-inline-insns-single=500 -nostdlib</armgcc.compiler.miscellaneous.OtherFlags>
         <armgcccpp.compiler.symbols.DefSymbols>
           <ListValues>
-            <Value>DEBUG</Value>
             <Value>F_CPU=48000000L</Value>
             <Value>ARDUINO=10805</Value>
             <Value>ARDUINO_SAMD_ZERO</Value>
@@ -241,6 +250,7 @@
             <Value>USB_MANUFACTURER="\"Arduino LLC\""</Value>
             <Value>USBCON</Value>
             <Value>SAMD_SERIES</Value>
+            <Value>DEBUG</Value>
           </ListValues>
         </armgcccpp.compiler.symbols.DefSymbols>
         <armgcccpp.compiler.directories.IncludePaths>
@@ -262,6 +272,7 @@
             <Value>../src/lib/Adafruit_GFX</Value>
             <Value>../src/periph</Value>
             <Value>../src/periph/BMI160</Value>
+            <Value>../src/periph/BMI160_bosch_driver</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -285,7 +296,8 @@
           </ListValues>
         </armgcccpp.linker.libraries.LibrarySearchPaths>
         <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
-        <armgcccpp.linker.memorysettings.ExternalRAM />
+        <armgcccpp.linker.memorysettings.ExternalRAM>
+        </armgcccpp.linker.memorysettings.ExternalRAM>
         <armgcccpp.linker.miscellaneous.LinkerFlags>-Tflash_with_bootloader.ld -Wl,--cref -Os -Wl,--check-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align</armgcccpp.linker.miscellaneous.LinkerFlags>
         <armgcccpp.assembler.general.IncludePaths>
           <ListValues>
@@ -477,6 +489,30 @@
     <Compile Include="src\lib\Adafruit_GFX\gfxfont.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\lib\CircleFit\CircleFitByTaubin.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\CircleFit\circle.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\CircleFit\circle.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\CircleFit\CircleFitByTaubin.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\CircleFit\data.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\CircleFit\data.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\CircleFit\mystuff.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\CircleFit\Utilities.cpp">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\lib\GxEPD-master\GxEPD.h">
       <SubType>compile</SubType>
     </Compile>
@@ -493,6 +529,18 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lib\GxEPD-master\GxIO\GxIO_SPI\GxIO_SPI.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\kalmanfilter3.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\kalmanfilter3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\MahonyAHRS\MahonyAHRS.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\MahonyAHRS\MahonyAHRS.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lib\NeoGPS\extras\configs\DTL\GPSfix_cfg.h">
@@ -627,16 +675,31 @@
     <Compile Include="src\numpad.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\periph\BMI160\BMI160.h">
+    <Compile Include="src\periph\BME280_bosch_driver\bme280.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\periph\BMI160\BMI160Gen.h">
+    <Compile Include="src\periph\BME280_bosch_driver\bme280.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\periph\BMI160\CurieIMU.h">
+    <Compile Include="src\periph\BME280_bosch_driver\bme280_defs.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\periph\BMI160\internal\ss_spi.h">
+    <Compile Include="src\periph\BMI160_bosch_driver\bmi160_bosch.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160_bosch_driver\bmi160_bosch.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMI160_bosch_driver\bmi160_defs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMM150_bosch_driver\bmm150.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMM150_bosch_driver\bmm150.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\BMM150_bosch_driver\bmm150_defs.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\periph\button_control.h">
@@ -651,7 +714,16 @@
     <Compile Include="src\periph\EEPROM.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\periph\MS5611.h">
+    <Compile Include="src\periph\MEMS.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\MEMS.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\MAX17055.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\periph\MAX17055.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\powerModes.cpp">
@@ -661,6 +733,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\roundbuff.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\routine.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\routine.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\SPI_IRQ.h">
@@ -720,31 +798,22 @@
     <Compile Include="src\lib\NeoGPS\src\ublox\ubxNMEA.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\periph\BMI160\BMI160.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\periph\BMI160\BMI160Gen.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\periph\BMI160\CurieIMU.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\periph\BMI160\ss_spi.cpp">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\periph\button_control.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\periph\EEPROM.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\periph\MS5611.cpp">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\roundbuff.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\SPI_IRQ.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Variables.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Variables.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="VarioSW.cpp">
@@ -789,16 +858,46 @@
     <Folder Include="src\lib\NeoGPS\src\" />
     <Folder Include="src\lib\NeoGPS\src\Garmin\" />
     <Folder Include="src\lib\NeoGPS\src\ublox\" />
+    <Folder Include="src\lib\MahonyAHRS" />
+    <Folder Include="src\lib\CircleFit" />
     <Folder Include="src\lib\RTCZero" />
     <Folder Include="src\periph" />
-    <Folder Include="src\periph\BMI160\" />
-    <Folder Include="src\periph\BMI160\internal\" />
+    <Folder Include="src\periph\BMI160_bosch_driver" />
+    <Folder Include="src\periph\BMM150_bosch_driver" />
+    <Folder Include="src\periph\BME280_bosch_driver" />
   </ItemGroup>
   <ItemGroup>
     <None Include="linker_scripts\linker_scripts\gcc\flash_without_bootloader.ld">
       <SubType>compile</SubType>
     </None>
     <None Include="linker_scripts\linker_scripts\gcc\flash_with_bootloader.ld">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BME280_bosch_driver\LICENSE">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BME280_bosch_driver\README.md">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BMI160_bosch_driver\changelog.md">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BMI160_bosch_driver\LICENSE">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BMI160_bosch_driver\README.md">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BMM150_bosch_driver\changelog.md">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BMM150_bosch_driver\Interrupt_settings.md">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BMM150_bosch_driver\LICENSE">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\periph\BMM150_bosch_driver\README.md">
       <SubType>compile</SubType>
     </None>
   </ItemGroup>

@@ -18,16 +18,17 @@ void GxIO_SPI::reset()
 {
   if (_rst >= 0)
   {
-    delay(20);
+    delayMicroseconds(20000);
     digitalWrite(_rst, LOW);
-    delay(20);
+    delayMicroseconds(20000);
     digitalWrite(_rst, HIGH);
-    delay(200);
+    delayMicroseconds(200000);
   }
 }
 
 void GxIO_SPI::init()
-{
+{  
+	
   if (_cs >= 0)
   {
     digitalWrite(_cs, HIGH);
@@ -48,11 +49,17 @@ void GxIO_SPI::init()
     digitalWrite(_bl, HIGH);
     pinMode(_bl, OUTPUT);
   }
+  
+
   reset();
+
   IOSPI.begin();
+
   IOSPI.setDataMode(SPI_MODE0);
   IOSPI.setBitOrder(MSBFIRST);
   setFrequency(GxIO_SPI_defaultFrequency);
+
+
 }
 
 void GxIO_SPI::setFrequency(uint32_t freq)

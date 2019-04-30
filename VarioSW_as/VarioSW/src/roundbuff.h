@@ -1,4 +1,4 @@
-#define RBUFF_LENGTH  61
+#define RBUFF_LENGTH  5
 
 
 class RBUFF

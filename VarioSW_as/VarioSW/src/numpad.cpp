@@ -13,6 +13,7 @@ int numpad(int initial_number) {
 
 
 		if (buttons.getFlag()) {
+			while(buttons.getFlag()){
 			printNumpadButton(selected, 0);
 			switch (buttons.getButtonPressed()) {
 				case (0):
@@ -130,6 +131,7 @@ int numpad(int initial_number) {
 				display.print(number);
 				break;
 			}
+		}
 			display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
 		}
 	}

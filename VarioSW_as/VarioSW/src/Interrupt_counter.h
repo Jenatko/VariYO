@@ -15,6 +15,11 @@ void counterInit(void);
 
 extern volatile float altChange;
 
+extern float yaw, pitch, roll;
+extern float a_vertical_imu;
+
+extern int pocitadlo;
+
 
 
 #endif /* INTERRUPT_COUNTER_H_ */

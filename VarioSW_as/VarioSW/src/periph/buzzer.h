@@ -25,6 +25,9 @@ void buzzerCounter(int count);
 //set frequency based on altitude change
 void buzzerAltitudeDiff(int altDiff_cm_in);
 
+//to check clk frequency, appears on SRAM_CS pin
+void clk_test(void);
+
 
 extern int th_sink;
 extern int th_rise;

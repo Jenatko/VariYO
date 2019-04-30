@@ -17,7 +17,8 @@ class BUTTONCONTROL
   private:
     int wasPressed = 0;
     int flag = 0;
-    int buttonPressed = 0;
+	int index = 0;
+    int buttonPressed[5] = {0, 0, 0, 0, 0};
     int block = 0;
 };
 

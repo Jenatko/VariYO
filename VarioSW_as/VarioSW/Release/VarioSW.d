@@ -1,4 +1,5 @@
-VarioSW.d VarioSW.o: .././VarioSW.cpp \
+VarioSW.d VarioSW.o: .././VarioSW.cpp ../src/SPI_IRQ.h \
+ ..\\..\ArduinoCore\include\libraries\spi/SPI.h \
  ..\\..\ArduinoCore\include\core/Arduino.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\lib\gcc\arm-none-eabi\6.3.1\include\stdbool.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\lib\gcc\arm-none-eabi\6.3.1\include\stdint.h \
@@ -150,30 +151,31 @@ VarioSW.d VarioSW.o: .././VarioSW.cpp \
  ..\\..\ArduinoCore\include\core/RingBuffer.h \
  ..\\..\ArduinoCore\include\core/USB/USB_host.h \
  ..\\..\ArduinoCore\include\core/USB/samd21_host.h \
- ..\\..\ArduinoCore\include\libraries\spi/SPI.h ../src/SPI_IRQ.h \
- ../src/periph/MS5611.h ../src/periph/../SPI_IRQ.h \
- ../src/periph/../definitions.h ../src/periph/BMI160/BMI160Gen.h \
- ../src/periph/BMI160/CurieIMU.h ../src/periph/BMI160/BMI160.h \
  ..\\..\ArduinoCore\include\core/wiring_private.h ../src/definitions.h \
- ../src/periph/button_control.h ../src/Menu.h ../src/numpad.h \
- ../src/lib/RTCZero/RTCZero.h ../src/periph/buzzer.h ../src/roundbuff.h \
- ../../ArduinoCore/src/libraries/SD/SD.h \
- ../../ArduinoCore/src/libraries/SD/utility/SdFat.h \
- ../../ArduinoCore/src/libraries/SD/utility/Sd2Card.h \
- ../../ArduinoCore/src/libraries/SD/utility/Sd2PinMap.h \
- ../../ArduinoCore/src/libraries/SD/utility/SdInfo.h \
- ../../ArduinoCore/src/libraries/SD/utility/FatStructs.h \
- ..\\..\ArduinoCore\include\core/Print.h \
- ../../ArduinoCore/src/libraries/SD/utility/SdFatUtil.h \
+ ../src/periph/button_control.h ../src/periph/../definitions.h \
+ ../src/Menu.h ../src/numpad.h ../src/lib/RTCZero/RTCZero.h \
+ ../src/periph/buzzer.h ../src/roundbuff.h ../src/routine.h \
  ../src/lib/NeoGPS/src/NMEAGPS.h ../src/lib/NeoGPS/src/CosaCompat.h \
  ../src/lib/NeoGPS/src/GPSfix.h ../src/lib/NeoGPS/src/NeoGPS_cfg.h \
  ../src/lib/NeoGPS/src/GPSfix_cfg.h ../src/lib/NeoGPS/src/NeoTime.h \
  ../src/lib/NeoGPS/src/Location.h ../src/lib/NeoGPS/src/NMEAGPS_cfg.h \
  ../src/lib/NeoGPS/src/NMEAGPSprivate.h ../src/lib/NeoGPS/src/GPSport.h \
- ../src/lib/NeoGPS/src/Streamers.h ../src/lib/GxEPD-master/GxEPD.h \
- ../src/lib/GxEPD-master/GxIO/GxIO.h \
- ../src/lib/Adafruit_GFX/Adafruit_GFX.h ../src/lib/Adafruit_GFX/gfxfont.h \
- ../src/lib/GxEPD-master/GxFont_GFX.h \
+ ../src/lib/NeoGPS/src/Streamers.h ../src/lib/kalmanfilter3.h \
+ ../src/periph/MAX17055.h ../src/periph/EEPROM.h \
+ ..\\..\ArduinoCore\include\core/arduino.h ../src/Variables.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/CircleFit/data.h ../src/lib/CircleFit/circle.h \
+ ../src/powerModes.h ..\\..\ArduinoCore\include\libraries\wire/Wire.h \
+ ../src/periph/MEMS.h ../src/periph/BMI160_bosch_driver/bmi160_bosch.h \
+ ../src/periph/BMI160_bosch_driver/bmi160_defs.h \
+ ../src/periph/BME280_bosch_driver/bme280.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/GxEPD-master/GxEPD.h ../src/lib/GxEPD-master/GxIO/GxIO.h \
+ ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
+ ..\\..\ArduinoCore\include\core/Print.h \
+ ../src/lib/Adafruit_GFX/gfxfont.h ../src/lib/GxEPD-master/GxFont_GFX.h \
  ../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h \
  ../src/lib/GxEPD-master/GxGDEP015OC1/../GxEPD.h \
  ../src/lib/GxEPD-master/GxIO/GxIO_SPI/GxIO_SPI.h \
@@ -184,6 +186,10 @@ VarioSW.d VarioSW.o: .././VarioSW.cpp \
  ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold12pt7b.h \
  ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold9pt7b.h \
  ../src/Interrupt_counter.h
+
+../src/SPI_IRQ.h:
+
+..\\..\ArduinoCore\include\libraries\spi/SPI.h:
 
 ..\\..\ArduinoCore\include\core/Arduino.h:
 
@@ -487,27 +493,13 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ..\\..\ArduinoCore\include\core/USB/samd21_host.h:
 
-..\\..\ArduinoCore\include\libraries\spi/SPI.h:
-
-../src/SPI_IRQ.h:
-
-../src/periph/MS5611.h:
-
-../src/periph/../SPI_IRQ.h:
-
-../src/periph/../definitions.h:
-
-../src/periph/BMI160/BMI160Gen.h:
-
-../src/periph/BMI160/CurieIMU.h:
-
-../src/periph/BMI160/BMI160.h:
-
 ..\\..\ArduinoCore\include\core/wiring_private.h:
 
 ../src/definitions.h:
 
 ../src/periph/button_control.h:
+
+../src/periph/../definitions.h:
 
 ../src/Menu.h:
 
@@ -519,21 +511,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/roundbuff.h:
 
-../../ArduinoCore/src/libraries/SD/SD.h:
-
-../../ArduinoCore/src/libraries/SD/utility/SdFat.h:
-
-../../ArduinoCore/src/libraries/SD/utility/Sd2Card.h:
-
-../../ArduinoCore/src/libraries/SD/utility/Sd2PinMap.h:
-
-../../ArduinoCore/src/libraries/SD/utility/SdInfo.h:
-
-../../ArduinoCore/src/libraries/SD/utility/FatStructs.h:
-
-..\\..\ArduinoCore\include\core/Print.h:
-
-../../ArduinoCore/src/libraries/SD/utility/SdFatUtil.h:
+../src/routine.h:
 
 ../src/lib/NeoGPS/src/NMEAGPS.h:
 
@@ -557,11 +535,47 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/lib/NeoGPS/src/Streamers.h:
 
+../src/lib/kalmanfilter3.h:
+
+../src/periph/MAX17055.h:
+
+../src/periph/EEPROM.h:
+
+..\\..\ArduinoCore\include\core/arduino.h:
+
+../src/Variables.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/CircleFit/data.h:
+
+../src/lib/CircleFit/circle.h:
+
+../src/powerModes.h:
+
+..\\..\ArduinoCore\include\libraries\wire/Wire.h:
+
+../src/periph/MEMS.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_bosch.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_defs.h:
+
+../src/periph/BME280_bosch_driver/bme280.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
 ../src/lib/GxEPD-master/GxEPD.h:
 
 ../src/lib/GxEPD-master/GxIO/GxIO.h:
 
 ../src/lib/Adafruit_GFX/Adafruit_GFX.h:
+
+..\\..\ArduinoCore\include\core/Print.h:
 
 ../src/lib/Adafruit_GFX/gfxfont.h:
 

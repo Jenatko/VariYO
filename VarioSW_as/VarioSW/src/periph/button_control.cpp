@@ -5,59 +5,81 @@
 
 
 int BUTTONCONTROL::getFlag() {
-  return flag;
+	return flag;
 
 }
 
 void BUTTONCONTROL::buttonUpdate() {
 
 
-  if (!digitalRead(BUTTON_UP)) {
-    buttonPressed = UP;
-    if (wasPressed == 0)
-      flag = 1;
-    wasPressed = 1;
+	if (!digitalRead(BUTTON_UP)) {
+		
+		if (wasPressed == 0 && index < 5){
+			buttonPressed[index] = UP;
+			flag = 1;
+			wasPressed = 1;
+			index++;
+		}
 
-  }
-  else if (!digitalRead(BUTTON_DOWN)) {
-    buttonPressed = DOWN;
-    if (wasPressed == 0)
-      flag = 1;
-    wasPressed = 1;
 
-  }
-  else if (!digitalRead(BUTTON_LEFT)) {
-    buttonPressed = LEFT;
-    if (wasPressed == 0)
-      flag = 1;
-    wasPressed = 1;
+	}
+	else if (!digitalRead(BUTTON_DOWN)) {
+		
+		if (wasPressed == 0 && index < 5){
+			buttonPressed[index] = DOWN;
+			flag = 1;
+			wasPressed = 1;
+			index++;
+		}
 
-  }
-  else if (!digitalRead(BUTTON_RIGHT)) {
-    buttonPressed = RIGHT;
-    if (wasPressed == 0)
-      flag = 1;
-    wasPressed = 1;
+	}
+	else if (!digitalRead(BUTTON_LEFT)) {
+		
+		if (wasPressed == 0 && index < 5){
+			buttonPressed[index] = LEFT;
+			flag = 1;
+			wasPressed = 1;
+			index++;
+		}
 
-  }
-  else if (!digitalRead(BUTTON_CENTER)) {
-    buttonPressed = PRESS;
-    if (wasPressed == 0)
-      flag = 1;
-    wasPressed = 1;
+	}
+	else if (!digitalRead(BUTTON_RIGHT)) {
+		
+		if (wasPressed == 0 && index < 5){
+			buttonPressed[index] = RIGHT;
+			flag = 1;
+			wasPressed = 1;
+			index++;
+		}
 
-  }
-  else
-    wasPressed = 0;
+	}
+	else if (!digitalRead(BUTTON_CENTER)) {
+		
+		if (wasPressed == 0 && index < 5){
+			buttonPressed[index] = PRESS;
+			flag = 1;
+			wasPressed = 1;
+			index++;
+		}
+
+	}
+	else
+	wasPressed = 0;
 
 
 }
 
 int BUTTONCONTROL::getButtonPressed() {
-  flag = 0;
-  int temp = buttonPressed;
-  buttonPressed = 0;
-  return temp;
+	if(index > 0){
+		index--;
+	}
+	int temp = buttonPressed[index];
+	if(index == 0){
+		flag = 0;
+	}
+	// buttonPressed = 0;
+	return temp;
+	
 
 }
 

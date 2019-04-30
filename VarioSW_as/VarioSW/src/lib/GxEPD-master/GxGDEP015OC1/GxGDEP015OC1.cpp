@@ -98,7 +98,9 @@ void GxGDEP015OC1::init(uint32_t serial_diag_bitrate)
     Serial.begin(serial_diag_bitrate);
     _diag_enabled = true;
   }
+
   IO.init();
+
   IO.setFrequency(4000000); // 4MHz
   if (_rst >= 0)
   {
@@ -121,10 +123,11 @@ void GxGDEP015OC1::fillScreen(uint16_t color)
 }
 
 void GxGDEP015OC1::update(void)
-{
+{          
   if (_current_page != -1) return;
   _using_partial_mode = false;
   _Init_Full(0x03);
+
   _writeCommand(0x24);
   for (uint16_t y = 0; y < GxGDEP015OC1_HEIGHT; y++)
   {
@@ -280,7 +283,7 @@ void GxGDEP015OC1::updateWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
     }
   }
   _Update_Part();
-  delay(GxGDEP015OC1_PU_DELAY);
+  delayMicroseconds(GxGDEP015OC1_PU_DELAY*1000);
   // update erase buffer
   _SetRamArea(xs_d8, xe_d8, y % 256, y / 256, ye % 256, ye / 256); // X-source area,Y-gate area
   _SetRamPointer(xs_d8, y % 256, y / 256); // set ram
@@ -295,7 +298,7 @@ void GxGDEP015OC1::updateWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
       _writeData(~data);
     }
   }
-  delay(GxGDEP015OC1_PU_DELAY);
+  delayMicroseconds(GxGDEP015OC1_PU_DELAY*1000);
 }
 
 void GxGDEP015OC1::_writeToWindow(uint16_t xs, uint16_t ys, uint16_t xd, uint16_t yd, uint16_t w, uint16_t h)
@@ -412,7 +415,7 @@ void GxGDEP015OC1::_waitWhileBusy(const char* comment)
   while (1)
   {
     if (!digitalRead(_busy)) break;
-    delay(1);
+    delayMicroseconds(1000);
     if (micros() - start > 10000000)
     {
       if (_diag_enabled) Serial.println("Busy Timeout!");
@@ -510,10 +513,13 @@ void GxGDEP015OC1::_InitDisplay(uint8_t em)
 }
 
 void GxGDEP015OC1::_Init_Full(uint8_t em)
-{
+{  
   _InitDisplay(em);
+
   _writeCommandData(LUTDefault_full, sizeof(LUTDefault_full));
+
   _PowerOn();
+
 }
 
 void GxGDEP015OC1::_Init_Part(uint8_t em)

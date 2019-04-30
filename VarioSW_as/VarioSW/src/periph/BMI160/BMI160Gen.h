@@ -25,5 +25,6 @@ class BMI160GenClass : public CurieIMUClass {
 };
 
 extern BMI160GenClass BMI160;
+extern int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz;
 
 #endif /* _BMI160GEN_H_ */

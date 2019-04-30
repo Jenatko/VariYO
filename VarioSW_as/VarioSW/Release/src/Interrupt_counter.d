@@ -154,7 +154,19 @@ src/Interrupt_counter.d src/Interrupt_counter.o: \
  ../src/periph/button_control.h ../src/periph/../definitions.h \
  ../src/periph/MS5611.h ../src/periph/../SPI_IRQ.h \
  ..\\..\ArduinoCore\include\libraries\spi/SPI.h ../src/periph/buzzer.h \
- ../src/roundbuff.h
+ ../src/roundbuff.h ../src/periph/BMI160/BMI160Gen.h \
+ ../src/periph/BMI160/CurieIMU.h ../src/periph/BMI160/BMI160.h \
+ ../src/lib/kalmanfilter3.h ../src/Variables.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/CircleFit/data.h ..\\..\ArduinoCore\include\core/arduino.h \
+ ../src/lib/CircleFit/circle.h ../src/periph/MEMS.h ../src/definitions.h \
+ ../src/SPI_IRQ.h ../src/periph/BMI160_bosch_driver/bmi160_bosch.h \
+ ../src/periph/BMI160_bosch_driver/bmi160_defs.h ../src/Variables.h \
+ ../src/periph/BME280_bosch_driver/bme280.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/MahonyAHRS/MahonyAHRS.h
 
 ..\\..\ArduinoCore\include\core/Arduino.h:
 
@@ -475,3 +487,43 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../src/periph/buzzer.h:
 
 ../src/roundbuff.h:
+
+../src/periph/BMI160/BMI160Gen.h:
+
+../src/periph/BMI160/CurieIMU.h:
+
+../src/periph/BMI160/BMI160.h:
+
+../src/lib/kalmanfilter3.h:
+
+../src/Variables.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/CircleFit/data.h:
+
+..\\..\ArduinoCore\include\core/arduino.h:
+
+../src/lib/CircleFit/circle.h:
+
+../src/periph/MEMS.h:
+
+../src/definitions.h:
+
+../src/SPI_IRQ.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_bosch.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_defs.h:
+
+../src/Variables.h:
+
+../src/periph/BME280_bosch_driver/bme280.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/MahonyAHRS/MahonyAHRS.h:

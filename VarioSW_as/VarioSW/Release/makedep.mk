@@ -4,15 +4,39 @@
 
 src\Interrupt_counter.cpp
 
+src\lib\CircleFit\circle.cpp
+
+src\lib\CircleFit\CircleFitByTaubin.cpp
+
+src\lib\CircleFit\data.cpp
+
+src\lib\CircleFit\Utilities.cpp
+
+src\lib\kalmanfilter3.cpp
+
+src\lib\MahonyAHRS\MahonyAHRS.cpp
+
 src\lib\RTCZero\RTCZero.cpp
 
 src\Menu.cpp
 
 src\numpad.cpp
 
+src\periph\BME280_bosch_driver\bme280.c
+
+src\periph\BMI160_bosch_driver\bmi160_bosch.c
+
+src\periph\BMM150_bosch_driver\bmm150.c
+
 src\periph\buzzer.cpp
 
+src\periph\MEMS.cpp
+
+src\periph\MAX17055.cpp
+
 src\powerModes.cpp
+
+src\routine.cpp
 
 src\lib\Adafruit_GFX\Adafruit_GFX.cpp
 
@@ -50,23 +74,15 @@ src\lib\NeoGPS\src\ublox\ubxmsg.cpp
 
 src\lib\NeoGPS\src\ublox\ubxNMEA.cpp
 
-src\periph\BMI160\BMI160.cpp
-
-src\periph\BMI160\BMI160Gen.cpp
-
-src\periph\BMI160\CurieIMU.cpp
-
-src\periph\BMI160\ss_spi.cpp
-
 src\periph\button_control.cpp
 
 src\periph\EEPROM.cpp
 
-src\periph\MS5611.cpp
-
 src\roundbuff.cpp
 
 src\SPI_IRQ.cpp
+
+src\Variables.cpp
 
 VarioSW.cpp
 

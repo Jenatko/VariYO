@@ -160,7 +160,24 @@ src/powerModes.d src/powerModes.o: ../src/powerModes.cpp \
  ../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h ../src/powerModes.h \
  ../src/definitions.h ../src/periph/button_control.h \
  ../src/periph/../definitions.h ../src/Interrupt_counter.h \
- ..\\..\ArduinoCore\include\core/wiring_private.h
+ ..\\..\ArduinoCore\include\core/wiring_private.h ../src/periph/EEPROM.h \
+ ..\\..\ArduinoCore\include\core/arduino.h ../src/Variables.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/CircleFit/data.h ../src/lib/CircleFit/circle.h \
+ ../src/Variables.h ../../ArduinoCore/src/libraries/SD/SD.h \
+ ../../ArduinoCore/src/libraries/SD/utility/SdFat.h \
+ ../../ArduinoCore/src/libraries/SD/utility/Sd2Card.h \
+ ../../ArduinoCore/src/libraries/SD/utility/Sd2PinMap.h \
+ ../../ArduinoCore/src/libraries/SD/utility/SdInfo.h \
+ ../../ArduinoCore/src/libraries/SD/utility/FatStructs.h \
+ ../../ArduinoCore/src/libraries/SD/utility/SdFatUtil.h \
+ ../src/periph/MEMS.h ../src/definitions.h ../src/SPI_IRQ.h \
+ ../src/periph/BMI160_bosch_driver/bmi160_bosch.h \
+ ../src/periph/BMI160_bosch_driver/bmi160_defs.h \
+ ../src/periph/BME280_bosch_driver/bme280.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h
 
 ..\\..\ArduinoCore\include\core/Arduino.h:
 
@@ -491,3 +508,49 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../src/Interrupt_counter.h:
 
 ..\\..\ArduinoCore\include\core/wiring_private.h:
+
+../src/periph/EEPROM.h:
+
+..\\..\ArduinoCore\include\core/arduino.h:
+
+../src/Variables.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/CircleFit/data.h:
+
+../src/lib/CircleFit/circle.h:
+
+../src/Variables.h:
+
+../../ArduinoCore/src/libraries/SD/SD.h:
+
+../../ArduinoCore/src/libraries/SD/utility/SdFat.h:
+
+../../ArduinoCore/src/libraries/SD/utility/Sd2Card.h:
+
+../../ArduinoCore/src/libraries/SD/utility/Sd2PinMap.h:
+
+../../ArduinoCore/src/libraries/SD/utility/SdInfo.h:
+
+../../ArduinoCore/src/libraries/SD/utility/FatStructs.h:
+
+../../ArduinoCore/src/libraries/SD/utility/SdFatUtil.h:
+
+../src/periph/MEMS.h:
+
+../src/definitions.h:
+
+../src/SPI_IRQ.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_bosch.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_defs.h:
+
+../src/periph/BME280_bosch_driver/bme280.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:

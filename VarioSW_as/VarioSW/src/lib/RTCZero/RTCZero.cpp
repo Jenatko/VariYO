@@ -498,3 +498,4 @@ void RTCZero::RTCresetRemove()
   while (RTCisSyncing())
     ;
 }
+

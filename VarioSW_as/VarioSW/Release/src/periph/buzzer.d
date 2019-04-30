@@ -150,7 +150,12 @@ src/periph/buzzer.d src/periph/buzzer.o: ../src/periph/buzzer.cpp \
  ..\\..\ArduinoCore\include\core/RingBuffer.h \
  ..\\..\ArduinoCore\include\core/USB/USB_host.h \
  ..\\..\ArduinoCore\include\core/USB/samd21_host.h ../src/definitions.h \
- ..\\..\ArduinoCore\include\core/wiring_private.h
+ ..\\..\ArduinoCore\include\core/wiring_private.h ../src/Variables.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/CircleFit/data.h ..\\..\ArduinoCore\include\core/arduino.h \
+ ../src/lib/CircleFit/circle.h
 
 ../src/periph/buzzer.h:
 
@@ -459,3 +464,17 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../src/definitions.h:
 
 ..\\..\ArduinoCore\include\core/wiring_private.h:
+
+../src/Variables.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/CircleFit/data.h:
+
+..\\..\ArduinoCore\include\core/arduino.h:
+
+../src/lib/CircleFit/circle.h:

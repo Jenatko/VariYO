@@ -5,6 +5,15 @@
 #include "MS5611.h"
 #include "buzzer.h"
 #include "roundbuff.h"
+#include <BMI160Gen.h>
+#include "kalmanfilter3.h"
+#include "Variables.h"
+#include "MEMS.h"
+
+
+#include <MahonyAHRS.h>
+
+Mahony filter;
 
 
 
@@ -79,33 +88,91 @@ void counterInit() { // Set up the generic clock (GCLK4) used to clock timers
 
 void TC4_Handler()                              // Interrupt Service Routine (ISR) for timer TC4
 {
-	digitalWrite(SRAM_CS, 0);
 	
-	//update temperature roughly once a second
+//digitalWrite(SRAM_CS, 0);
 	
-	if (zoufalepomocnapromenna % 60 == 0) {
-		ms5611.tempUpdate(1);
-		flag_sec = 1;
-	}
-	else if ((zoufalepomocnapromenna - 1) % 60 == 0) {
-		ms5611.tempUpdate(2);
-		ms5611.requestPressure();
-	}
-	
-	
-	else {
-		//store last pressure
-		rbuff.putIn(ms5611.updatePressure());
-		ms5611.requestPressure();
+	uint8_t inFifoWaiting = IMU_FifoBytesToRead();
+	while (inFifoWaiting != 0) {
+		for(int i = 0; i < inFifoWaiting; i+=12){
+			
+		//	SerialUSB.print(inFifoWaiting);
+		//	SerialUSB.print(",");
+		//	SerialUSB.println(i);
+			
+			IMU_ReadFrameFromFifo();
+			
+			ax_corr = (float)(ax-statVar.offsetX) / statVar.gainErrorX ;
+			ay_corr = (float)(ay-statVar.offsetY) / statVar.gainErrorY;
+			az_corr = (float)(az-statVar.offsetZ) / statVar.gainErrorZ;
+			
+			ax_avg = ax_avg*9.0/10.0+ax/10.0;
+			ay_avg = ay_avg*9.0/10.0+ay/10.0;
+			az_avg = az_avg*9.0/10.0+az/10.0;
+			gx_avg = gx_avg*9.0/10.0+gx/10.0;
+			gy_avg = gy_avg*9.0/10.0+gy/10.0;
+			gz_avg = gz_avg*9.0/10.0+gz/10.0;
+
+			/*	SerialUSB.print(gx);
+			SerialUSB.print(" ");
+			SerialUSB.print(gy);
+			SerialUSB.print(" ");
+			SerialUSB.println(gz);
+			*/
+			
+			filter.updateIMU(gx/131.2, gy/131.2, gz/131.2, ax_corr/16384.0, ay_corr/16384.0, az_corr/16384.0);
+			
+
+		}
 		
-		float vyska = ms5611.readAltitude(rbuff.getAverage());
-		float vyskaLast = ms5611.readAltitude(rbuff.getAverageOld());
-		altChange = (vyska - vyskaLast);
-
-
-		buzzerAltitudeDiff(altChange * 100);
-
+		//		if(zoufalepomocnapromenna % 2== 0)
+		//		SerialUSB.println(a_vertical_imu, 3);
+		inFifoWaiting = IMU_FifoBytesToRead();
 	}
+
+	
+	yaw = filter.getYaw();
+	pitch = filter.getPitch();
+	roll = filter.getRoll();
+
+	
+	//a_vertical_imu = az/16384.0*cos(roll*0.01745329)*cos(pitch*0.01745329) - ax/16384.0*sin(pitch*0.01745329) + ay/16384.0*sin(roll*0.01745329)*cos(pitch*0.01745329);
+	
+	a_vertical_imu = filter.getVertical(ax_corr/16384.0, ay_corr/16384.0, az_corr/16384.0);
+	
+		
+
+	BME_read();
+
+
+
+//recalculateTaylor();
+
+digitalWrite(SRAM_CS, 0);	
+	float alt = getAltitude()*100;
+	digitalWrite(SRAM_CS, 1);	
+		
+			
+	kalmanFilter3_update(alt, a_vertical_imu*1000.0-1000.0, (float)1/60.0, &alt_filter, &vario_filter);
+
+
+
+	buzzerAltitudeDiff((int)vario_filter);
+	
+	/*
+	SerialUSB.print(flag_sec++);
+	SerialUSB.print(" ");
+	SerialUSB.print(pressure_read);
+	SerialUSB.print(" ");
+	SerialUSB.print(altChange);
+	SerialUSB.print(" ");
+	SerialUSB.print((int)(a_vertical_imu*1000.0-1000.0));
+	SerialUSB.print(" ");
+	SerialUSB.print((int)(vyska*100));
+	SerialUSB.print(" ");
+	SerialUSB.println((int)alt_filter);
+	*/
+	
+
 
 	
 	//generate short beep bursts, long beep or be silent
@@ -113,6 +180,8 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	buzzerEna(1);
 	else
 	buzzerEna(0);
+	
+
 	
 	zoufalepomocnapromenna++;
 	buzzerRepeatCounter++;
@@ -122,9 +191,9 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	buttons.buttonUpdate();
 	
 	
-	
+pocitadlo++;
 
-	digitalWrite(SRAM_CS, 1);
+
 	
 	//clear interrupt flags
 	REG_TC4_INTFLAG = TC_INTFLAG_MC1;

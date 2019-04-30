@@ -152,7 +152,12 @@ src/periph/EEPROM.d src/periph/EEPROM.o: ../src/periph/EEPROM.cpp \
  ..\\..\ArduinoCore\include\core/USB/samd21_host.h \
  ../src/periph/../definitions.h \
  ..\\..\ArduinoCore\include\libraries\spi/SPI.h \
- ..\\..\ArduinoCore\include\core/Arduino.h ../src/roundbuff.h
+ ..\\..\ArduinoCore\include\core/Arduino.h ../src/Variables.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/CircleFit/data.h ../src/lib/CircleFit/circle.h \
+ ../src/roundbuff.h
 
 ../src/periph/EEPROM.h:
 
@@ -463,5 +468,17 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ..\\..\ArduinoCore\include\libraries\spi/SPI.h:
 
 ..\\..\ArduinoCore\include\core/Arduino.h:
+
+../src/Variables.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/CircleFit/data.h:
+
+../src/lib/CircleFit/circle.h:
 
 ../src/roundbuff.h:

@@ -163,8 +163,27 @@ src/Menu.d src/Menu.o: ../src/Menu.cpp \
  ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold12pt7b.h \
  ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold9pt7b.h ../src/Menu.h \
  ../src/periph/button_control.h ../src/periph/../definitions.h \
- ../src/numpad.h ../src/roundbuff.h ../src/periph/MS5611.h \
- ../src/periph/../SPI_IRQ.h ../src/powerModes.h
+ ../src/numpad.h ../src/roundbuff.h ../src/powerModes.h ../src/routine.h \
+ ../src/lib/NeoGPS/src/NMEAGPS.h ../src/lib/NeoGPS/src/CosaCompat.h \
+ ../src/lib/NeoGPS/src/GPSfix.h ../src/lib/NeoGPS/src/NeoGPS_cfg.h \
+ ../src/lib/NeoGPS/src/GPSfix_cfg.h ../src/lib/NeoGPS/src/NeoTime.h \
+ ../src/lib/NeoGPS/src/Location.h ../src/lib/NeoGPS/src/NMEAGPS_cfg.h \
+ ../src/lib/NeoGPS/src/NMEAGPSprivate.h ../src/lib/NeoGPS/src/GPSport.h \
+ ../src/lib/NeoGPS/src/Streamers.h ../src/periph/MAX17055.h \
+ ../src/Variables.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/CircleFit/data.h ..\\..\ArduinoCore\include\core/arduino.h \
+ ../src/lib/CircleFit/circle.h ../src/periph/EEPROM.h ../src/Variables.h \
+ ../src/periph/MEMS.h ../src/definitions.h ../src/SPI_IRQ.h \
+ ../src/periph/BMI160_bosch_driver/bmi160_bosch.h \
+ ../src/periph/BMI160_bosch_driver/bmi160_defs.h \
+ ../src/periph/BME280_bosch_driver/bme280.h \
+ ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ../src/lib/RTCZero/RTCZero.h ../src/periph/buzzer.h \
+ ..\\..\ArduinoCore\include\core/wiring_private.h \
+ ../src/lib/NeoGPS/src/GPSfix.h
 
 ../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h:
 
@@ -502,8 +521,70 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/roundbuff.h:
 
-../src/periph/MS5611.h:
-
-../src/periph/../SPI_IRQ.h:
-
 ../src/powerModes.h:
+
+../src/routine.h:
+
+../src/lib/NeoGPS/src/NMEAGPS.h:
+
+../src/lib/NeoGPS/src/CosaCompat.h:
+
+../src/lib/NeoGPS/src/GPSfix.h:
+
+../src/lib/NeoGPS/src/NeoGPS_cfg.h:
+
+../src/lib/NeoGPS/src/GPSfix_cfg.h:
+
+../src/lib/NeoGPS/src/NeoTime.h:
+
+../src/lib/NeoGPS/src/Location.h:
+
+../src/lib/NeoGPS/src/NMEAGPS_cfg.h:
+
+../src/lib/NeoGPS/src/NMEAGPSprivate.h:
+
+../src/lib/NeoGPS/src/GPSport.h:
+
+../src/lib/NeoGPS/src/Streamers.h:
+
+../src/periph/MAX17055.h:
+
+../src/Variables.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/CircleFit/data.h:
+
+..\\..\ArduinoCore\include\core/arduino.h:
+
+../src/lib/CircleFit/circle.h:
+
+../src/periph/EEPROM.h:
+
+../src/Variables.h:
+
+../src/periph/MEMS.h:
+
+../src/definitions.h:
+
+../src/SPI_IRQ.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_bosch.h:
+
+../src/periph/BMI160_bosch_driver/bmi160_defs.h:
+
+../src/periph/BME280_bosch_driver/bme280.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/RTCZero/RTCZero.h:
+
+../src/periph/buzzer.h:
+
+..\\..\ArduinoCore\include\core/wiring_private.h:
+
+../src/lib/NeoGPS/src/GPSfix.h:
