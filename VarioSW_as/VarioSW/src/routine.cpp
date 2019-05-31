@@ -1,0 +1,437 @@
+/*
+* routine.cpp
+*
+* Created: 16/10/2018 22:39:40
+*  Author: Jena
+*/
+#include "routine.h"
+#include "definitions.h"
+#include <Arduino.h>
+#include "SPI.h"
+#include "RTCZero.h"
+#include "MEMS.h"
+
+#include <NMEAGPS.h>
+#include <GPSport.h>
+#include <Streamers.h>
+
+#include "Variables.h"
+
+#include "CircleFitByTaubin.h"
+
+#include "MadgwickAHRS.h"
+
+
+NMEAGPS  gps;
+gps_fix  fix;
+
+#include <SD.h>
+Sd2Card card;
+SdVolume volume;
+SdFile root;
+File tracklog;
+File HeightData;
+
+
+
+int position_updated = 0;
+int sec_old = 0;
+
+/*
+void adjustTime( NeoGPS::time_t & dt ){
+int32_t          zone_hours   = statVar.TimeZone; // EST
+int32_t          zone_minutes =  0L; // usually zero
+NeoGPS::clock_t  zone_offset  =	zone_hours   * NeoGPS::SECONDS_PER_HOUR +	zone_minutes * NeoGPS::SECONDS_PER_MINUTE;
+
+NeoGPS::clock_t seconds = dt;
+seconds += zone_offset;
+dt = seconds;
+}
+*/
+
+void routine(void){
+
+
+	//updating GPS
+	if(statVar.ena_vector & ENA_GPS){
+		SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+		digitalWrite(GPS_CS, 0);
+		byte fn;
+		do {
+			fn = SPI.transfer( 0xFF );
+			//	SerialUSB.write(fn);   //uncomment for sending GPS data over Serial (to work with u-center)
+		} while (gps.handle(fn) != NMEAGPS::DECODE_CHR_INVALID || fn != 0xff );
+		
+		digitalWrite(GPS_CS, 1);
+		if(gps.available()){
+			fix = gps.read();
+			//SerialUSB.println(fix.valid.date);
+			if(fix.valid.time){
+				//adjustTime(fix.dateTime);
+				rtc.setTime(fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
+			}
+			if(fix.valid.date){
+				rtc.setDate(fix.dateTime.date, fix.dateTime.month, fix.dateTime.year);
+			}
+			redraw = 1;
+			position_updated = 1;
+		}
+		else{
+			position_updated = 0;
+		}
+		/*   //procedure for capturing commands sent to GPS
+		else{
+		SerialUSB.println("-----------------");
+		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
+		SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+		digitalWrite(GPS_CS, 0);
+		fn = SerialUSB.read();
+		gps.handle(SPI.transfer(fn));
+		SerialUSB.print(fn);
+		digitalWrite(GPS_CS, 1);
+
+		}
+		SerialUSB.println("-----------------");
+		delay(50);
+		}
+		*/
+	}
+	//update display if GPS is off
+	else{
+		int sec = rtc.getSeconds();
+		if( sec != sec_old){
+			redraw = 1;
+			sec_old = sec;
+		}
+		
+		position_updated = 0;
+	}
+
+	if(position_updated){
+		alt_agl();
+		update_wind();
+
+	}
+	update_tracklog();
+
+
+	g_meter = pow(  ((float)ax*ax + (float)ay*ay + (float)az*az)/268.4e6 , 0.5) ;
+	
+	if(present_devices & SI7021_PRESENT){
+		if(read_si7021())
+		request_si7021();
+	}
+	yaw = Madgwick_filter.getYaw();
+	pitch = Madgwick_filter.getPitch();
+	roll = Madgwick_filter.getRoll();
+	
+
+}
+
+
+void update_tracklog(){
+	
+	if (present_devices & SD_PRESENT)	{
+		if((statVar.ena_vector & ENA_TRACKLOG) || tracklog_stat == TRACKLOG_FILE_OPEN){
+			if (tracklog_stat == TRACKLOG_FILE_CLOSED){
+				if(fix.valid.time){
+					//SerialUSB.println("opening");
+					
+					char cesta_char[40];
+					
+					
+					SD.begin(SD_CS);
+					
+					String cesta = ("/Tracks/");
+					cesta.concat(String(rtc.getYear()));
+					cesta.concat("/");
+					cesta.concat(String(rtc.getMonth()));
+					cesta.concat("/");
+					cesta.concat(String(rtc.getDay()));
+					
+					cesta.toCharArray(cesta_char, 40);
+					
+					if(SD.exists(cesta_char))
+					SerialUSB.println("existuje");
+					else{
+						SerialUSB.println(cesta_char);
+						SD.mkdir(cesta_char);
+						SerialUSB.println("vytvoreno");
+					}
+					
+					cesta.concat("/");
+					cesta.concat(String(rtc.getHours()));
+					cesta.concat(String(rtc.getMinutes()));
+					cesta.concat(String(rtc.getSeconds()));
+					cesta.concat(String(".gpx"));
+					cesta.toCharArray(cesta_char, 40);
+					
+					tracklog = SD.open(cesta_char, FILE_WRITE);
+					
+					tracklog.println("<gpx>");
+					tracklog.println("  <trk>");
+					tracklog.println("    <trkseg>");
+					tracklog_stat = TRACKLOG_FILE_OPEN;
+					
+					
+				}
+			}
+			if (tracklog && position_updated){
+				//	position_updated = 0;
+				//	SerialUSB.println("logging");
+				if(fix.valid.location){
+					tracklog.print("      <trkpt lat=\"");
+					tracklog.print(fix.latitude(), 6);
+					tracklog.print("\" lon=\"");
+					tracklog.print(fix.longitude(),5);
+					tracklog.println("\">");
+					
+					tracklog.print("        <ele>");
+					tracklog.print(fix.altitude(), 1);
+					tracklog.println("</ele>");
+					
+					tracklog.print("        <note>,");
+					tracklog.print(enviromental_data.temperature, 1);
+					tracklog.print(",");
+					tracklog.print(enviromental_data.humidity, 1);
+					tracklog.print(",");
+					tracklog.print(enviromental_data.pressure, 1);
+					tracklog.print(",");
+					tracklog.print(alt_filter/100, 1);
+					tracklog.print(",");
+					tracklog.print(vario_filter, 1);
+					tracklog.print(",");
+					tracklog.print(g_meter, 3);
+					tracklog.print(",");
+					tracklog.print(fix.valid.speed);
+					tracklog.print(",");
+					tracklog.print(fix.valid.heading);
+					tracklog.print(",");
+					tracklog.print(fix.speed_kph());
+					tracklog.print(",");
+					tracklog.print(fix.heading());
+					tracklog.print(",");
+					tracklog.print(wind_speed_mps);
+					tracklog.print(",");
+					tracklog.print(wind_direction);
+					tracklog.print(",");
+					tracklog.print(movement_circle_fit.a);
+					tracklog.print(",");
+					tracklog.print(movement_circle_fit.b);
+					tracklog.print(",");
+					tracklog.print(movement_circle_fit.r);
+					tracklog.print(",");
+					
+					tracklog.print(ax);
+					tracklog.print(",");
+					tracklog.print(ay);
+					tracklog.print(",");
+					tracklog.print(az);
+					tracklog.print(",");
+					tracklog.print(gx);
+					tracklog.print(",");
+					tracklog.print(gy);
+					tracklog.print(",");
+					tracklog.print(gz);
+					tracklog.print(",");
+										tracklog.print(mx);
+										tracklog.print(",");
+										tracklog.print(my);
+										tracklog.print(",");
+										tracklog.print(mz);
+										tracklog.print(",");
+																				tracklog.print(mx_cor);
+																				tracklog.print(",");
+																				tracklog.print(my_cor);
+																				tracklog.print(",");
+																				tracklog.print(mz_cor);
+																				tracklog.print(",");
+					
+					tracklog.print(ax_avg);
+					tracklog.print(",");
+					tracklog.print(ay_avg);
+					tracklog.print(",");
+					tracklog.print(az_avg);
+					tracklog.print(",");
+					tracklog.print(gx_avg);
+					tracklog.print(",");
+					tracklog.print(gy_avg);
+					tracklog.print(",");
+					tracklog.print(gz_avg);
+					tracklog.print(",");
+					
+					tracklog.print(yaw);
+					tracklog.print(",");
+					tracklog.print(pitch);
+					tracklog.print(",");
+					tracklog.print(roll);
+					tracklog.print(",");
+					tracklog.print(ground_level);
+					tracklog.print(",");
+					tracklog.print(fix.valid.date);
+					tracklog.print(",");
+					tracklog.print(fix.valid.time);
+					tracklog.print(",");
+					
+					
+					
+					
+					
+					tracklog.println("</note>");
+					
+					
+					
+					
+					
+					/*
+					
+					tracklog.print("        <dataX>,");
+					for(int i = 0; i < WIND_RBUFF_SIZE; i++){
+					tracklog.print(movement_vector_data.X[i]);
+					tracklog.print(",");
+					}
+					tracklog.println("</dataX>");
+					
+					tracklog.print("        <dataY>,");
+					for(int i = 0; i < WIND_RBUFF_SIZE; i++){
+					tracklog.print(movement_vector_data.Y[i]);
+					tracklog.print(",");
+					}
+					tracklog.println("</dataY>");
+					*/
+					
+					tracklog.print("        <time>");
+					
+					tracklog.print(fix.dateTime.year);
+					tracklog.print("-");
+					tracklog.print(fix.dateTime.month);
+					tracklog.print("-");
+					tracklog.print(fix.dateTime.date);
+					tracklog.print("T");
+					
+					tracklog.print(fix.dateTime.hours);
+					tracklog.print(":");
+					tracklog.print(fix.dateTime.minutes);
+					tracklog.print(":");
+					tracklog.print(fix.dateTime.seconds);
+					
+					tracklog.println("Z</time>");
+					tracklog.println("      </trkpt>");
+				}
+				
+				if(tracklog_stat == TRACKLOG_FILE_OPEN && !(statVar.ena_vector & ENA_TRACKLOG)){
+					tracklog.println("    </trkseg>");
+					tracklog.println("  </trk>");
+					tracklog.println("</gpx>");
+					tracklog.close();
+					tracklog_stat = TRACKLOG_FILE_CLOSED;
+					//	SerialUSB.println("closing file");
+				}
+			}
+			
+			
+			
+		}
+	}
+	
+}
+
+void update_wind(){
+	if(fix.valid.speed && fix.valid.heading){
+		if(fix.dateTime.seconds%2 == 0){
+			float x,y;
+			x = fix.speed_kph() * KPH2MPS * cos(fix.heading() * DEG2RAD);
+			y = fix.speed_kph() * KPH2MPS * sin(fix.heading() * DEG2RAD);
+			movement_vector_data.X[movement_vector_data.write_index % WIND_RBUFF_SIZE] = x;
+			movement_vector_data.Y[movement_vector_data.write_index % WIND_RBUFF_SIZE] = y;
+			movement_vector_data.write_index++;
+			
+			movement_circle_fit = CircleFitByTaubin(movement_vector_data);
+			wind_speed_mps = sqrt(movement_circle_fit.a*movement_circle_fit.a + movement_circle_fit.b*movement_circle_fit.b);
+			wind_direction = atan2(movement_circle_fit.a, movement_circle_fit.b)*RAD2DEG;
+			if(wind_direction < 0)
+			wind_direction += 360;
+		}
+		
+	}
+	
+
+}
+
+void alt_agl(){
+	
+	if(fix.valid.location && (present_devices & SD_PRESENT)){
+		int int_lat = (int)fix.latitude();
+		int int_lon = (int)fix.longitude();
+		
+		
+		
+		float temp_lat  = round(1201.0f-((float)fix.latitude() - int_lat)*1200.0f);
+		float temp_lon = round(((float)fix.longitude() - int_lon)*1200.0f);
+		
+		//int row = 1201-(fix.latitude() - int_lat)*1201;
+		//int col = (fix.longitude() - int_lon)*1201;
+		
+		int row = (int)temp_lat;
+		int col = (int)temp_lon;
+		
+		char cesta_char2[20];
+
+
+		SD.begin(SD_CS);
+		
+
+		String cesta = ("/");
+		if(int_lat < 0){
+			cesta.concat("S");
+		}
+		else{
+			cesta.concat("N");
+		}
+		if(int_lat < 10 && int_lat > -10){
+			cesta.concat("0");
+		}
+		cesta.concat(String(int_lat));
+		
+		if(temp_lon < 0){
+			cesta.concat("W");
+		}
+		else{
+			cesta.concat("E");
+		}
+		if(int_lon < 10 && int_lon > -10){
+			cesta.concat("0");
+		}
+		if(int_lon < 100 && int_lon > -100){
+			cesta.concat("0");
+		}
+		cesta.concat(String(int_lon));
+		cesta.concat(".HGT");
+		
+	//	SerialUSB.println(cesta);
+		
+		
+		//cesta = ("/N49E016.HGT");
+		cesta.toCharArray(cesta_char2, 20);
+		if(!HeightData){
+			
+			HeightData = SD.open(cesta_char2, FILE_READ);
+		}
+		if(HeightData){
+			HeightData.seek(((row-1)*1201+col)*2);
+
+			int lsbs = HeightData.read();
+			int msbs = HeightData.read();
+
+			
+			ground_level = (lsbs << 8)+msbs;
+			
+			//SerialUSB.println(HeightData.read());
+			//SerialUSB.println(HeightData.read());
+			
+		}
+		else
+		SerialUSB.println("not open");
+	}
+	
+}
