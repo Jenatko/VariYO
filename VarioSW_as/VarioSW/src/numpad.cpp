@@ -124,6 +124,7 @@ int numpad(int initial_number) {
 					number = -number;
 					break;
 					case (15):
+					SerialUSB.println(initial_number);
 					return initial_number;
 				}
 				display.fillRect(NUMPAD_LEFT_OFFSET + 1, NUMPAD_BOTTOM_OFFSET - 4 * NUMPAD_BUTTON_SIZE - 39, 4 * NUMPAD_BUTTON_SIZE - 1, 38, GxEPD_WHITE);

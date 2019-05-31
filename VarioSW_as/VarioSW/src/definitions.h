@@ -33,6 +33,8 @@
 #define PB23 31
 #define PA13 38
 
+#define PA03 42
+
 
 
 #define BUZZER_TIMER_FREQ 3e6
@@ -51,19 +53,22 @@
 #define EEPROM_INSTR_READ 0b11
 #define EEPROM_INSTR_WRITE 0b10
 
-#define ENA_GPS 0
-#define ENA_GPS_LOW_POWER 1
-#define ENA_TRACKLOG 2
-#define ENA_BUZZER 3
+#define ENA_GPS 1
+#define ENA_GPS_LOW_POWER 2
+#define ENA_TRACKLOG 4
+#define ENA_BUZZER 8
+#define ENA_HEATER 16
+#define ENA_HEATER_AUTO 32
 
 //---------------------------------
 //-----GPIOs----------------------
 //----------------------------------
-#define BUTTON_UP PA28
+#define BUTTON_UP  PB03
 #define BUTTON_DOWN PB02
-#define BUTTON_LEFT PB03
+#define BUTTON_LEFT PA28 
 #define BUTTON_RIGHT PA27
 #define BUTTON_CENTER PB09
+
 
 #define EEPROM_CS PA20
 
@@ -81,6 +86,8 @@
 
 
 #define GPS_CS PA04
+#define GPS_BCKP PB08
+
 
 #define IMU_CS PA05
 
@@ -102,6 +109,11 @@
 
 #define DAC PA02
 
+#define HEAT PA03
+
+
+
+
 
 
 
@@ -115,3 +127,12 @@
 
 #define KPH2MPS 0.2777777778
 #define MPS2KPH 3.6
+
+
+#define BMX160_PRESENT 1
+#define LPS33_PRESENT 2
+#define SI7021_PRESENT 4
+#define GPS_PRESENT 8
+#define MAX17055_PRESENT 16
+#define SD_PRESENT 32
+#define FIFO_FRAME_SIZE 21

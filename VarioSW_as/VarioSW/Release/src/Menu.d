@@ -179,11 +179,15 @@ src/Menu.d src/Menu.o: ../src/Menu.cpp \
  ../src/periph/MEMS.h ../src/definitions.h ../src/SPI_IRQ.h \
  ../src/periph/BMI160_bosch_driver/bmi160_bosch.h \
  ../src/periph/BMI160_bosch_driver/bmi160_defs.h \
+ ../src/periph/BMM150_bosch_driver/bmm150.h \
+ ../src/periph/BMM150_bosch_driver/bmm150_defs.h \
  ../src/periph/BME280_bosch_driver/bme280.h \
  ../src/periph/BME280_bosch_driver/bme280_defs.h \
+ ..\\..\ArduinoCore\include\libraries\wire/Wire.h \
  ../src/lib/RTCZero/RTCZero.h ../src/periph/buzzer.h \
  ..\\..\ArduinoCore\include\core/wiring_private.h \
- ../src/lib/NeoGPS/src/GPSfix.h
+ ../src/lib/NeoGPS/src/GPSfix.h ../src/chess.h ../src/lib/kalmanfilter3.h \
+ ../src/lib/MadgwickAHRS/MadgwickAHRS.h
 
 ../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h:
 
@@ -577,9 +581,15 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/periph/BMI160_bosch_driver/bmi160_defs.h:
 
+../src/periph/BMM150_bosch_driver/bmm150.h:
+
+../src/periph/BMM150_bosch_driver/bmm150_defs.h:
+
 ../src/periph/BME280_bosch_driver/bme280.h:
 
 ../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+..\\..\ArduinoCore\include\libraries\wire/Wire.h:
 
 ../src/lib/RTCZero/RTCZero.h:
 
@@ -588,3 +598,9 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ..\\..\ArduinoCore\include\core/wiring_private.h:
 
 ../src/lib/NeoGPS/src/GPSfix.h:
+
+../src/chess.h:
+
+../src/lib/kalmanfilter3.h:
+
+../src/lib/MadgwickAHRS/MadgwickAHRS.h:

@@ -38,7 +38,7 @@
 
 #include "MEMS.h"
 
-
+#include "chess.h"
 
 
 
@@ -72,8 +72,12 @@ void Gauge_enable(Gauge *gau);
 
 
 void displayUpdate(void){
-	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+
+
+display.fillScreen(GxEPD_WHITE);
+	//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 	
+
 	statVar.varioGauge.value = vario_filter/100;
 	Gauge_enable(&statVar.varioGauge);
 	Gauge_update(&statVar.varioGauge);
@@ -93,14 +97,19 @@ void displayUpdate(void){
 	display.print(var_localtime->tm_sec);
 	display.setCursor(10,110);
 	
-	time_t flighttime_t = rtc.getEpoch() - var_takeofftime;
-	struct tm *flighttime;
-	flighttime = gmtime(&flighttime_t);
-	display.print(flighttime->tm_hour);
-	display.print(":");
-	display.print(flighttime->tm_min);
-	display.print(":");
-	display.print(flighttime->tm_sec);
+	
+	if(statVar.ena_vector & ENA_TRACKLOG){
+		time_t flighttime_t = rtc.getEpoch() - var_takeofftime;
+		struct tm *flighttime;
+		flighttime = gmtime(&flighttime_t);
+		display.print(flighttime->tm_hour);
+		display.print(":");
+		display.print(flighttime->tm_min);
+		display.print(":");
+		display.print(flighttime->tm_sec);
+	}
+	else
+	display.print("stopped");
 	
 	display.setCursor(10,130);
 	//display.print(alt_filter);
@@ -127,6 +136,8 @@ void displayUpdate(void){
 	display.print("temp:");
 	display.print(enviromental_data.temperature/100.0);
 	display.print("degC");
+
+
 	
 
 	/*
@@ -143,8 +154,15 @@ void displayUpdate(void){
 	*/
 	
 	display.setFont(&FreeMonoBold12pt7b);
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+
+	
+//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	
+	display.partiallyUpdateScreen();
+	
+
 	redraw = 0;
+	
 }
 
 
@@ -156,8 +174,14 @@ void setup() {
 	rtc.setTime(23, 59, 40);
 	rtc.setDate(1, 1, 2014);
 	
-	pinMode(POWER_ENA, INPUT_PULLDOWN);
+		pinMode(HEAT, OUTPUT);
+		digitalWrite(HEAT, 0);
 	
+	pinMode(POWER_ENA, OUTPUT);
+	digitalWrite(POWER_ENA, 1);
+	
+	delay(100);
+	digitalWrite(POWER_ENA, 0);
 	delay(50);
 	
 	pinMode(BUTTON_LEFT, INPUT_PULLUP);
@@ -177,7 +201,7 @@ void setup() {
 	pinMode(SD_CS, OUTPUT);
 	digitalWrite(SD_CS, 1);
 
-	pinMode(SD_DETECT, INPUT);
+	pinMode(SD_DETECT, INPUT_PULLUP);
 
 	pinMode(SD_RST, OUTPUT);
 	digitalWrite(SD_RST, 0);
@@ -191,11 +215,16 @@ void setup() {
 
 	pinMode(GPS_CS, OUTPUT);
 	digitalWrite(GPS_CS, 1);
+	
+	pinMode(GPS_BCKP, OUTPUT);
+	digitalWrite(GPS_BCKP, 1);
 
 	pinPeripheral(MOSI_IRQ, PIO_SERCOM);
 	pinPeripheral(MISO_IRQ, PIO_SERCOM);
 	pinPeripheral(SCK_IRQ, PIO_SERCOM);
 	
+	
+
 	//clk_test();
 	//buzzerEna(1);
 	//delay(10000);
@@ -211,11 +240,14 @@ void setup() {
 	
 	eepromRead(0, statVar);
 	
+	present_devices = 0;
+	
+	
 
 
 	
-	if(statVar.ena_vector & (1<<ENA_GPS)){
-		if(statVar.ena_vector & (1<<ENA_GPS_LOW_POWER)){
+	if(statVar.ena_vector & (ENA_GPS)){
+		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
 			GPS_low();
 		}
 		else{
@@ -227,11 +259,10 @@ void setup() {
 	}
 	
 	menu_init();
+	//while(!SerialUSB.available());
 
 
 	analogWrite(DAC, statVar.BuzzerVolume);
-	analogWrite(DAC, 0);	//stfu for debug:-)
-		analogWrite(DAC, 255);	//stfu for debug:-)
 
 
 	display.init(0);
@@ -241,45 +272,83 @@ void setup() {
 
 	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 	display.update();
+	
 	display.setRotation(0);
 
 	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
 	display.setTextWrap(0);
 	
-	display.setCursor(100, 170);
-	
+	display.setCursor(10, 20);
+	display.print("display ok");
+	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
 
 	
 	Wire.begin();
-
-	max17055.setResistSensor(0.039);
 	
-
-	max17055.setCapacity(500);
-	
-	//	while(!SerialUSB.available());
-	//	SerialUSB.println("wtf");
-
-	IMU_init();
-	BME_init_1ms();
-
-	delay(100);
-	
-
-	int fn = 0;
-
-	/*while (1)
-	{	BME_read();
-	SerialUSB.print(enviromental_data.temperature);
-	if(fn%500 < 250){
-	BME_init_1s();
+	display.setCursor(10, 40);
+	if(max17055.checkFunct()){
+		max17055.setResistSensor(0.039);
+		max17055.setCapacity(1200);
+		display.print("max17055 ok");
+		present_devices |= MAX17055_PRESENT;
+		
 	}
 	else{
-	BME_init_1s();
+		display.print("max17055 NOK");
 	}
+	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+
+	
+
+	display.setCursor(10, 60);
+	if(IMU_init()==0){
+		display.print("BMX160 ok");
+		present_devices |= BMX160_PRESENT;
+		//SerialUSB.println( MAG_init());
+	}
+	else{
+		display.print("BMX160 NOK");
+	}
+	//present_devices += BMX160_PRESENT;
+	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	
+	
+	display.setCursor(10, 80);
+	if(lps33_test()){
+		lps33_init();
+		display.print("lps33 ok");
+		present_devices |= LPS33_PRESENT;
+	}
+	else{
+		display.print("lps33 NOK");
+	}
+	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	
+	
+	display.setCursor(10, 100);
+	if(request_si7021() == 0){
+		display.print("si7021 ok");
+		present_devices |= SI7021_PRESENT;
+	}
+	else{
+		display.print("si7021 NOK");
+	}
+	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	
+	display.setCursor(10, 120);
+	if(digitalRead(SD_DETECT) == 0){
+		display.print("SD present");
+		present_devices |= SD_PRESENT;
+	}
+	else{
+		display.print("no SD card");
+	}
+	pinMode(SD_DETECT, INPUT);
+	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	
+
+
 	delay(1000);
-	fn++;
-	}*/
 	
 	
 	
@@ -295,7 +364,7 @@ void setup() {
 
 
 
-	kalmanFilter3_configure(1000.0, 10.0, 1.0, myRealAltitude, 0.0 , 0.0);
+	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
 	
 	
 	statVar.varioGauge.size_X = 130;
@@ -316,11 +385,6 @@ void setup() {
 }
 
 void loop() {
-	
-
-
-
-
 
 	if (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){
@@ -333,32 +397,34 @@ void loop() {
 			break;
 			
 			case DOWN:
-			statVar.BuzzerVolume -=50;
-			if(statVar.BuzzerVolume<0){
+			statVar.BuzzerVolume -=30;
+			if(statVar.BuzzerVolume<=0){
 				statVar.BuzzerVolume = 0;
+				
 			}
-			analogWrite(DAC, statVar.BuzzerVolume);
-			SerialUSB.println("down_vol");
+			buzzerSetVolume(statVar.BuzzerVolume);
 			break;
 			
 			case UP:
-			statVar.BuzzerVolume +=50;
+			statVar.BuzzerVolume +=30;
 			if(statVar.BuzzerVolume>255){
 				statVar.BuzzerVolume = 255;
+				
 			}
-			analogWrite(DAC, statVar.BuzzerVolume);
-			SerialUSB.println("up_vol");
+			buzzerSetVolume(statVar.BuzzerVolume);
 			break;
 		}
 
 	}
-
-
+	uint64_t t_start = micros();
 	routine();
+					uint64_t t_stop = micros();
+				//	SerialUSB.println((uint32_t)((t_stop-t_start)/1000));
+
 
 
 	if(redraw){
-
+		//digitalWrite(SRAM_CS, 0);
 		/*
 		Wire.beginTransmission(SI7021_ADDRESS);
 		Wire.write(SI7021_MEASURE_RH);
@@ -407,7 +473,6 @@ void loop() {
 			powerOff();
 		}
 		
-
 		
 		/*
 		if(pocitadlo % 10 == 0){

@@ -177,11 +177,14 @@ class SERCOM
 		void setClockModeSPI(SercomSpiClockMode clockMode) ;
 		void writeDataSPI(uint8_t data) ;
 		uint16_t readDataSPI( void ) ;
+		void transferDataSPI(void *buf, uint32_t count);
+
 		bool isBufferOverflowErrorSPI( void ) ;
 		bool isDataRegisterEmptySPI( void ) ;
 		bool isTransmitCompleteSPI( void ) ;
 		bool isReceiveCompleteSPI( void ) ;
-
+		
+		
 		/* ========== WIRE ========== */
 		void initSlaveWIRE(uint8_t address) ;
 		void initMasterWIRE(uint32_t baudrate) ;

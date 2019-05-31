@@ -37,13 +37,14 @@ void debugBME280(void);
 void debugMAX17055(void);
 void debugGPS(void);
 void debugXOSC32k(void);
+void printAccelerometerData(void);
 
 extern menu topmenu;
 extern menu menu0;
 extern menu menu1;
 extern menu menu2;
 extern menu menu3;
-extern menu menu4;
+extern menu system_menu;
 
 
 extern double myRealAltitude;

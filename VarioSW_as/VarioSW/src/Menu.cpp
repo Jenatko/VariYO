@@ -19,6 +19,10 @@
 #include "buzzer.h"
 #include "wiring_private.h"
 #include "GPSfix.h"
+#include "chess.h"
+#include "kalmanfilter3.h"
+
+#include "MadgwickAHRS.h"
 
 
 char listTopMenu[][15] = {"0. Peripher", "1. System", "2. Vario", "3. Debug", "Start Trcklog", "MassStorage1", "Power Off"};
@@ -37,13 +41,13 @@ char menu2_list[][15] = {"2.0 Thres. up", "2.1 Thresh. dn", "Equation rise", "Eq
 char menu2_name[15] = "Vario";
 int  menu2_id = 0x12;
 
-char menu3_list[][15] = {"BMI160", "BME280", "MAX17055", "GPS", "set Default","print EEPROM", "32kHz test"};
+char menu3_list[][15] = {"BMIX60", "LPS33,SI7021", "MAX17055", "GPS", "set Default","print EEPROM", "32kHz test", "Print accel"};
 char menu3_name[15] = "3. Debug";
 int  menu3_id = 0x13;
 
-char menu4_list[][15] = {"1.0 Time zone", "4.1 item", "4.2 item", "4.3 item", "4.4 item", "4.5 item"};
-char menu4_name[15] = "System";
-int  menu4_id = 0x14;
+char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off"};
+char system_menu_name[15] = "System";
+int  system_menu_id = 0x14;
 
 int lastmenutype = 0;
 
@@ -53,7 +57,7 @@ menu menu0;
 menu menu1;
 menu menu2;
 menu menu3;
-menu menu4;
+menu system_menu;
 
 
 void menu_init() {
@@ -93,10 +97,10 @@ void menu_init() {
 	menu3.jmeno_menu = menu3_name;
 	menu3.menu_id = menu3_id;
 
-	menu4.pole = menu4_list;
-	menu4.velikost = sizeof(menu4_list) / sizeof(menu4_list[0]);
-	menu4.jmeno_menu = menu4_name;
-	menu4.menu_id = menu4_id;
+	system_menu.pole = system_menu_list;
+	system_menu.velikost = sizeof(system_menu_list) / sizeof(system_menu_list[0]);
+	system_menu.jmeno_menu = system_menu_name;
+	system_menu.menu_id = system_menu_id;
 
 
 }
@@ -324,7 +328,7 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		//system
 		else if (selected == 1){
-			MenuEntry(&menu4);
+			MenuEntry(&system_menu);
 		}
 		//vario
 		else if (selected == 2){
@@ -336,10 +340,10 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		//ena/dis tracklog
 		else if (selected == 4){
-			if(!(statVar.ena_vector & 1<<ENA_TRACKLOG)){
+			if(!(statVar.ena_vector & ENA_TRACKLOG)){
 				strncpy(listTopMenu[4], "Stop Trcklog", 15);
 				menu_init();
-				statVar.ena_vector |= 1<<ENA_TRACKLOG;
+				statVar.ena_vector |= ENA_TRACKLOG;
 
 				var_takeofftime = rtc.getEpoch();
 
@@ -347,7 +351,7 @@ void menuSelector(menu *menuPointer, int selected) {
 			else{
 				strncpy(listTopMenu[4], "Start Trcklog", 15);
 				menu_init();
-				statVar.ena_vector &= ~(1<<ENA_TRACKLOG);
+				statVar.ena_vector &= ~(ENA_TRACKLOG);
 			}
 		}
 		//mass storage
@@ -391,13 +395,48 @@ void menuSelector(menu *menuPointer, int selected) {
 			statVar.TimeZone = numpad(statVar.TimeZone);
 			PrepareMenu(menuPointer);
 		}
+				if (selected == 1){
+					playChessGame();
+					PrepareMenu(menuPointer);
+				}
+				if (selected == 2){
+					statVar.zvariance = numpad(statVar.zvariance);
+					kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+					PrepareMenu(menuPointer);
+				}
+				if (selected == 3){
+					statVar.accelvariance = numpad(statVar.accelvariance);
+					kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+					PrepareMenu(menuPointer);
+				}
+				if (selected == 4){
+					eepromWrite(0, statVar);
+				}
+								if (selected == 5){
+							if(statVar.ena_vector & (ENA_HEATER)){
+								strncpy(system_menu_list[5], "heater off", 15);
+								menu_init();
+								digitalWrite(HEAT, 0);
+								statVar.ena_vector  = statVar.ena_vector & (~(ENA_HEATER));
+
+							}
+							else{
+								strncpy(system_menu_list[5], "heater on", 15);
+								digitalWrite(HEAT, 1);
+								menu_init();
+								statVar.ena_vector  = statVar.ena_vector | (ENA_HEATER);
+							}
+			
+								}
+				
+				
 	}
 	//-------------Altimeter menu
 
 	if (menuPointer->menu_id == 0x11) {
 		if (selected == 0){
-			//ms5611.setSeaLevel(numpad(myRealAltitude), rbuff.getAverage());
-			setSeaPressureFromAltitude(numpad(myRealAltitude), enviromental_data.pressure);
+			SerialUSB.println(alt_baro);
+			setSeaPressureFromAltitude(numpad(alt_baro/100), enviromental_data.pressure);
 			SerialUSB.println("setsealevel");
 		}
 		else if (selected == 1){
@@ -468,6 +507,12 @@ void menuSelector(menu *menuPointer, int selected) {
 			PrepareMenu(menuPointer);
 
 		}
+		//print accelerometer data to serial
+				else if (selected == 7){
+					printAccelerometerData();
+					PrepareMenu(menuPointer);
+
+				}
 
 	}
 
@@ -475,101 +520,124 @@ void menuSelector(menu *menuPointer, int selected) {
 }
 
 void debugBMI160(void){
-	display.setFont(&FreeMonoBold9pt7b);
+	display.setFont();
 	while (!buttons.getFlag())	{
 		routine();
 		display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-		display.setCursor(50, 10);
+		display.setCursor(50, 0);
 		display.print("uncor");
-		display.setCursor(140, 10);
+		display.setCursor(140, 0);
 		display.print("cor");
-		display.setCursor(5, 24);
+		display.setCursor(5, 10);
 		display.print("ax");
-		display.setCursor(35, 24);
+		display.setCursor(35, 10);
 		display.print(ax);
-		display.setCursor(5, 36);
+		display.setCursor(5, 20);
 		display.print("ay");
-		display.setCursor(35, 36);
+		display.setCursor(35, 20);
 		display.print(ay);
-		display.setCursor(5, 48);
+		display.setCursor(5, 30);
 		display.print("az");
-		display.setCursor(35, 48);
+		display.setCursor(35, 30);
 		display.print(az);
 		
 
-		display.setCursor(120, 24);
+		display.setCursor(120, 10);
 		display.print(ax_corr);
 
-		display.setCursor(120, 36);
+		display.setCursor(120, 20);
 		display.print(ay_corr);
 
-		display.setCursor(120, 48);
+		display.setCursor(120, 30);
 		display.print(az_corr);
 		
-		display.setCursor(5, 60);
+		display.setCursor(5, 40);
 		display.print("g");
-		display.setCursor(35, 60);
+		display.setCursor(35, 40);
 		display.print(   pow(  ((float)ax*ax + (float)ay*ay + (float)az*az)/268.435456e6 , 0.5) , 3   );
-		display.setCursor(120, 60);
+		display.setCursor(120, 40);
 		display.print(   pow(  ((float)ax_corr*ax_corr + (float)ay_corr*ay_corr + (float)az_corr*az_corr)/268.435456e6 , 0.5) , 3   );
 		
-		display.setCursor(5, 80);
+		display.setCursor(5, 50);
 		display.print("gx");
-		display.setCursor(35, 80);
+		display.setCursor(35, 50);
 		display.print(gx);
-		display.setCursor(120, 80);
+		display.setCursor(120, 50);
 		display.print(gx/131.2);
-		display.setCursor(5, 92);
+		display.setCursor(5, 60);
 		display.print("gy");
-		display.setCursor(35, 92);
+		display.setCursor(35, 60);
 		display.print(gy);
-		display.setCursor(120, 92);
+		display.setCursor(120, 60);
 		display.print(gy/131.2);
-		display.setCursor(5, 104);
+		display.setCursor(5, 70);
 		display.print("gz");
-		display.setCursor(35, 104);
+		display.setCursor(35, 70);
 		display.print(gz);
-		display.setCursor(120, 104);
+		display.setCursor(120, 70);
 		display.print(gz/131.2);
+		
+				display.setCursor(5, 80);
+				display.print("mx");
+				display.setCursor(35, 80);
+				display.print(mx_cor);
+				display.setCursor(120, 80);
+
+				display.setCursor(5, 90);
+				display.print("my");
+				display.setCursor(35, 90);
+				display.print(my_cor);
+				display.setCursor(120, 90);
+
+				display.setCursor(5, 100);
+				display.print("mz");
+				display.setCursor(35, 100);
+				display.print(mz_cor);
+				display.setCursor(120, 100);
+
+		
+		
 		
 		display.setCursor(50, 120);
 		display.print("gain");
 		display.setCursor(140, 120);
 		display.print("offset");
 		
-		display.setCursor(5, 136);
+		display.setCursor(5, 130);
 		display.print("x");
-		display.setCursor(35, 136);
-		display.print(statVar.gainErrorX, 3);
-		display.setCursor(140, 136);
-		display.print(statVar.offsetX);
+		display.setCursor(35, 130);
+		display.print(statVar.gainErrorAccelX, 3);
+		display.setCursor(140, 130);
+		display.print(statVar.offsetAccelX);
 		
-		display.setCursor(5, 148);
+		display.setCursor(5, 140);
 		display.print("y");
-		display.setCursor(35, 148);
-		display.print(statVar.gainErrorY, 3);
-		display.setCursor(140, 148);
-		display.print(statVar.offsetY);
+		display.setCursor(35, 140);
+		display.print(statVar.gainErrorAccelY, 3);
+		display.setCursor(140, 140);
+		display.print(statVar.offsetAccelY);
 		
-		display.setCursor(5, 160);
+		display.setCursor(5, 150);
 		display.print("z");
-		display.setCursor(35, 160);
-		display.print(statVar.gainErrorZ, 3);
-		display.setCursor(140, 160);
-		display.print(statVar.offsetZ);
-		
-		display.setCursor(5, 175);
+		display.setCursor(35, 150);
+		display.print(statVar.gainErrorAccelZ, 3);
+		display.setCursor(140, 150);
+		display.print(statVar.offsetAccelZ);
+		display.setCursor(5, 160);
 		display.print("yaw");
-		display.setCursor(60, 175);
+		display.setCursor(60, 160);
 		display.print(yaw);
-		display.setCursor(5, 187);
+
+		display.setCursor(5, 170);
 		display.print("pitch");
-		display.setCursor(60, 187);
+		display.setCursor(60, 170);
 		display.print(pitch);
-		display.setCursor(5, 199);
+
+		display.setCursor(5, 180);
 		display.print("roll");
-		display.setCursor(60, 199);
+		display.setCursor(60, 180);
 		display.print(roll);
+
 
 		
 		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
@@ -644,19 +712,47 @@ void debugXOSC32k(void){
 	
 }
 
+void printAccelerometerData(void){
+	display.setFont(&FreeMonoBold9pt7b);
+			display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+			display.setCursor(5, 30);
+			display.println("acel data on serialUSB");
+			display.println("ax,ay,az");
+
+			
+			display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+	while (!buttons.getFlag())
+	{
+		routine();
+		delay(100);
+		SerialUSB.print(ax);
+		SerialUSB.print(",");
+		SerialUSB.print(ay);
+		SerialUSB.print(",");
+		SerialUSB.println(az);
+
+
+	}
+	pinMode(SRAM_CS, OUTPUT);
+	buzzerInit();
+	display.setFont(&FreeMonoBold12pt7b);
+	buttons.getButtonPressed();
+	
+}
+
 void debugMAX17055(void){
 	display.setFont(&FreeMonoBold9pt7b);
 	while (!buttons.getFlag())
 	{
 		routine();
 		display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-		display.setCursor(5, 15);
+		display.setCursor(5, 180);
 		display.print("Vcurr");
-		display.setCursor(70, 15);
+		display.setCursor(70, 180);
 		display.print(max17055.getInstantaneousVoltage(), 3); display.print(" V");
-		display.setCursor(5, 30);
+		display.setCursor(5, 195);
 		display.print("Vavg");
-		display.setCursor(70, 30);
+		display.setCursor(70, 195);
 		display.print(max17055.getAverageVoltage(), 3); display.print(" V");
 
 		
@@ -705,6 +801,7 @@ void debugMAX17055(void){
 		
 		
 		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+		SerialUSB.println(max17055.getVFSOC());
 
 
 	}

@@ -12,8 +12,12 @@
 
 
 #include <MahonyAHRS.h>
+#include <MadgwickAHRS.h>
 
-Mahony filter;
+
+Mahony Mahony_filter;
+Madgwick Madgwick_filter;
+
 
 
 
@@ -88,75 +92,77 @@ void counterInit() { // Set up the generic clock (GCLK4) used to clock timers
 
 void TC4_Handler()                              // Interrupt Service Routine (ISR) for timer TC4
 {
-	
-//digitalWrite(SRAM_CS, 0);
-	
-	uint8_t inFifoWaiting = IMU_FifoBytesToRead();
-	while (inFifoWaiting != 0) {
-		for(int i = 0; i < inFifoWaiting; i+=12){
+
+	//read_mag();
+	//IMU_read();
+	SPI_IRQ.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));
+	if(present_devices & BMX160_PRESENT){
+		for(int i = 0; i < IMU_FifoBytesToRead(); i+=FIFO_FRAME_SIZE){
 			
-		//	SerialUSB.print(inFifoWaiting);
-		//	SerialUSB.print(",");
-		//	SerialUSB.println(i);
+			//		SerialUSB.print(inFifoWaiting);
+			//	SerialUSB.print(",");
+			//	SerialUSB.println(i);
 			
 			IMU_ReadFrameFromFifo();
-			
-			ax_corr = (float)(ax-statVar.offsetX) / statVar.gainErrorX ;
-			ay_corr = (float)(ay-statVar.offsetY) / statVar.gainErrorY;
-			az_corr = (float)(az-statVar.offsetZ) / statVar.gainErrorZ;
-			
-			ax_avg = ax_avg*9.0/10.0+ax/10.0;
-			ay_avg = ay_avg*9.0/10.0+ay/10.0;
-			az_avg = az_avg*9.0/10.0+az/10.0;
-			gx_avg = gx_avg*9.0/10.0+gx/10.0;
-			gy_avg = gy_avg*9.0/10.0+gy/10.0;
-			gz_avg = gz_avg*9.0/10.0+gz/10.0;
+			//	digitalWrite(SRAM_CS, 1);
 
-			/*	SerialUSB.print(gx);
-			SerialUSB.print(" ");
-			SerialUSB.print(gy);
-			SerialUSB.print(" ");
-			SerialUSB.println(gz);
-			*/
+			ax_corr = (float)(ax-statVar.offsetAccelX) * statVar.gainErrorAccelX ;
+			ay_corr = (float)(ay-statVar.offsetAccelY) * statVar.gainErrorAccelY;
+			az_corr = (float)(az-statVar.offsetAccelZ) * statVar.gainErrorAccelZ;
+
 			
-			filter.updateIMU(gx/131.2, gy/131.2, gz/131.2, ax_corr/16384.0, ay_corr/16384.0, az_corr/16384.0);
+			mx_cor = mx*1000000 + statVar.offsetMagX;
+			my_cor = my*1000000 + statVar.offsetMagY;
+			mz_cor = mz*1000000 + statVar.offsetMagZ;
+			mx_cor /= statVar.gainErrorMagX;
+			my_cor /= statVar.gainErrorMagY;
+			mz_cor /= statVar.gainErrorMagZ;
 			
+			
+			
+			ax_avg = ((ax_avg<<5)-ax_avg+ax)>>5;
+			ay_avg = ((ay_avg<<5)- ay_avg+ay)>>5;
+			az_avg = ((az_avg<<5)- az_avg+az)>>5;
+			gx_avg = ((gx_avg<<5)- gx_avg+gx)>>5;
+			gy_avg = ((gy_avg<<5)- gy_avg +gy)>>5;
+			gz_avg = ((gz_avg<<5)- gz_avg+gz)>>5;
+					
+			//Mahony_filter.updateIMU(gx/131.2f, gy/131.2f, gz/131.2f, ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
+		//	digitalWrite(SRAM_CS, 0);
+			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*0.0174533f), gy*(1/131.2f*0.0174533f), gz*(1/131.2f*0.0174533f), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
+			//	digitalWrite(SRAM_CS, 1);
 
 		}
+
+	
+		//yaw = Mahony_filter.getYaw();
+		//pitch = Mahony_filter.getPitch();
+		//roll = Mahony_filter.getRoll();
+
+
 		
-		//		if(zoufalepomocnapromenna % 2== 0)
-		//		SerialUSB.println(a_vertical_imu, 3);
-		inFifoWaiting = IMU_FifoBytesToRead();
+	//	digitalWrite(SRAM_CS, 1);
+		
+		//a_vertical_imu = az/16384.0*cos(roll*0.01745329)*cos(pitch*0.01745329) - ax/16384.0*sin(pitch*0.01745329) + ay/16384.0*sin(roll*0.01745329)*cos(pitch*0.01745329);
+		
+		a_vertical_imu = Madgwick_filter.getVertical(ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
+		
 	}
 
-	
-	yaw = filter.getYaw();
-	pitch = filter.getPitch();
-	roll = filter.getRoll();
-
-	
-	//a_vertical_imu = az/16384.0*cos(roll*0.01745329)*cos(pitch*0.01745329) - ax/16384.0*sin(pitch*0.01745329) + ay/16384.0*sin(roll*0.01745329)*cos(pitch*0.01745329);
-	
-	a_vertical_imu = filter.getVertical(ax_corr/16384.0, ay_corr/16384.0, az_corr/16384.0);
-	
+	if(present_devices & LPS33_PRESENT){
+		//digitalWrite(SRAM_CS, 0);
+		baro_readPressure();
+		SPI_IRQ.endTransaction();
+		//digitalWrite(SRAM_CS, 1);
 		
-
-	BME_read();
-
-
-
-//recalculateTaylor();
-
-digitalWrite(SRAM_CS, 0);	
-	float alt = getAltitude()*100;
-	digitalWrite(SRAM_CS, 1);	
 		
-			
-	kalmanFilter3_update(alt, a_vertical_imu*1000.0-1000.0, (float)1/60.0, &alt_filter, &vario_filter);
+		alt_baro = getAltitude()*100;
 
-
-
-	buzzerAltitudeDiff((int)vario_filter);
+		
+		//SerialUSB.println(alt_baro);
+		kalmanFilter3_update(alt_baro, a_vertical_imu*1000.0f-1000.0f, (float)1/60.0f, &alt_filter, &vario_filter);
+		buzzerAltitudeDiff((int)vario_filter);
+	}
 	
 	/*
 	SerialUSB.print(flag_sec++);
@@ -176,7 +182,7 @@ digitalWrite(SRAM_CS, 0);
 
 	
 	//generate short beep bursts, long beep or be silent
-	if (buzzerRepeatCounter < buzzerEnaMax)
+	if (buzzer_counter < buzzer_on_preiod)
 	buzzerEna(1);
 	else
 	buzzerEna(0);
@@ -184,14 +190,19 @@ digitalWrite(SRAM_CS, 0);
 
 	
 	zoufalepomocnapromenna++;
-	buzzerRepeatCounter++;
-	if (buzzerRepeatCounter > buzzerRepeatCounterMax)
-	buzzerRepeatCounter = 0;
+	buzzer_counter++;
+	if (buzzer_counter > buzzer_period)
+	buzzer_counter = 0;
 
 	buttons.buttonUpdate();
 	
 	
-pocitadlo++;
+	pocitadlo++;
+
+	if(pocitadlo%20 == 0){
+		//Mag_print_angles();
+		//	print_mag();
+	}
 
 
 	

@@ -21,6 +21,8 @@
 #include <avr/pgmspace.h>
 #endif
 
+#include "definitions.h"
+
 // Partial Update Delay, may have an influence on degradation
 #define GxGDEP015OC1_PU_DELAY 5
 
@@ -273,12 +275,20 @@ void GxGDEP015OC1::updateWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
   _SetRamPointer(xs_d8, y % 256, y / 256); // set ram
   _waitWhileBusy();
   _writeCommand(0x24);
+  
+  uint8_t buffer2[GxGDEP015OC1_BUFFER_SIZE];
+  for(int i = 0; i < GxGDEP015OC1_BUFFER_SIZE; i++){
+	  buffer2[i] = _buffer[i];
+	  
+  }
+  
   for (int16_t y1 = y; y1 <= ye; y1++)
   {
     for (int16_t x1 = xs_d8; x1 <= xe_d8; x1++)
     {
       uint16_t idx = y1 * (GxGDEP015OC1_WIDTH / 8) + x1;
-      uint8_t data = (idx < sizeof(_buffer)) ? _buffer[idx] : 0x00;
+     // uint8_t data = (idx < sizeof(_buffer)) ? _buffer[idx] : 0x00;
+	  uint8_t data = (idx < sizeof(_buffer)) ? buffer2[idx] : 0x00;
       _writeData(~data);
     }
   }
@@ -289,16 +299,78 @@ void GxGDEP015OC1::updateWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
   _SetRamPointer(xs_d8, y % 256, y / 256); // set ram
   _waitWhileBusy();
   _writeCommand(0x24);
-  for (int16_t y1 = y; y1 <= ye; y1++)
+  for (uint16_t y = 0; y < GxGDEP015OC1_HEIGHT; y++)
   {
-    for (int16_t x1 = xs_d8; x1 <= xe_d8; x1++)
+    for (uint16_t x = 0; x < GxGDEP015OC1_WIDTH / 8; x++)
     {
-      uint16_t idx = y1 * (GxGDEP015OC1_WIDTH / 8) + x1;
+      uint16_t idx = y * (GxGDEP015OC1_WIDTH / 8) + x;
       uint8_t data = (idx < sizeof(_buffer)) ? _buffer[idx] : 0x00;
       _writeData(~data);
     }
   }
   delayMicroseconds(GxGDEP015OC1_PU_DELAY*1000);
+}
+
+void GxGDEP015OC1::partiallyUpdateScreen(void)
+{
+	if (_current_page != -1) return;
+	
+	uint16_t xe = GxGDEP015OC1_WIDTH - 1;
+	uint16_t ye = GxGDEP015OC1_HEIGHT - 1;
+	uint16_t xs_d8 = 0;
+	uint16_t xe_d8 = xe / 8;
+	_Init_Part(0x03);
+	_SetRamArea(xs_d8, xe_d8, 0, 0, ye % 256, ye / 256); // X-source area,Y-gate area
+	_SetRamPointer(xs_d8, 0, 0); // set ram
+	_waitWhileBusy();
+	_writeCommand(0x24);
+	
+	uint8_t buffer2[GxGDEP015OC1_BUFFER_SIZE];
+	for(int i = 0; i < GxGDEP015OC1_BUFFER_SIZE; i++){
+		buffer2[i] = ~_buffer[i];
+		
+	}
+	
+	digitalWrite(DISP_CS, 0);
+	sercom4.transferDataSPI(buffer2, 5000);
+	digitalWrite(DISP_CS, 1);
+	
+	/*
+  for (uint16_t y = 0; y < GxGDEP015OC1_HEIGHT; y++)
+  {
+	  for (uint16_t x = 0; x < GxGDEP015OC1_WIDTH / 8; x++)
+	  {
+		  uint16_t idx = y * (GxGDEP015OC1_WIDTH / 8) + x;
+		  uint8_t data = (idx < sizeof(_buffer)) ? _buffer[idx] : 0x00;
+		  _writeData(~data);
+	  }
+  }
+  */
+  
+	_Update_Part();
+	delayMicroseconds(GxGDEP015OC1_PU_DELAY*1000);
+	// update erase buffer
+	_SetRamArea(xs_d8, xe_d8, 0, 0, ye % 256, ye / 256); // X-source area,Y-gate area
+	_SetRamPointer(xs_d8, 0, 0); // set ram
+	_waitWhileBusy();
+	_writeCommand(0x24);
+	
+	digitalWrite(DISP_CS, 0);
+	sercom4.transferDataSPI(buffer2, 5000);
+	digitalWrite(DISP_CS, 1);
+	
+	/*
+  for (uint16_t y = 0; y < GxGDEP015OC1_HEIGHT; y++)
+  {
+	  for (uint16_t x = 0; x < GxGDEP015OC1_WIDTH / 8; x++)
+	  {
+		  uint16_t idx = y * (GxGDEP015OC1_WIDTH / 8) + x;
+		  uint8_t data = (idx < sizeof(_buffer)) ? _buffer[idx] : 0x00;
+		  _writeData(~data);
+	  }
+  }
+  */
+	delayMicroseconds(GxGDEP015OC1_PU_DELAY*1000);
 }
 
 void GxGDEP015OC1::_writeToWindow(uint16_t xs, uint16_t ys, uint16_t xd, uint16_t yd, uint16_t w, uint16_t h)

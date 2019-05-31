@@ -19,6 +19,7 @@ void GPS_low(void);
 void GPS_off(void);
 void GPS_stopped(void);
 
+void gpsBckpTimer(void);
 
 
 #endif /* POWERMODES_H_ */

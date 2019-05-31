@@ -11,9 +11,9 @@
 #include "wiring_private.h"
 #include "Variables.h"
 
- volatile int buzzerRepeatCounterMax;
- volatile int buzzerEnaMax;
- volatile int buzzerRepeatCounter;
+ volatile int buzzer_period;
+ volatile int buzzer_on_preiod;
+ volatile int buzzer_counter;
 
 void buzzerInit() {
 
@@ -81,16 +81,14 @@ void clk_test(){
 }
 
 void buzzerEna(int enable) {
-	if (enable) {
+
+	if (enable && statVar.BuzzerVolume != 0) {
 		pinPeripheral(BUZZER_PIN, PIO_TIMER);
 	}
 	else {
 		pinMode(BUZZER_PIN, OUTPUT);
 		digitalWrite(BUZZER_PIN, 0);
 	}
-	
-	
-
 }
 
 void buzzerFreq(int freq) {
@@ -110,23 +108,21 @@ void buzzerAltitudeDiff(int altDiff_cm_in) {
 	if (altDiff_cm < -1000)
 	altDiff_cm = -1000;
 	if (altDiff_cm < statVar.th_sink) {
-		buzzerEnaMax = 0xffff;
-		buzzerFreq(altDiff_cm * altDiff_cm * 0.0004 + 0.7222 * altDiff_cm + 450);
+		buzzer_on_preiod = 0xffff;
+		buzzerFreq(altDiff_cm * altDiff_cm * 0.0004f + 0.7222f * altDiff_cm + 450);
 	}
 	else if (altDiff_cm > statVar.th_rise) {
-		buzzerEnaMax = 3;
-		buzzerFreq(altDiff_cm * altDiff_cm * 0.0012 + 2.44 * altDiff_cm + 325);
-		// buzzerRepeatCounterMax = altDiff_cm * altDiff_cm * 0.00009 - 0.1457 * altDiff_cm + 64.29;
-		buzzerRepeatCounterMax = altDiff_cm * altDiff_cm * altDiff_cm * -1.06e-7 + altDiff_cm * altDiff_cm * 2.53e-4 - 0.207 * altDiff_cm + 66;
-		//   SerialUSB.println( buzzerRepeatCounterMax);
+		buzzer_on_preiod = 3;
+		buzzerFreq(altDiff_cm * altDiff_cm * 0.0012f + 2.44f * altDiff_cm + 325);
+		buzzer_period = altDiff_cm * altDiff_cm * altDiff_cm * -1.06e-7f + altDiff_cm * altDiff_cm * 2.53e-4f - 0.207f * altDiff_cm + 66;
+
 	}
 	else {
-		buzzerEnaMax = -1;
-		//   SerialUSB.println( "a");
+		buzzer_on_preiod = -1;
+
 	}
 }
 
-void buzzerSetVolume(char* buzzerVolume){
-	
-	
+void buzzerSetVolume(uint8_t buzzerVolume){
+		analogWrite(DAC, buzzerVolume);
 	}

@@ -321,6 +321,18 @@ uint16_t SERCOM::readDataSPI()
   return sercom->SPI.DATA.bit.DATA;  // Reading data
 }
 
+void SERCOM::transferDataSPI(void *buf, uint32_t count)
+{
+	uint8_t *buffer = reinterpret_cast<uint8_t *>(buf);
+
+	for (size_t i=0; i<count; i++) {
+		sercom->SPI.DATA.bit.DATA = *buffer; // Initiate byte transfer.
+		while(sercom->SPI.INTFLAG.bit.RXC == 0); // Wait for data to be available in the receive buffer.
+		*buffer++ = sercom->SPI.DATA.bit.DATA & 0xFF; // Read received byte, then increment pointer into buffer.
+	}
+
+}
+
 bool SERCOM::isBufferOverflowErrorSPI()
 {
   return sercom->SPI.STATUS.bit.BUFOVF;
@@ -695,3 +707,5 @@ void SERCOM::initClockNVIC( void )
     /* Wait for synchronization */
   }
 }
+
+

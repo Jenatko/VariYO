@@ -9,18 +9,18 @@
 #include "Variables.h"
 #include "SD.h"
 #include "MEMS.h"
+#include "RTCZero.h"
 
 extern File tracklog;
 
 void powerOff() {
-
 	if(tracklog_stat == 1){
 		tracklog.println("    </trkseg>");
 		tracklog.println("  </trk>");
 		tracklog.println("</gpx>");
 		tracklog.close();
 		tracklog_stat = 0;
-		statVar.ena_vector & ~(1<<ENA_TRACKLOG);
+		statVar.ena_vector &= ~(ENA_TRACKLOG);
 	}
 	
 	
@@ -50,17 +50,27 @@ void powerOff() {
 
 	DAC->CTRLA.bit.ENABLE=0;*/
 	allLow();
+	gpsBckpTimer();
 	__WFI();
+if(digitalRead(BUTTON_CENTER))   //go back to sleep if woken up by RTC timer (gps backup power turning off)
+__WFI();
 	
-	
-	for(int fn = 0; fn < 100; fn++){
-		digitalWrite(SRAM_CS, 0);
-		digitalWrite(SRAM_CS, 1);
-	}
+	rtc.detachInterrupt();
+
 	reinitializePins();
 	counterInit();
-	REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;
-	REG_EIC_INTFLAG = EIC_INTFLAG_EXTINT9;
+
+	
+	
+		pinMode(SD_DETECT, INPUT_PULLUP);
+		delay(10);
+		if(digitalRead(SD_DETECT) == 0){
+			present_devices |= SD_PRESENT;
+		}
+		else{
+			present_devices &= ~SD_PRESENT;
+		}
+		pinMode(SD_DETECT, INPUT);
 
 	
 	
@@ -76,8 +86,12 @@ void powerOff() {
 
 	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
 	display.setTextWrap(0);
+	if(present_devices | BMX160_PRESENT)
 		IMU_init();
-		BME_init_1ms();
+	if(present_devices | LPS33_PRESENT)		
+				lps33_init();
+	if(present_devices | SI7021_PRESENT)					
+				request_si7021();
 	
 
 }
@@ -108,16 +122,18 @@ void allLow() {
 	digitalWrite(MISO_IRQ, 0);
 	digitalWrite(MOSI_IRQ, 0);
 	digitalWrite(SCK_IRQ, 0);
-	
-	pinMode(POWER_ENA, INPUT_PULLUP);
+	digitalWrite(POWER_ENA, 1);
+	digitalWrite(HEAT, 0);
+
 	
 }
 
 
 void reinitializePins() {
 	
-	pinMode(POWER_ENA, INPUT_PULLDOWN);
-	delayMicroseconds(20000);
+	digitalWrite(GPS_BCKP, 1);
+	digitalWrite(POWER_ENA, 0);
+	delay(50);
 	digitalWrite(EEPROM_CS, 1);
 	digitalWrite(SRAM_CS, 1);
 	digitalWrite(SD_CS, 1);
@@ -127,6 +143,8 @@ void reinitializePins() {
 	digitalWrite(DISP_RST, 1);
 	digitalWrite(DISP_DC,1);
 	digitalWrite(DISP_CS, 1);
+	
+		digitalWrite(HEAT, statVar.ena_vector & ENA_HEATER);
 
 	pinPeripheral(MOSI_IRQ, PIO_SERCOM);
 	pinPeripheral(MISO_IRQ, PIO_SERCOM);
@@ -142,8 +160,12 @@ void reinitializePins() {
 
 
 void wakeUp() {
+	
+
 
 	detachInterrupt(BUTTON_CENTER);
+	REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;
+	REG_EIC_INTFLAG = EIC_INTFLAG_EXTINT9;
 
 
 }
@@ -186,8 +208,8 @@ void massStorageEna() {
 
 void GPS_low(void){
 	
-	statVar.ena_vector |= (1<<ENA_GPS);
-	statVar.ena_vector |= (1<<ENA_GPS_LOW_POWER);
+	statVar.ena_vector |= (ENA_GPS);
+	statVar.ena_vector |= (ENA_GPS_LOW_POWER);
 	byte m1[] = {0xB5, 0x62, 0x06, 0x86, 0x08, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x97, 0x6F};
 	byte m2[] = {0xB5, 0x62, 0x06, 0x86, 0x00, 0x00, 0x8C, 0xAA};
 
@@ -207,8 +229,8 @@ void GPS_low(void){
 
 void GPS_full(void){
 	
-	statVar.ena_vector |= (1<<ENA_GPS);
-	statVar.ena_vector &= ~(1<<ENA_GPS_LOW_POWER);
+	statVar.ena_vector |= (ENA_GPS);
+	statVar.ena_vector &= ~(ENA_GPS_LOW_POWER);
 	
 	byte m1[] = {0xB5, 0x62, 0x06, 0x86, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x94, 0x5a};
 	byte m2[] = {0xB5, 0x62, 0x06, 0x86, 0x00, 0x00, 0x8C, 0xAA};
@@ -229,7 +251,7 @@ void GPS_full(void){
 
 void GPS_off(void){
 	
-	statVar.ena_vector &= ~ (1<<ENA_GPS);
+	statVar.ena_vector &= ~ (ENA_GPS);
 	byte m0[] = {0xB5, 0x62,   0x02, 0x41, 0x10, 0x00,    0x00, 0x00, 0x00, 0x00,   0x00, 0x00, 0x00, 0x00,    0x06, 0x00, 0x00, 0x00,   0x80, 0x00, 0x00, 0x00,  0xD9, 0x4B};
 	//byte m2[] = {0xB5, 0x62, 0x06, 0x86, 0x00, 0x00, 0x8C, 0xAA};
 	
@@ -281,4 +303,19 @@ void GPS_stopped(void){
 		SPI.transfer(m2[i]);
 	}
 	digitalWrite(GPS_CS, 1);
+}
+
+
+void disableGPSBckp(){
+	digitalWrite(GPS_BCKP, 0);	
+}
+
+
+void gpsBckpTimer(){
+	
+	rtc.setAlarmEpoch(rtc.getEpoch()+(4*3600));  //time of ephemirides validity
+	  rtc.enableAlarm(rtc.MATCH_HHMMSS);
+
+	  rtc.attachInterrupt(disableGPSBckp);
+	
 }

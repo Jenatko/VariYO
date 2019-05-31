@@ -2,6 +2,8 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
+src\chess.cpp
+
 src\Interrupt_counter.cpp
 
 src\lib\CircleFit\circle.cpp
@@ -13,6 +15,8 @@ src\lib\CircleFit\data.cpp
 src\lib\CircleFit\Utilities.cpp
 
 src\lib\kalmanfilter3.cpp
+
+src\lib\MadgwickAHRS\MadgwickAHRS.cpp
 
 src\lib\MahonyAHRS\MahonyAHRS.cpp
 

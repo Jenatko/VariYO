@@ -164,9 +164,13 @@ src/Interrupt_counter.d src/Interrupt_counter.o: \
  ../src/lib/CircleFit/circle.h ../src/periph/MEMS.h ../src/definitions.h \
  ../src/SPI_IRQ.h ../src/periph/BMI160_bosch_driver/bmi160_bosch.h \
  ../src/periph/BMI160_bosch_driver/bmi160_defs.h ../src/Variables.h \
+ ../src/periph/BMM150_bosch_driver/bmm150.h \
+ ../src/periph/BMM150_bosch_driver/bmm150_defs.h \
  ../src/periph/BME280_bosch_driver/bme280.h \
  ../src/periph/BME280_bosch_driver/bme280_defs.h \
- ../src/lib/MahonyAHRS/MahonyAHRS.h
+ ..\\..\ArduinoCore\include\libraries\wire/Wire.h \
+ ../src/lib/MahonyAHRS/MahonyAHRS.h \
+ ../src/lib/MadgwickAHRS/MadgwickAHRS.h
 
 ..\\..\ArduinoCore\include\core/Arduino.h:
 
@@ -522,8 +526,16 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/Variables.h:
 
+../src/periph/BMM150_bosch_driver/bmm150.h:
+
+../src/periph/BMM150_bosch_driver/bmm150_defs.h:
+
 ../src/periph/BME280_bosch_driver/bme280.h:
 
 ../src/periph/BME280_bosch_driver/bme280_defs.h:
 
+..\\..\ArduinoCore\include\libraries\wire/Wire.h:
+
 ../src/lib/MahonyAHRS/MahonyAHRS.h:
+
+../src/lib/MadgwickAHRS/MadgwickAHRS.h:

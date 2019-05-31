@@ -5,6 +5,7 @@
 
 
 int BUTTONCONTROL::getFlag() {
+
 	return flag;
 
 }
@@ -70,14 +71,28 @@ void BUTTONCONTROL::buttonUpdate() {
 }
 
 int BUTTONCONTROL::getButtonPressed() {
+	/*
 	if(index > 0){
-		index--;
+	index--;
 	}
 	int temp = buttonPressed[index];
 	if(index == 0){
+	flag = 0;
+	}
+	return temp;
+	*/
+	if(index > 0){
+		index--;
+	}
+	int temp = buttonPressed[0];
+	if(index == 0){
 		flag = 0;
 	}
-	// buttonPressed = 0;
+	buttonPressed[0] = buttonPressed[1];
+	buttonPressed[1] = buttonPressed[2];
+	buttonPressed[2] = buttonPressed[3];
+	buttonPressed[3] = buttonPressed[4];
+	buttonPressed[4] = buttonPressed[5];
 	return temp;
 	
 

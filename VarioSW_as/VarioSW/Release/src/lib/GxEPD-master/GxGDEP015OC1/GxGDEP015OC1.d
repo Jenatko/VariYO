@@ -159,7 +159,8 @@ src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.d \
  ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
  ..\\..\ArduinoCore\include\core/Print.h \
  ../src/lib/Adafruit_GFX/gfxfont.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h
+ ../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h \
+ ../src/definitions.h
 
 ../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h:
 
@@ -478,3 +479,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../src/lib/Adafruit_GFX/gfxfont.h:
 
 ../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h:
+
+../src/definitions.h:
