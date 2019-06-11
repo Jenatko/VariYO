@@ -21,6 +21,7 @@
 
 typedef struct Gauge{
 	float value;
+	uint16_t settings;
 	uint8_t decimals;
 	uint8_t size_X;
 	uint8_t size_Y;
@@ -28,7 +29,8 @@ typedef struct Gauge{
 	uint8_t offset_Y;
 	uint8_t frame;
 	uint8_t font;
-		uint8_t ena;
+	uint8_t ena;
+	uint8_t showPlusSign;
 	char name_shown[10];
 	char units[4];
 } Gauge;
@@ -57,15 +59,23 @@ typedef struct StaticVariables{
 	float gainErrorAccelZ;
 	int offsetAccelZ;
 	
-		int gainErrorMagX;
-		int offsetMagX;
-		int gainErrorMagY;
-		int offsetMagY;
-		int gainErrorMagZ;
-		int offsetMagZ;
-		
-		float zvariance, accelvariance;
+	int gainErrorMagX;
+	int offsetMagX;
+	int gainErrorMagY;
+	int offsetMagY;
+	int gainErrorMagZ;
+	int offsetMagZ;
+	
+	float zvariance, accelvariance;
 	Gauge varioGauge;
+	Gauge altitudeGauge;
+	Gauge AGLGauge;
+	Gauge speedGauge;
+	Gauge headingGauge;
+	Gauge tempGauge;
+	Gauge humidGauge;
+	Gauge windGauge;
+	Gauge windDirGauge;
 	
 	
 } StaticVariables;
@@ -76,18 +86,24 @@ typedef struct StaticVariables{
 
 extern double myRealAltitude;
 extern volatile float altChange;
+extern volatile int counter500ms;
 extern int redraw;
 extern int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor;
 extern float yaw, pitch, roll;
 extern float a_vertical_imu;
 extern float alt_filter, vario_filter, alt_baro;
 extern int tracklog_stat;
-extern struct tm*  var_localtime;
+//extern struct tm*  var_localtime;
+extern struct tm  var_localtime;
 extern time_t  var_takeofftime;
 extern float g_meter;
 extern int ground_level;
+extern int PerformRoutineInWaitWhileBusy;
+extern int position_updated;
 
 extern uint8_t present_devices;
+
+extern float battery_voltage, battery_SOC;
 
 
 

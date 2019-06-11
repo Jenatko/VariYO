@@ -14,6 +14,10 @@ src\lib\CircleFit\data.cpp
 
 src\lib\CircleFit\Utilities.cpp
 
+src\lib\GxEPD2\GxEPD2_154.cpp
+
+src\lib\GxEPD2\GxEPD2_EPD.cpp
+
 src\lib\kalmanfilter3.cpp
 
 src\lib\MadgwickAHRS\MadgwickAHRS.cpp
@@ -45,18 +49,6 @@ src\routine.cpp
 src\lib\Adafruit_GFX\Adafruit_GFX.cpp
 
 src\lib\Adafruit_GFX\Adafruit_SPITFT.cpp
-
-src\lib\GxEPD-master\GxEPD-master\library.cpp
-
-src\lib\GxEPD-master\GxEPD.cpp
-
-src\lib\GxEPD-master\GxFont_GFX.cpp
-
-src\lib\GxEPD-master\GxGDEP015OC1\GxGDEP015OC1.cpp
-
-src\lib\GxEPD-master\GxIO\GxIO.cpp
-
-src\lib\GxEPD-master\GxIO\GxIO_SPI\GxIO_SPI.cpp
 
 src\lib\NeoGPS\src\DMS.cpp
 

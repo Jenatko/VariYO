@@ -1,4 +1,6 @@
-#include <GxGDEP015OC1/GxGDEP015OC1.h>
+
+#include <GxEPD2_BW.h>
+//#include <GxGDEP015OC1/GxGDEP015OC1.h>
 #include <Fonts/FreeMonoBold24pt7b.h>
 #include <Fonts/FreeMonoBold18pt7b.h>
 #include <Fonts/FreeMonoBold12pt7b.h>
@@ -45,9 +47,17 @@ char menu3_list[][15] = {"BMIX60", "LPS33,SI7021", "MAX17055", "GPS", "set Defau
 char menu3_name[15] = "3. Debug";
 int  menu3_id = 0x13;
 
-char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off"};
+char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off", "gauges"};
 char system_menu_name[15] = "System";
 int  system_menu_id = 0x14;
+
+char gauge_menu_list[][15] = {"enable", "position", "size", "frame", "decimals", "name", "units", "font", "Showing + sgn"};
+char gauge_menu_name[15] = "Gauge";
+int  gauge_menu_id = 0x15;
+
+char gauges_menu_list[][15] = {"Vario", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity"};
+char gauges_menu_name[15] = "Gauges";
+int  gauges_menu_id = 0x16;
 
 int lastmenutype = 0;
 
@@ -58,6 +68,10 @@ menu menu1;
 menu menu2;
 menu menu3;
 menu system_menu;
+menu gauge_menu;
+menu gauges_menu;
+
+Gauge *gaugepointer = &statVar.varioGauge;
 
 
 void menu_init() {
@@ -102,6 +116,16 @@ void menu_init() {
 	system_menu.jmeno_menu = system_menu_name;
 	system_menu.menu_id = system_menu_id;
 
+
+	gauge_menu.pole = gauge_menu_list;
+	gauge_menu.velikost = sizeof(gauge_menu_list) / sizeof(gauge_menu_list[0]);
+	gauge_menu.jmeno_menu = gauge_menu_name;
+	gauge_menu.menu_id = gauge_menu_id;
+	
+	gauges_menu.pole = gauges_menu_list;
+	gauges_menu.velikost = sizeof(gauges_menu_list) / sizeof(gauges_menu_list[0]);
+	gauges_menu.jmeno_menu = gauges_menu_name;
+	gauges_menu.menu_id = gauges_menu_id;
 
 }
 
@@ -252,7 +276,7 @@ void drawMenuSimple(menu *menuPointer) {
 		// display.print(temp);
 
 	}
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
+	display.display(true);
 	menuPointer->selected_old = menuPointer->selected;
 	
 	//erase text from framebuffer to prepare for next screen
@@ -313,7 +337,7 @@ void drawMenuDetailed(menu *menuPointer) {
 		}
 	}
 
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
+	display.display(true);
 
 }
 
@@ -395,41 +419,44 @@ void menuSelector(menu *menuPointer, int selected) {
 			statVar.TimeZone = numpad(statVar.TimeZone);
 			PrepareMenu(menuPointer);
 		}
-				if (selected == 1){
-					playChessGame();
-					PrepareMenu(menuPointer);
-				}
-				if (selected == 2){
-					statVar.zvariance = numpad(statVar.zvariance);
-					kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
-					PrepareMenu(menuPointer);
-				}
-				if (selected == 3){
-					statVar.accelvariance = numpad(statVar.accelvariance);
-					kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
-					PrepareMenu(menuPointer);
-				}
-				if (selected == 4){
-					eepromWrite(0, statVar);
-				}
-								if (selected == 5){
-							if(statVar.ena_vector & (ENA_HEATER)){
-								strncpy(system_menu_list[5], "heater off", 15);
-								menu_init();
-								digitalWrite(HEAT, 0);
-								statVar.ena_vector  = statVar.ena_vector & (~(ENA_HEATER));
+		if (selected == 1){
+			playChessGame();
+			PrepareMenu(menuPointer);
+		}
+		if (selected == 2){
+			statVar.zvariance = numpad(statVar.zvariance);
+			kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+			PrepareMenu(menuPointer);
+		}
+		if (selected == 3){
+			statVar.accelvariance = numpad(statVar.accelvariance);
+			kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+			PrepareMenu(menuPointer);
+		}
+		if (selected == 4){
+			eepromWrite(0, statVar);
+		}
+		if (selected == 5){
+			if(statVar.ena_vector & (ENA_HEATER)){
+				strncpy(system_menu_list[5], "heater off", 15);
+				menu_init();
+				digitalWrite(HEAT, 0);
+				statVar.ena_vector  = statVar.ena_vector & (~(ENA_HEATER));
 
-							}
-							else{
-								strncpy(system_menu_list[5], "heater on", 15);
-								digitalWrite(HEAT, 1);
-								menu_init();
-								statVar.ena_vector  = statVar.ena_vector | (ENA_HEATER);
-							}
+			}
+			else{
+				strncpy(system_menu_list[5], "heater on", 15);
+				digitalWrite(HEAT, 1);
+				menu_init();
+				statVar.ena_vector  = statVar.ena_vector | (ENA_HEATER);
+			}
 			
-								}
-				
-				
+		}
+		if (selected == 6){
+			MenuEntry(&gauges_menu);
+			
+			
+		}
 	}
 	//-------------Altimeter menu
 
@@ -508,15 +535,276 @@ void menuSelector(menu *menuPointer, int selected) {
 
 		}
 		//print accelerometer data to serial
-				else if (selected == 7){
-					printAccelerometerData();
-					PrepareMenu(menuPointer);
+		else if (selected == 7){
+			printAccelerometerData();
+			PrepareMenu(menuPointer);
 
+		}
+
+	}
+	//gauges menu
+	if (menuPointer->menu_id == 0x16) {
+		//BMI160
+		if (selected == 0){
+			gaugepointer = &statVar.varioGauge;
+		}
+		if (selected == 1){
+			gaugepointer = &statVar.altitudeGauge;
+		}
+		if (selected == 2){
+			gaugepointer = &statVar.AGLGauge;
+		}
+		if (selected == 3){
+			gaugepointer = &statVar.speedGauge;
+		}
+		if (selected == 4){
+			gaugepointer = &statVar.headingGauge;
+		}
+		if (selected == 5){
+			gaugepointer = &statVar.windGauge;
+		}
+		if (selected == 6){
+			gaugepointer = &statVar.windDirGauge;
+		}
+		if (selected == 7){
+			gaugepointer = &statVar.tempGauge;
+		}
+		if (selected == 8){
+			gaugepointer = &statVar.humidGauge;
+		}
+		
+		
+		setGaugeMenu(gaugepointer);
+		MenuEntry(&gauge_menu);
+	}
+	
+	
+	
+	
+	
+	
+	
+	//----------gauge menu
+	if (menuPointer->menu_id == 0x15) {
+		//enable
+		if (selected == 0){
+			if ((gaugepointer->settings & GAUGE_ENA) == 0)
+			{
+				strncpy(gauge_menu_list[0], "Enabled", 15);
+				gaugepointer->settings  |= GAUGE_ENA;
+			}
+			else{
+				strncpy(gauge_menu_list[0], "Disabled", 15);
+				gaugepointer->settings &= ~GAUGE_ENA;
+			}
+			menu_init();
+		}
+		//position
+		else if (selected == 1){
+			int exitloop = 0;
+			while(!exitloop){
+				display.fillScreen(GxEPD_WHITE);
+				printGauges();
+				display.display(1);
+				if(buttons.getFlag()){
+					switch(buttons.getButtonPressed())
+					{
+						case UP:
+						gaugepointer->offset_Y -=5;
+						if (gaugepointer->offset_Y <0)
+						{
+							gaugepointer->offset_Y =0;
+						}
+						
+						break;
+
+						case DOWN:
+						gaugepointer->offset_Y +=5;
+						if (gaugepointer->offset_Y >200)
+						{
+							gaugepointer->offset_Y =200;
+						}
+						break;
+
+						case LEFT:
+						gaugepointer->offset_X -=5;
+						if (gaugepointer->offset_X <0)
+						{
+							gaugepointer->offset_X =0;
+						}
+						break;
+
+						case RIGHT:
+						gaugepointer->offset_X +=5;
+						if (gaugepointer->offset_X >200)
+						{
+							gaugepointer->offset_X =200;
+						}
+						break;
+						case PRESS:
+						exitloop = 1;
+						break;
+
+						default:
+						break;
+					}
 				}
+				
+			}
+			PrepareMenu(menuPointer);
+			
+		}
+		//size
+		else if (selected == 2){
+			int exitloop = 0;
+			while(!exitloop){
+				display.fillScreen(GxEPD_WHITE);
+				printGauges();
+				display.display(1);
+				if(buttons.getFlag()){
+					switch(buttons.getButtonPressed())
+					{
+						case UP:
+						gaugepointer->size_Y -=5;
+						if (gaugepointer->size_Y <0)
+						{
+							gaugepointer->size_Y =0;
+						}
+						
+						break;
+
+						case DOWN:
+						gaugepointer->size_Y +=5;
+						if (gaugepointer->size_Y >200)
+						{
+							gaugepointer->size_Y =200;
+						}
+						break;
+
+						case LEFT:
+						gaugepointer->size_X -=5;
+						if (gaugepointer->size_X <0)
+						{
+							gaugepointer->size_X =0;
+						}
+						break;
+
+						case RIGHT:
+						gaugepointer->size_X +=5;
+						if (gaugepointer->size_X >200)
+						{
+							gaugepointer->size_X =200;
+						}
+						break;
+						case PRESS:
+						exitloop = 1;
+						break;
+
+						default:
+						break;
+					}
+				}
+				
+			}
+			PrepareMenu(menuPointer);
+			
+		}
+		//frame
+		else if (selected == 3){
+			if (gaugepointer->settings & GAUGE_FRAME)
+			{
+				strncpy(gauge_menu_list[3], "Frame off", 15);
+				gaugepointer->settings &= ~GAUGE_FRAME;
+			}
+			else{
+				strncpy(gauge_menu_list[3], "Frame on", 15);
+				gaugepointer->settings |= GAUGE_FRAME;
+			}
+			menu_init();
+		}
+		//decimals
+		else if (selected == 4){
+			gaugepointer->decimals = numpad(gaugepointer->decimals);
+			PrepareMenu(menuPointer);
+		}
+		//name
+		else if (selected == 5){
+			keypad(gaugepointer->name_shown, 10);
+			PrepareMenu(menuPointer);
+		}
+		
+		//units
+		else if (selected == 6){
+			
+			//strncpy(gaugepointer->units, keypad(3), 4);
+
+			keypad(gaugepointer->units, 3);
+			PrepareMenu(menuPointer);
+
+		}
+		//font
+		else if (selected == 7){
+			if ((gaugepointer->settings & GAUGE_FONT_MASK) == GAUGE_FONT_3)  //12 18 24
+			{
+				strncpy(gauge_menu_list[7], "font size 9", 15);
+				gaugepointer->settings &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings |= GAUGE_FONT_0;
+			}
+			else if((gaugepointer->settings & GAUGE_FONT_MASK) == GAUGE_FONT_0){
+				strncpy(gauge_menu_list[7], "font size 12", 15);
+				gaugepointer->settings &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings |= GAUGE_FONT_1;
+			}
+			else if((gaugepointer->settings & GAUGE_FONT_MASK) == GAUGE_FONT_1){
+				strncpy(gauge_menu_list[7], "font size 18", 15);
+				gaugepointer->settings &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings |= GAUGE_FONT_2;
+			}
+			else{
+				strncpy(gauge_menu_list[7], "font size 24", 15);
+				gaugepointer->settings &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings |= GAUGE_FONT_3;
+			}
+			menu_init();
+
+		}
+		//showing plus sign
+		else if (selected == 8){
+			if (gaugepointer->settings & GAUGE_SHOW_PLUS_SIGN)
+			{
+				strncpy(gauge_menu_list[8], "not showing +", 15);
+				gaugepointer->settings &= ~GAUGE_SHOW_PLUS_SIGN;
+			}
+			else{
+				strncpy(gauge_menu_list[8], "showing + sign", 15);
+				gaugepointer->settings |= GAUGE_SHOW_PLUS_SIGN;
+			}
+			menu_init();
+		}
 
 	}
 
 
+}
+
+void setGaugeMenu(Gauge *gaugePointer){
+	if (gaugepointer->settings & GAUGE_ENA) strncpy(gauge_menu_list[0], "Enabled", 15);
+	else strncpy(gauge_menu_list[0], "Disabled", 15);
+
+	if (gaugepointer->settings & GAUGE_FRAME) strncpy(gauge_menu_list[3], "Frame on", 15);
+	else strncpy(gauge_menu_list[3], "Frame off", 15);
+
+	if ((gaugepointer->settings & GAUGE_FONT_MASK) == 0) strncpy(gauge_menu_list[7], "font size 9", 15);
+	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 1) strncpy(gauge_menu_list[7], "font size 12", 15);
+	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 2) strncpy(gauge_menu_list[7], "font size 18", 15);
+	else strncpy(gauge_menu_list[7], "font size 24", 15);
+	
+
+	if (gaugepointer->settings & GAUGE_SHOW_PLUS_SIGN)	strncpy(gauge_menu_list[8], "showing + sgn", 15);
+	else strncpy(gauge_menu_list[8], "not showing +", 15);
+
+	
+	menu_init();
 }
 
 void debugBMI160(void){
@@ -577,23 +865,23 @@ void debugBMI160(void){
 		display.setCursor(120, 70);
 		display.print(gz/131.2);
 		
-				display.setCursor(5, 80);
-				display.print("mx");
-				display.setCursor(35, 80);
-				display.print(mx_cor);
-				display.setCursor(120, 80);
+		display.setCursor(5, 80);
+		display.print("mx");
+		display.setCursor(35, 80);
+		display.print(mx_cor);
+		display.setCursor(120, 80);
 
-				display.setCursor(5, 90);
-				display.print("my");
-				display.setCursor(35, 90);
-				display.print(my_cor);
-				display.setCursor(120, 90);
+		display.setCursor(5, 90);
+		display.print("my");
+		display.setCursor(35, 90);
+		display.print(my_cor);
+		display.setCursor(120, 90);
 
-				display.setCursor(5, 100);
-				display.print("mz");
-				display.setCursor(35, 100);
-				display.print(mz_cor);
-				display.setCursor(120, 100);
+		display.setCursor(5, 100);
+		display.print("mz");
+		display.setCursor(35, 100);
+		display.print(mz_cor);
+		display.setCursor(120, 100);
 
 		
 		
@@ -640,7 +928,7 @@ void debugBMI160(void){
 
 
 		
-		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+		display.display(true);
 
 
 	}
@@ -677,7 +965,7 @@ void debugBME280(void){
 
 		
 		
-		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+		display.display(true);
 
 
 	}
@@ -701,7 +989,7 @@ void debugXOSC32k(void){
 		display.println("          SRAM_CS");
 
 		
-		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+		display.display(true);
 
 
 	}
@@ -714,13 +1002,13 @@ void debugXOSC32k(void){
 
 void printAccelerometerData(void){
 	display.setFont(&FreeMonoBold9pt7b);
-			display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-			display.setCursor(5, 30);
-			display.println("acel data on serialUSB");
-			display.println("ax,ay,az");
+	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+	display.setCursor(5, 30);
+	display.println("acel data on serialUSB");
+	display.println("ax,ay,az");
 
-			
-			display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+	
+	display.display(true);
 	while (!buttons.getFlag())
 	{
 		routine();
@@ -800,7 +1088,7 @@ void debugMAX17055(void){
 		
 		
 		
-		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+		display.display(true);
 		SerialUSB.println(max17055.getVFSOC());
 
 
@@ -877,23 +1165,166 @@ void debugGPS(void){
 		/*
 		SerialUSB.println(" ");
 		for(int i = 0; i < gps.sat_count; i++){
-			if(gps.satellites[i].tracked){
-				SerialUSB.print(gps.satellites[i].id);
-				SerialUSB.print(",");
-				SerialUSB.print(gps.satellites[i].snr);
-				SerialUSB.print(",");
-			}
+		if(gps.satellites[i].tracked){
+		SerialUSB.print(gps.satellites[i].id);
+		SerialUSB.print(",");
+		SerialUSB.print(gps.satellites[i].snr);
+		SerialUSB.print(",");
+		}
 		}
 		SerialUSB.println(" ");
-*/
+		*/
 
 
 
-		display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT);
+		display.display(true);
 
 
 	}
 	display.setFont(&FreeMonoBold12pt7b);
 	buttons.getButtonPressed();
 	
+}
+
+void Gauge_enable(Gauge *gau) {
+	if (gau->settings & GAUGE_ENA) {
+		if (gau->settings & GAUGE_FRAME) {
+			display.drawRect(gau->offset_X, gau->offset_Y, gau->size_X, gau->size_Y, GxEPD_BLACK);
+			//      display.fillRect(0, 0, 199, 199, GxEPD_BLACK);
+			//         display.drawRect(offset_X-1, offset_Y-1, size_X+1, size_Y+1, GxEPD_WHITE);
+		}
+		if (gau->name_shown[0] != '\0') {
+			//	display.fillRect(gau->offset_X + 5 , gau->offset_Y - 11, strlen(gau->name_shown) * 12, 13, GxEPD_WHITE);
+			display.setCursor(gau->offset_X + 8, gau->offset_Y);
+			display.setFont(&FreeMonoBold9pt7b);
+
+			display.print(gau->name_shown);
+
+			display.setFont(&FreeMonoBold12pt7b);
+
+		}
+		if (gau->units[0] != '\0') {
+			display.setFont(&FreeMonoBold9pt7b);
+			switch (gau->font) {
+				case (0):
+				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 20);
+				break;
+				case (1):
+				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 20);
+				break;
+				case (2):
+				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 25);
+				break;
+				case (3):
+				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 32);
+				break;
+			}
+			//	display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + gau->size_Y - 17);
+			display.print(gau->units);
+			display.setFont(&FreeMonoBold12pt7b);
+
+		}
+
+
+	}
+}
+
+
+
+
+void Gauge_update(Gauge *gau) {
+	//SerialUSB.println(gau->settings, HEX);
+	if (gau->settings & GAUGE_ENA) {
+		switch (gau->settings & GAUGE_FONT_MASK) {
+			case (0):
+			display.setFont(&FreeMonoBold9pt7b);
+			display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
+			break;
+			case (1):
+			display.setFont(&FreeMonoBold12pt7b);
+			display.setCursor(gau->offset_X + 5, gau->offset_Y + 22);
+			break;
+			case (2):
+			display.setFont(&FreeMonoBold18pt7b);
+			display.setCursor(gau->offset_X + 5, gau->offset_Y + 28);
+			break;
+			case (3):
+			display.setFont(&FreeMonoBold24pt7b);
+			display.setCursor(gau->offset_X + 5, gau->offset_Y + 35);
+			break;
+		}
+		//display.fillRect(gau->offset_X + 1, gau->offset_Y + 1, gau->size_X - 2 - strlen(gau->units) * 12, gau->size_Y - 2, GxEPD_WHITE);
+		//display.setCursor(offset_X + 5, offset_Y + 22);
+		int ahoj = gau->settings;
+		SerialUSB.println(ahoj, HEX);
+		if(ahoj & GAUGE_VALIDS){
+			//to be done, not so simple as i thought :-D
+			
+			/*
+			char test[50];
+			float cislo = gau->value;
+			unsigned long start = micros();
+			
+			sprintf(test, "%+.2g", cislo*1000000);
+			unsigned long stop = micros();
+			SerialUSB.println(stop-start);
+			display.print(test);
+			
+			int valid_pow = 1;
+			int digits = ((gau->settings & GAUGE_DIGITS_MASK) >> 2);
+			for(int i = 0; i <digits; i++) valid_pow *=10;
+
+
+
+
+
+			if(abs(gau->value) >= valid_pow) display.print(gau->value, digits-7);
+			else if(abs(gau->value) >= valid_pow/10.0f) display.print(gau->value, digits-6);
+			else if(abs(gau->value) >= valid_pow/100.0f) display.print(gau->value, digits-5);
+			else if(abs(gau->value) >= valid_pow/1000.0f) display.print(gau->value, digits-4);
+			else if(abs(gau->value) >= valid_pow/10000.0f) display.print(gau->value, digits-3);
+			else if(abs(gau->value) >= valid_pow/100000.0f) display.print(gau->value, digits-2);
+			else if(abs(gau->value) >= valid_pow/1000000.0f) display.print(gau->value, digits-1);
+			else display.print(gau->value, digits);
+
+			*/
+			display.print(gau->value, 2);
+			
+		}
+		else{
+			if(gau->settings & GAUGE_SHOW_PLUS_SIGN){
+				if(gau->value >=0)
+				display.print("+");
+			}
+			display.print(gau->value, (gau->settings & GAUGE_DIGITS_MASK) >> 2);
+			
+		}
+		display.setFont(&FreeMonoBold12pt7b);
+	}
+}
+
+
+void printGauges(){
+	Gauge_enable(&statVar.varioGauge);
+	Gauge_enable(&statVar.altitudeGauge);
+	Gauge_enable(&statVar.AGLGauge);
+	Gauge_enable(&statVar.tempGauge);
+	Gauge_enable(&statVar.humidGauge);
+	Gauge_enable(&statVar.speedGauge);
+	Gauge_enable(&statVar.headingGauge);
+	Gauge_enable(&statVar.windDirGauge);
+	Gauge_enable(&statVar.windGauge);
+	
+	Gauge_update(&statVar.varioGauge);
+	Gauge_update(&statVar.altitudeGauge);
+	Gauge_update(&statVar.AGLGauge);
+	Gauge_update(&statVar.tempGauge);
+	Gauge_update(&statVar.humidGauge);
+	
+	Gauge_update(&statVar.speedGauge);
+	Gauge_update(&statVar.headingGauge);
+	Gauge_update(&statVar.windGauge);
+	Gauge_update(&statVar.windDirGauge);
+	
+
 }

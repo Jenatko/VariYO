@@ -136,3 +136,27 @@
 #define MAX17055_PRESENT 16
 #define SD_PRESENT 32
 #define FIFO_FRAME_SIZE 21
+
+#define GAUGE_FONT_0 0
+#define GAUGE_FONT_1 1
+#define GAUGE_FONT_2 2
+#define GAUGE_FONT_3 3
+#define GAUGE_FONT_MASK 0x03
+#define GAUGE_DIGITS_0 0
+#define GAUGE_DIGITS_1 4
+#define GAUGE_DIGITS_2 8
+#define GAUGE_DIGITS_3 12
+#define GAUGE_DIGITS_4 16
+#define GAUGE_DIGITS_5 20
+#define GAUGE_DIGITS_6 24
+#define GAUGE_DIGITS_7 28
+
+
+#define GAUGE_DIGITS_MASK 0x1C
+#define GAUGE_ENA 32
+#define GAUGE_FRAME 64
+#define GAUGE_SHOW_PLUS_SIGN 128
+#define GAUGE_VALIDS 256
+
+
+

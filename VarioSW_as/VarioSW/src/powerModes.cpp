@@ -1,5 +1,7 @@
 #include <Arduino.h>
-#include <GxGDEP015OC1/GxGDEP015OC1.h>
+
+#include <GxEPD2_BW.h>
+//#include <GxGDEP015OC1/GxGDEP015OC1.h>
 #include "powerModes.h"
 #include "definitions.h"
 #include "button_control.h"
@@ -13,7 +15,7 @@
 
 extern File tracklog;
 
-void powerOff() {
+void powerOff(int lowVoltage) {
 	if(tracklog_stat == 1){
 		tracklog.println("    </trkseg>");
 		tracklog.println("  </trk>");
@@ -28,7 +30,11 @@ void powerOff() {
 	display.fillRect(0, 0, 199, 199, GxEPD_WHITE);
 	display.setCursor(20, 100);
 	display.print("Power Off");
-	display.update();
+	if(lowVoltage){
+	display.setCursor(10, 120);
+	display.print("Battery empty");
+	}
+	display.display();
 	USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
 	//USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_RUNSTDBY;
 	SCB->SCR |= 1 << 2;
@@ -52,8 +58,13 @@ void powerOff() {
 	allLow();
 	gpsBckpTimer();
 	__WFI();
-if(digitalRead(BUTTON_CENTER))   //go back to sleep if woken up by RTC timer (gps backup power turning off)
-__WFI();
+	for(int i = 0; i < 100; i++){
+		if(digitalRead(BUTTON_CENTER)){   //go back to sleep if woken up by RTC timer (gps backup power turning off)
+			__WFI();
+			i = 0;
+		}
+		delay(10);
+	}
 	
 	rtc.detachInterrupt();
 
@@ -62,15 +73,15 @@ __WFI();
 
 	
 	
-		pinMode(SD_DETECT, INPUT_PULLUP);
-		delay(10);
-		if(digitalRead(SD_DETECT) == 0){
-			present_devices |= SD_PRESENT;
-		}
-		else{
-			present_devices &= ~SD_PRESENT;
-		}
-		pinMode(SD_DETECT, INPUT);
+	pinMode(SD_DETECT, INPUT_PULLUP);
+	delay(10);
+	if(digitalRead(SD_DETECT) == 0){
+		present_devices |= SD_PRESENT;
+	}
+	else{
+		present_devices &= ~SD_PRESENT;
+	}
+	pinMode(SD_DETECT, INPUT);
 
 	
 	
@@ -81,17 +92,17 @@ __WFI();
 
 	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 
-	display.update();
+	display.display();
 	display.setRotation(0);
 
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
+	display.display(true);
 	display.setTextWrap(0);
 	if(present_devices | BMX160_PRESENT)
-		IMU_init();
-	if(present_devices | LPS33_PRESENT)		
-				lps33_init();
-	if(present_devices | SI7021_PRESENT)					
-				request_si7021();
+	IMU_init();
+	if(present_devices | LPS33_PRESENT)
+	lps33_init();
+	if(present_devices | SI7021_PRESENT)
+	request_si7021();
 	
 
 }
@@ -144,7 +155,7 @@ void reinitializePins() {
 	digitalWrite(DISP_DC,1);
 	digitalWrite(DISP_CS, 1);
 	
-		digitalWrite(HEAT, statVar.ena_vector & ENA_HEATER);
+	digitalWrite(HEAT, statVar.ena_vector & ENA_HEATER);
 
 	pinPeripheral(MOSI_IRQ, PIO_SERCOM);
 	pinPeripheral(MISO_IRQ, PIO_SERCOM);
@@ -176,8 +187,8 @@ void massStorageEna() {
 	display.print("USB mass storage");
 	display.setCursor(20, 120);
 	display.print("push to end");
-	display.update();
-	display.powerDown();
+	display.display();
+	display.powerOff();
 	
 	pinMode(22, INPUT);
 	pinMode(23, INPUT);
@@ -207,6 +218,7 @@ void massStorageEna() {
 
 
 void GPS_low(void){
+	SerialUSB.println("gps low");
 	
 	statVar.ena_vector |= (ENA_GPS);
 	statVar.ena_vector |= (ENA_GPS_LOW_POWER);
@@ -307,15 +319,15 @@ void GPS_stopped(void){
 
 
 void disableGPSBckp(){
-	digitalWrite(GPS_BCKP, 0);	
+	digitalWrite(GPS_BCKP, 0);
 }
 
 
 void gpsBckpTimer(){
 	
 	rtc.setAlarmEpoch(rtc.getEpoch()+(4*3600));  //time of ephemirides validity
-	  rtc.enableAlarm(rtc.MATCH_HHMMSS);
+	rtc.enableAlarm(rtc.MATCH_HHMMSS);
 
-	  rtc.attachInterrupt(disableGPSBckp);
+	rtc.attachInterrupt(disableGPSBckp);
 	
 }

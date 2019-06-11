@@ -17,7 +17,7 @@ extern NMEAGPS  gps;
 extern gps_fix  fix;
 
 
-void routine(void);
+void routine(int pollGPS = 0);
 
 void update_tracklog(void);
 
@@ -25,7 +25,9 @@ void update_wind(void);
 
 void alt_agl(void);
 
+void redrawRoutine(void);
 
+void alt_agl_debug(float lat, float lon);
 
 
 #endif /* ROUTINE_H_ */

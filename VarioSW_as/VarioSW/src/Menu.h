@@ -9,6 +9,8 @@
 #ifndef MENU_H_
 #define MENU_H_
 
+#include "Variables.h"
+
 typedef struct {
 	char (*pole)[15];
 	char *jmeno_menu;
@@ -45,7 +47,13 @@ extern menu menu1;
 extern menu menu2;
 extern menu menu3;
 extern menu system_menu;
+extern menu gauge_menu;
+extern menu gauges_menu;
 
+void Gauge_update(Gauge *gau);
+void Gauge_enable(Gauge *gau);
+void setGaugeMenu(Gauge *gaugePointer);
+void printGauges();
 
 extern double myRealAltitude;
 

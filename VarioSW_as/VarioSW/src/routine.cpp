@@ -10,6 +10,9 @@
 #include "SPI.h"
 #include "RTCZero.h"
 #include "MEMS.h"
+#include "MAX17055.h"
+
+#include "powerModes.h"
 
 #include <NMEAGPS.h>
 #include <GPSport.h>
@@ -34,8 +37,11 @@ File HeightData;
 
 
 
-int position_updated = 0;
+
 int sec_old = 0;
+
+//uint8_t var_update_wind = 0;
+//uint8_t var_update_tracklog = 0;
 
 /*
 void adjustTime( NeoGPS::time_t & dt ){
@@ -49,7 +55,8 @@ dt = seconds;
 }
 */
 
-void routine(void){
+//void routine(int pollGPS = 1, int performOtherTasks = 1)
+void routine(int OnlyReadGPS){
 
 
 	//updating GPS
@@ -59,7 +66,7 @@ void routine(void){
 		byte fn;
 		do {
 			fn = SPI.transfer( 0xFF );
-			//	SerialUSB.write(fn);   //uncomment for sending GPS data over Serial (to work with u-center)
+			//SerialUSB.write(fn);   //uncomment for sending GPS data over Serial (to work with u-center)
 		} while (gps.handle(fn) != NMEAGPS::DECODE_CHR_INVALID || fn != 0xff );
 		
 		digitalWrite(GPS_CS, 1);
@@ -73,28 +80,36 @@ void routine(void){
 			if(fix.valid.date){
 				rtc.setDate(fix.dateTime.date, fix.dateTime.month, fix.dateTime.year);
 			}
+			
+
+			//var_update_tracklog = 1;
+			//var_update_wind = 1;
+			
+			
+			
 			redraw = 1;
+			counter500ms = 0;
 			position_updated = 1;
 		}
 		else{
 			position_updated = 0;
 		}
-		/*   //procedure for capturing commands sent to GPS
-		else{
-		SerialUSB.println("-----------------");
-		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
-		SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-		digitalWrite(GPS_CS, 0);
-		fn = SerialUSB.read();
-		gps.handle(SPI.transfer(fn));
-		SerialUSB.print(fn);
-		digitalWrite(GPS_CS, 1);
+		//procedure for capturing commands sent to GPS
 
-		}
-		SerialUSB.println("-----------------");
-		delay(50);
-		}
-		*/
+		// 		SerialUSB.println("-----------------");
+		// 		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
+		// 			SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+		// 			digitalWrite(GPS_CS, 0);
+		// 			fn = SerialUSB.read();
+		// 			gps.handle(SPI.transfer(fn));
+		// 			SerialUSB.print(fn);
+		// 			digitalWrite(GPS_CS, 1);
+		//
+		// 		}
+		// 		SerialUSB.println("-----------------");
+		// 		delay(50);
+
+		
 	}
 	//update display if GPS is off
 	else{
@@ -102,16 +117,56 @@ void routine(void){
 		if( sec != sec_old){
 			redraw = 1;
 			sec_old = sec;
+			counter500ms = 0;
 		}
 		
 		position_updated = 0;
 	}
 
+	if(OnlyReadGPS == 0){
+		if(position_updated){
+			alt_agl();
+			update_wind();
+
+		}
+		
+		update_tracklog();
+
+
+		g_meter = pow(  ((float)ax*ax + (float)ay*ay + (float)az*az)/268.4e6 , 0.5) ;
+		
+		if(present_devices & SI7021_PRESENT){
+			if(read_si7021())
+			request_si7021();
+		}
+		
+		if(present_devices & MAX17055_PRESENT){
+			battery_SOC = max17055.getSOC();
+			battery_voltage = max17055.getAverageVoltage();
+			
+			if(battery_voltage < 3){
+				powerOff(1);
+				
+			}
+		}
+		yaw = Madgwick_filter.getYaw();
+		pitch = Madgwick_filter.getPitch();
+		roll = Madgwick_filter.getRoll();
+	}
+
+}
+
+
+//so far not used since there is plenty of time while refreshing display. needs to prevent writing duplicate points in tracklog if GPS is not polled every time before writing tracklog
+void redrawRoutine(){
+	SerialUSB.println("routine");
 	if(position_updated){
 		alt_agl();
 		update_wind();
+		//		SerialUSB.println("agl");
 
 	}
+	
 	update_tracklog();
 
 
@@ -124,13 +179,14 @@ void routine(void){
 	yaw = Madgwick_filter.getYaw();
 	pitch = Madgwick_filter.getPitch();
 	roll = Madgwick_filter.getRoll();
-	
 
+	
 }
 
 
 void update_tracklog(){
 	
+
 	if (present_devices & SD_PRESENT)	{
 		if((statVar.ena_vector & ENA_TRACKLOG) || tracklog_stat == TRACKLOG_FILE_OPEN){
 			if (tracklog_stat == TRACKLOG_FILE_CLOSED){
@@ -151,24 +207,34 @@ void update_tracklog(){
 					
 					cesta.toCharArray(cesta_char, 40);
 					
-					if(SD.exists(cesta_char))
-					SerialUSB.println("existuje");
+					if(SD.exists(cesta_char));
+					//SerialUSB.println("existuje");
 					else{
-						SerialUSB.println(cesta_char);
+						//SerialUSB.println(cesta_char);
 						SD.mkdir(cesta_char);
-						SerialUSB.println("vytvoreno");
+						//SerialUSB.println("vytvoreno");
 					}
 					
 					cesta.concat("/");
-					cesta.concat(String(rtc.getHours()));
-					cesta.concat(String(rtc.getMinutes()));
-					cesta.concat(String(rtc.getSeconds()));
+					
+					int path_sec = rtc.getSeconds();
+					int path_hours = rtc.getHours();
+					int path_min = rtc.getMinutes();
+					
+					if(path_hours < 10) cesta.concat("0");
+					cesta.concat(String(path_hours));
+					if(path_min < 10) cesta.concat("0");
+					cesta.concat(String(path_min));
+					if(path_sec < 10) cesta.concat("0");
+					cesta.concat(String(path_sec));
 					cesta.concat(String(".gpx"));
 					cesta.toCharArray(cesta_char, 40);
 					
 					tracklog = SD.open(cesta_char, FILE_WRITE);
 					
-					tracklog.println("<gpx>");
+					tracklog.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n");
+					
+					tracklog.println("<gpx version=\"1.1\" creator=\"mojehustevario\">");
 					tracklog.println("  <trk>");
 					tracklog.println("    <trkseg>");
 					tracklog_stat = TRACKLOG_FILE_OPEN;
@@ -177,6 +243,7 @@ void update_tracklog(){
 				}
 			}
 			if (tracklog && position_updated){
+				//update_tracklog = 0;
 				//	position_updated = 0;
 				//	SerialUSB.println("logging");
 				if(fix.valid.location){
@@ -234,18 +301,18 @@ void update_tracklog(){
 					tracklog.print(",");
 					tracklog.print(gz);
 					tracklog.print(",");
-										tracklog.print(mx);
-										tracklog.print(",");
-										tracklog.print(my);
-										tracklog.print(",");
-										tracklog.print(mz);
-										tracklog.print(",");
-																				tracklog.print(mx_cor);
-																				tracklog.print(",");
-																				tracklog.print(my_cor);
-																				tracklog.print(",");
-																				tracklog.print(mz_cor);
-																				tracklog.print(",");
+					tracklog.print(mx);
+					tracklog.print(",");
+					tracklog.print(my);
+					tracklog.print(",");
+					tracklog.print(mz);
+					tracklog.print(",");
+					tracklog.print(mx_cor);
+					tracklog.print(",");
+					tracklog.print(my_cor);
+					tracklog.print(",");
+					tracklog.print(mz_cor);
+					tracklog.print(",");
 					
 					tracklog.print(ax_avg);
 					tracklog.print(",");
@@ -300,7 +367,7 @@ void update_tracklog(){
 					tracklog.println("</dataY>");
 					*/
 					
-					tracklog.print("        <time>");
+					tracklog.print("        <time>20");
 					
 					tracklog.print(fix.dateTime.year);
 					tracklog.print("-");
@@ -338,6 +405,7 @@ void update_tracklog(){
 
 void update_wind(){
 	if(fix.valid.speed && fix.valid.heading){
+		//update_wind = 0;
 		if(fix.dateTime.seconds%2 == 0){
 			float x,y;
 			x = fix.speed_kph() * KPH2MPS * cos(fix.heading() * DEG2RAD);
@@ -379,11 +447,12 @@ void alt_agl(){
 
 
 		SD.begin(SD_CS);
-		
 
-		String cesta = ("/");
-		if(int_lat < 0){
+
+		String cesta = ("/HGT/");
+		if(fix.latitude() < 0){
 			cesta.concat("S");
+			int_lat--;
 		}
 		else{
 			cesta.concat("N");
@@ -391,10 +460,11 @@ void alt_agl(){
 		if(int_lat < 10 && int_lat > -10){
 			cesta.concat("0");
 		}
-		cesta.concat(String(int_lat));
-		
-		if(temp_lon < 0){
+		cesta.concat(String(abs(int_lat)));
+
+		if(fix.longitude() < 0){
 			cesta.concat("W");
+			int_lon--;
 		}
 		else{
 			cesta.concat("E");
@@ -405,12 +475,12 @@ void alt_agl(){
 		if(int_lon < 100 && int_lon > -100){
 			cesta.concat("0");
 		}
-		cesta.concat(String(int_lon));
+		cesta.concat(String(abs(int_lon)));
 		cesta.concat(".HGT");
-		
-	//	SerialUSB.println(cesta);
-		
-		
+
+		//SerialUSB.println(cesta);
+
+
 		//cesta = ("/N49E016.HGT");
 		cesta.toCharArray(cesta_char2, 20);
 		if(!HeightData){
@@ -433,5 +503,85 @@ void alt_agl(){
 		else
 		SerialUSB.println("not open");
 	}
+	
+}
+
+void alt_agl_debug(float lat, float lon){
+	
+
+	int int_lat = lat;
+	int int_lon = lon;
+	
+	
+	
+	float temp_lat  = round(1201.0f-((float)lat - int_lat)*1200.0f);
+	float temp_lon = round(((float)lon - int_lon)*1200.0f);
+	
+	//int row = 1201-(fix.latitude() - int_lat)*1201;
+	//int col = (fix.longitude() - int_lon)*1201;
+	
+	int row = (int)temp_lat;
+	int col = (int)temp_lon;
+	
+	char cesta_char2[20];
+
+
+	SD.begin(SD_CS);
+	
+
+	String cesta = ("/HGT/");
+	if(lat < 0){
+		cesta.concat("S");
+		int_lat--;
+	}
+	else{
+		cesta.concat("N");
+	}
+	if(int_lat < 10 && int_lat > -10){
+		cesta.concat("0");
+	}
+	cesta.concat(String(abs(int_lat)));
+	
+	if(lon < 0){
+		cesta.concat("W");
+		int_lon--;
+	}
+	else{
+		cesta.concat("E");
+	}
+	if(int_lon < 10 && int_lon > -10){
+		cesta.concat("0");
+	}
+	if(int_lon < 100 && int_lon > -100){
+		cesta.concat("0");
+	}
+	cesta.concat(String(abs(int_lon)));
+	cesta.concat(".HGT");
+	
+	SerialUSB.println(cesta);
+	
+	
+	//cesta = ("/N49E016.HGT");
+	cesta.toCharArray(cesta_char2, 20);
+	if(!HeightData){
+		
+		HeightData = SD.open(cesta_char2, FILE_READ);
+	}
+	if(HeightData){
+		HeightData.seek(((row-1)*1201+col)*2);
+
+		int lsbs = HeightData.read();
+		int msbs = HeightData.read();
+
+		
+		ground_level = (lsbs << 8)+msbs;
+		
+		//SerialUSB.println(HeightData.read());
+		//SerialUSB.println(HeightData.read());
+		HeightData.close();
+	}
+	else;
+	//	SerialUSB.println("not open");
+	
 	
 }

@@ -4,7 +4,10 @@
 * Created: 5.5.2019 15:38:14
 *  Author: Jena
 */
-#include <GxGDEP015OC1/GxGDEP015OC1.h>
+
+#include <GxEPD2_BW.h>
+//#include <GxGDEP015OC1/GxGDEP015OC1.h>
+
 #include <Fonts/FreeMonoBold24pt7b.h>
 #include <Fonts/FreeMonoBold18pt7b.h>
 #include <Fonts/FreeMonoBold12pt7b.h>
@@ -22,10 +25,11 @@ ChessGameStruct ChessGame;
 
 void playChessGame(){
 	initChessGame();
-						drawChessBoard();
-						chooseChessField(ChessGame.chosenField);
-						selectChessField(ChessGame.selectedField);
-						display.update();
+	drawChessBoard();
+	chooseChessField(ChessGame.chosenField);
+	selectChessField(ChessGame.selectedField);
+	display.display();
+	int pieceMoved = 0;
 	
 	while (1) {
 
@@ -67,6 +71,7 @@ void playChessGame(){
 					else{
 						movePiece(ChessGame.chosenField, ChessGame.selectedField);
 						ChessGame.chosenField = -1;
+						pieceMoved = 1;
 					}
 					break;
 				}
@@ -74,7 +79,8 @@ void playChessGame(){
 			drawChessBoard();
 			chooseChessField(ChessGame.chosenField);
 			selectChessField(ChessGame.selectedField);
-			display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+			display.display(!pieceMoved);
+			pieceMoved = 0;
 			
 		}
 		if(ChessGame.kingisdead)
@@ -142,8 +148,8 @@ void movePiece(int origin, int destination){
 		}
 	}
 	if(ChessGame.ChessPieces[index_orig].type == CHESS_PAWN)
-		if(ChessGame.ChessPieces[index_orig].pos_y == 0 ||ChessGame.ChessPieces[index_orig].pos_y == 7)
-		ChessGame.ChessPieces[index_orig].type = CHESS_QUEEN;
+	if(ChessGame.ChessPieces[index_orig].pos_y == 0 ||ChessGame.ChessPieces[index_orig].pos_y == 7)
+	ChessGame.ChessPieces[index_orig].type = CHESS_QUEEN;
 	
 	
 }
@@ -244,7 +250,7 @@ void initChessPieces(){
 }
 
 void drawChessBoard(){
-	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+	display.fillScreen(GxEPD_WHITE);
 	
 	/*
 	for(int i = 0; i < 8*CHESS_SIZE; i++){
@@ -259,37 +265,57 @@ void drawChessBoard(){
 		for(int j = 0; j < 8*CHESS_SIZE; j++){
 			if(i%2 ==0){
 				if(j%2 == 0){
-					display.drawPixel(CHESSBOARD_OFFSET_LEFT + i, j + CHESSBOARD_OFFSET_TOP, GxEPD_BLACK);
+					if((i/CHESS_SIZE % 2) != 0){
+						if((j/CHESS_SIZE % 2) == 0){
+							display.drawPixel(CHESSBOARD_OFFSET_LEFT + i, j + CHESSBOARD_OFFSET_TOP, GxEPD_BLACK);
+						}
+					}
+					if((i/CHESS_SIZE % 2) == 0){
+						if((j/CHESS_SIZE % 2) != 0){
+							display.drawPixel(CHESSBOARD_OFFSET_LEFT + i, j + CHESSBOARD_OFFSET_TOP, GxEPD_BLACK);
+						}
+					}
+					
 				}
 			}
 			
 			if(i%2 ==1){
 				if(j%2 == 1){
-					display.drawPixel(CHESSBOARD_OFFSET_LEFT + i, j + CHESSBOARD_OFFSET_TOP, GxEPD_BLACK);
+					if((i/CHESS_SIZE % 2) != 0){
+						if((j/CHESS_SIZE % 2) == 0){
+							display.drawPixel(CHESSBOARD_OFFSET_LEFT + i, j + CHESSBOARD_OFFSET_TOP, GxEPD_BLACK);
+						}
+					}
+					if((i/CHESS_SIZE % 2) == 0){
+						if((j/CHESS_SIZE % 2) != 0){
+							display.drawPixel(CHESSBOARD_OFFSET_LEFT + i, j + CHESSBOARD_OFFSET_TOP, GxEPD_BLACK);
+						}
+					}
+					
 				}
 			}
 		}
 	}
-	
+	/*
 	for(int i = 0; i < 8; i++){
-		for(int j = 0; j <8; j++){
-			if(i%2 == 0){
-				if(j%2 == 0){
-					display.fillRect(j*CHESS_SIZE + CHESSBOARD_OFFSET_LEFT, i * CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, CHESS_SIZE, GxEPD_WHITE);
-				}
-				
-			}
-			if(i%2 == 1){
-				if(j%2 == 1){
-					display.fillRect(j*CHESS_SIZE + CHESSBOARD_OFFSET_LEFT, i * CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, CHESS_SIZE, GxEPD_WHITE);
-				}
-				
-			}
-			
-		}
-		
+	for(int j = 0; j <8; j++){
+	if(i%2 == 0){
+	if(j%2 == 0){
+	display.fillRect(j*CHESS_SIZE + CHESSBOARD_OFFSET_LEFT, i * CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, CHESS_SIZE, GxEPD_WHITE);
 	}
 	
+	}
+	if(i%2 == 1){
+	if(j%2 == 1){
+	display.fillRect(j*CHESS_SIZE + CHESSBOARD_OFFSET_LEFT, i * CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, CHESS_SIZE, GxEPD_WHITE);
+	}
+	
+	}
+	
+	}
+	
+	}
+	*/
 
 	
 	for(int i = 0; i < 32; i++){
@@ -1090,13 +1116,13 @@ void chooseChessField(int8_t field){
 		int x = field%8;
 		int y = field/8;;
 		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, GxEPD_BLACK);
-		//	display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+1, CHESS_SIZE, GxEPD_BLACK);
-		//	display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE, CHESS_SIZE, GxEPD_BLACK);
+			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+1, CHESS_SIZE, GxEPD_BLACK);
+			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE, CHESS_SIZE, GxEPD_BLACK);
 		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-1, CHESS_SIZE, GxEPD_BLACK);
 		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, GxEPD_BLACK);
 		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+ CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, GxEPD_BLACK);
-		//	display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, GxEPD_BLACK);
-		//	display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+ CHESS_SIZE-1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, GxEPD_BLACK);
+			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, GxEPD_BLACK);
+			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+ CHESS_SIZE-1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, CHESS_SIZE, GxEPD_BLACK);
 	}
 }
 
@@ -1106,42 +1132,42 @@ void selectChessField(int8_t field){
 		int y = field/8;
 		
 		
-//		if (x%2+y%2 !=1)
-//		{
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+1, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+2, 8, GxEPD_BLACK);
-			
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-1, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-2, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-3, 8, GxEPD_BLACK);
-			
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+ CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+1, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+ CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+2, 8, GxEPD_BLACK);
-			
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-1, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-2, 8, GxEPD_BLACK);
-			display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-3, 8, GxEPD_BLACK);
-			
-			
-			
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+2, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+2, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
-			
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-1 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-2 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-3 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
-			
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-1 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-2 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
-			display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-3 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
-	/*	}
+		//		if (x%2+y%2 !=1)
+		//		{
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+1, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+2, 8, GxEPD_BLACK);
+		
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-1, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-2, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-3, 8, GxEPD_BLACK);
+		
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+ CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+1, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+ CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP+2, 8, GxEPD_BLACK);
+		
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-1, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-2, 8, GxEPD_BLACK);
+		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE + CHESS_SIZE - 8, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE-3, 8, GxEPD_BLACK);
+		
+		
+		
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+2, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+1, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE+2, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
+		
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-1 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-2 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-3 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_BLACK);
+		
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-1 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-2 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
+		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-3 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_BLACK);
+		/*	}
 		
 		else{
 		display.drawFastHLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP, 8, GxEPD_WHITE);
@@ -1178,7 +1204,7 @@ void selectChessField(int8_t field){
 		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-2 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_WHITE);
 		display.drawFastVLine(CHESSBOARD_OFFSET_LEFT + x*CHESS_SIZE-3 + CHESS_SIZE, y*CHESS_SIZE + CHESSBOARD_OFFSET_TOP + CHESS_SIZE - 8, 8, GxEPD_WHITE);
 		}
-*/
+		*/
 		
 
 	}

@@ -150,15 +150,12 @@ src/powerModes.d src/powerModes.o: ../src/powerModes.cpp \
  ..\\..\ArduinoCore\include\core/RingBuffer.h \
  ..\\..\ArduinoCore\include\core/USB/USB_host.h \
  ..\\..\ArduinoCore\include\core/USB/samd21_host.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxEPD.h \
- ..\\..\ArduinoCore\include\libraries\spi/SPI.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxIO/GxIO.h \
- ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
+ ../src/lib/GxEPD2/GxEPD2_BW.h ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
  ..\\..\ArduinoCore\include\core/Print.h \
- ../src/lib/Adafruit_GFX/gfxfont.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h ../src/powerModes.h \
- ../src/definitions.h ../src/periph/button_control.h \
+ ../src/lib/Adafruit_GFX/gfxfont.h ../src/lib/GxEPD2/GxEPD2_EPD.h \
+ ..\\..\ArduinoCore\include\libraries\spi/SPI.h \
+ ../src/lib/GxEPD2/GxEPD2.h ../src/lib/GxEPD2/GxEPD2_154.h \
+ ../src/powerModes.h ../src/definitions.h ../src/periph/button_control.h \
  ../src/periph/../definitions.h ../src/Interrupt_counter.h \
  ..\\..\ArduinoCore\include\core/wiring_private.h ../src/periph/EEPROM.h \
  ..\\..\ArduinoCore\include\core/arduino.h ../src/Variables.h \
@@ -485,13 +482,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ..\\..\ArduinoCore\include\core/USB/samd21_host.h:
 
-../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h:
-
-../src/lib/GxEPD-master/GxGDEP015OC1/../GxEPD.h:
-
-..\\..\ArduinoCore\include\libraries\spi/SPI.h:
-
-../src/lib/GxEPD-master/GxGDEP015OC1/../GxIO/GxIO.h:
+../src/lib/GxEPD2/GxEPD2_BW.h:
 
 ../src/lib/Adafruit_GFX/Adafruit_GFX.h:
 
@@ -499,7 +490,13 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/lib/Adafruit_GFX/gfxfont.h:
 
-../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h:
+../src/lib/GxEPD2/GxEPD2_EPD.h:
+
+..\\..\ArduinoCore\include\libraries\spi/SPI.h:
+
+../src/lib/GxEPD2/GxEPD2.h:
+
+../src/lib/GxEPD2/GxEPD2_154.h:
 
 ../src/powerModes.h:
 

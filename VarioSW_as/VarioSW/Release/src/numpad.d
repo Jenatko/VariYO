@@ -1,5 +1,5 @@
 src/numpad.d src/numpad.o: ../src/numpad.cpp \
- ../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h \
+ ../src/lib/GxEPD2/GxEPD2_BW.h ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
  ..\\..\ArduinoCore\include\core/Arduino.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\lib\gcc\arm-none-eabi\6.3.1\include\stdbool.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\lib\gcc\arm-none-eabi\6.3.1\include\stdint.h \
@@ -151,16 +151,20 @@ src/numpad.d src/numpad.o: ../src/numpad.cpp \
  ..\\..\ArduinoCore\include\core/RingBuffer.h \
  ..\\..\ArduinoCore\include\core/USB/USB_host.h \
  ..\\..\ArduinoCore\include\core/USB/samd21_host.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxEPD.h \
- ..\\..\ArduinoCore\include\libraries\spi/SPI.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxIO/GxIO.h \
- ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
  ..\\..\ArduinoCore\include\core/Print.h \
- ../src/lib/Adafruit_GFX/gfxfont.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h ../src/numpad.h \
- ../src/periph/button_control.h ../src/periph/../definitions.h
+ ../src/lib/Adafruit_GFX/gfxfont.h ../src/lib/GxEPD2/GxEPD2_EPD.h \
+ ..\\..\ArduinoCore\include\libraries\spi/SPI.h \
+ ../src/lib/GxEPD2/GxEPD2.h ../src/lib/GxEPD2/GxEPD2_154.h \
+ ../src/numpad.h ../src/periph/button_control.h \
+ ../src/periph/../definitions.h \
+ ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold24pt7b.h \
+ ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold18pt7b.h \
+ ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold12pt7b.h \
+ ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold9pt7b.h
 
-../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h:
+../src/lib/GxEPD2/GxEPD2_BW.h:
+
+../src/lib/Adafruit_GFX/Adafruit_GFX.h:
 
 ..\\..\ArduinoCore\include\core/Arduino.h:
 
@@ -464,22 +468,28 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ..\\..\ArduinoCore\include\core/USB/samd21_host.h:
 
-../src/lib/GxEPD-master/GxGDEP015OC1/../GxEPD.h:
-
-..\\..\ArduinoCore\include\libraries\spi/SPI.h:
-
-../src/lib/GxEPD-master/GxGDEP015OC1/../GxIO/GxIO.h:
-
-../src/lib/Adafruit_GFX/Adafruit_GFX.h:
-
 ..\\..\ArduinoCore\include\core/Print.h:
 
 ../src/lib/Adafruit_GFX/gfxfont.h:
 
-../src/lib/GxEPD-master/GxGDEP015OC1/../GxFont_GFX.h:
+../src/lib/GxEPD2/GxEPD2_EPD.h:
+
+..\\..\ArduinoCore\include\libraries\spi/SPI.h:
+
+../src/lib/GxEPD2/GxEPD2.h:
+
+../src/lib/GxEPD2/GxEPD2_154.h:
 
 ../src/numpad.h:
 
 ../src/periph/button_control.h:
 
 ../src/periph/../definitions.h:
+
+../src/lib/Adafruit_GFX/Fonts/FreeMonoBold24pt7b.h:
+
+../src/lib/Adafruit_GFX/Fonts/FreeMonoBold18pt7b.h:
+
+../src/lib/Adafruit_GFX/Fonts/FreeMonoBold12pt7b.h:
+
+../src/lib/Adafruit_GFX/Fonts/FreeMonoBold9pt7b.h:

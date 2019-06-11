@@ -15,16 +15,22 @@ StaticVariables statVar;
 
 double myRealAltitude= 200;
 volatile float altChange;
+volatile int counter500ms = 0;
 int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor;
 float yaw, pitch, roll;
 float a_vertical_imu;
 float alt_filter, vario_filter, alt_baro;
 int redraw = 0;
 int tracklog_stat = 0;
-struct tm* var_localtime;
+//struct tm* var_localtime;
+struct tm var_localtime;
 time_t var_takeofftime;
 float g_meter = 1;
 int ground_level;
+int PerformRoutineInWaitWhileBusy = 0;
+int position_updated = 0;
+
+float battery_voltage, battery_SOC;
 
 
 uint8_t present_devices;
@@ -42,11 +48,12 @@ Circle movement_circle_fit;
 
 
 void setVariablesDefault(){
+	memset(&statVar, sizeof(statVar), 0);
 	statVar = {
 		.th_rise = 30,
 		.th_sink = -150,
 		.ena_vector= 0,
-		.BuzzerVolume = 128,
+		.BuzzerVolume = 0,
 		.TimeZone = +1,
 		
 		//MS5611 baro
@@ -54,26 +61,104 @@ void setVariablesDefault(){
 		
 		//MAX17055 fuel gauge
 		.resistSensor = 0.039,
-		.designCap = 500,
+		.designCap = 1200,
 		
 		//Accelerometer
-		.gainErrorAccelX = 0.97824,
-		.offsetAccelX = 87,
-		.gainErrorAccelY = 1.00159,
-		.offsetAccelY = 686,
-		.gainErrorAccelZ  = 1.00203,
-		.offsetAccelZ = -431,
+		.gainErrorAccelX  = (double)16384/16315,
+		.offsetAccelX = 12,
+		.gainErrorAccelY = (double)16384/16453,
+		.offsetAccelY = 910,
+		.gainErrorAccelZ = (double)16384/16639,
+		.offsetAccelZ = 328,
+
 		
 		//Magnetometer, apply mag_data*1000000
-				.gainErrorMagX = 4856,
-				.offsetMagX = 37264580,
-				.gainErrorMagY = 4844,
-				.offsetMagY = 3280550,
-				.gainErrorMagZ = 4649,
-				.offsetMagZ = 447930,
-				
-				.zvariance = 40 ,
-				 .accelvariance = 10
+		.gainErrorMagX = 5005,
+		.offsetMagX = 23615971,
+		.gainErrorMagY = 4821,
+		.offsetMagY = -147760,
+		.gainErrorMagZ = 4444,
+		.offsetMagZ = 21860756,
+		
+		.zvariance = 40 ,
+		.accelvariance = 10
 
 	};
-};
+	
+	statVar.varioGauge.settings = GAUGE_FRAME | GAUGE_ENA | GAUGE_SHOW_PLUS_SIGN | GAUGE_DIGITS_1 | GAUGE_FONT_2;
+	statVar.varioGauge.size_X = 130;
+	statVar.varioGauge.size_Y = 40;
+	statVar.varioGauge.offset_X = 0;
+	statVar.varioGauge.offset_Y = 30;
+	statVar.varioGauge.value = 1.5;
+	String("Vario").toCharArray(statVar.varioGauge.name_shown, 10);
+	String("m/s").toCharArray(statVar.varioGauge.units, 4);
+	
+	statVar.altitudeGauge.settings = GAUGE_FRAME | GAUGE_ENA | GAUGE_DIGITS_1 | GAUGE_FONT_1;
+	statVar.altitudeGauge.size_X = 120;
+	statVar.altitudeGauge.size_Y = 50;
+	statVar.altitudeGauge.offset_X = 0;
+	statVar.altitudeGauge.offset_Y = 85;
+	statVar.altitudeGauge.value = 1.5;
+	String("Altitude").toCharArray(statVar.altitudeGauge.name_shown, 10);
+	String("mnm").toCharArray(statVar.altitudeGauge.units, 4);
+	
+
+	statVar.AGLGauge.settings = GAUGE_ENA | GAUGE_DIGITS_0 | GAUGE_FONT_1;
+	statVar.AGLGauge.size_X = 120;
+	statVar.AGLGauge.size_Y = 40;
+	statVar.AGLGauge.offset_X = 0;
+	statVar.AGLGauge.offset_Y = 105;
+	statVar.AGLGauge.value = 1.5;
+	
+	statVar.tempGauge.settings = GAUGE_FRAME | GAUGE_ENA | GAUGE_DIGITS_0 | GAUGE_FONT_1;	
+	statVar.tempGauge.size_X = 80;
+	statVar.tempGauge.size_Y = 50;
+	statVar.tempGauge.offset_X = 120;
+	statVar.tempGauge.offset_Y = 150;
+	statVar.tempGauge.value = 1.5;
+	
+	
+	statVar.humidGauge.settings = GAUGE_ENA | GAUGE_DIGITS_0 | GAUGE_FONT_1;
+	statVar.humidGauge.size_X = 60;
+	statVar.humidGauge.size_Y = 20;
+	statVar.humidGauge.offset_X = 120;
+	statVar.humidGauge.offset_Y = 170;
+	statVar.humidGauge.value = 1.5;
+	
+	statVar.speedGauge.settings = GAUGE_FRAME | GAUGE_ENA | GAUGE_DIGITS_1 | GAUGE_FONT_1;
+	statVar.speedGauge.size_X = 90;
+	statVar.speedGauge.size_Y = 50;
+	statVar.speedGauge.offset_X = 0;
+	statVar.speedGauge.offset_Y = 150;
+	statVar.speedGauge.value = 1.5;
+	
+	statVar.headingGauge.settings = GAUGE_ENA | GAUGE_DIGITS_0 | GAUGE_FONT_1;	
+	statVar.headingGauge.size_X = 90;
+	statVar.headingGauge.size_Y = 50;
+	statVar.headingGauge.offset_X = 0;
+	statVar.headingGauge.offset_Y = 170;
+	statVar.headingGauge.value = 1.5;
+	
+	
+	
+	String("").toCharArray(statVar.AGLGauge.name_shown, 10);
+	String("AGL").toCharArray(statVar.AGLGauge.units, 4);
+	
+
+	String("Air").toCharArray(statVar.tempGauge.name_shown, 10);
+	String("*C").toCharArray(statVar.tempGauge.units, 4);
+	String("").toCharArray(statVar.humidGauge.name_shown, 10);
+	String("%").toCharArray(statVar.humidGauge.units, 4);
+	
+	String("Speed").toCharArray(statVar.speedGauge.name_shown, 10);
+	String("kph").toCharArray(statVar.speedGauge.units, 4);
+	String("").toCharArray(statVar.headingGauge.name_shown, 10);
+	String("deg").toCharArray(statVar.headingGauge.units, 4);
+	
+	String("").toCharArray(statVar.windGauge.name_shown, 10);
+	String("kph").toCharArray(statVar.windGauge.units, 4);
+	String("").toCharArray(statVar.windDirGauge.name_shown, 10);
+	String("deg").toCharArray(statVar.windDirGauge.units, 4);
+	
+}

@@ -40,12 +40,22 @@
 
 #include "chess.h"
 
+#include "routine.h"
 
 
-#include <GxEPD.h>
-#include <GxGDEP015OC1/GxGDEP015OC1.h>    // 1.54" b/w
-#include <GxIO/GxIO_SPI/GxIO_SPI.h>
-#include <GxIO/GxIO.h>
+// #include <GxEPD.h>
+// #include <GxGDEP015OC1/GxGDEP015OC1.h>    // 1.54" b/w
+// #include <GxIO/GxIO_SPI/GxIO_SPI.h>
+// #include <GxIO/GxIO.h>
+
+#define ENABLE_GxEPD2_GFX 0
+
+
+#include <GxEPD2_BW.h>
+#define MAX_DISPAY_BUFFER_SIZE 15000ul // ~15k is a good compromise
+#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPAY_BUFFER_SIZE / (EPD::WIDTH / 8))
+
+
 
 #include <Fonts/FreeMonoBold24pt7b.h>
 #include <Fonts/FreeMonoBold18pt7b.h>
@@ -54,9 +64,12 @@
 
 #include "Interrupt_counter.h"
 
+GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*DC=D3*/ PA14, /*RST=D4*/ PA15, /*BUSY=D2*/ PA10));
 
-GxIO_Class io(SPI, /*CS=*/ DISP_CS, /*DC=*/ DISP_DC, /*RST=*/ DISP_RST);
-GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
+
+//GxIO_Class io(SPI, /*CS=*/ DISP_CS, /*DC=*/ DISP_DC, /*RST=*/ DISP_RST);
+//GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
+
 
 
 
@@ -66,50 +79,95 @@ GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
 int pocitadlo = 0;
 
 
-void Gauge_update(Gauge *gau);
-void Gauge_enable(Gauge *gau);
 
+void draw_antenna(int x_oirg, int y_orig);
+void draw_floppy(int x_orig, int y_orig);
 
 
 void displayUpdate(void){
 
 
-display.fillScreen(GxEPD_WHITE);
+	display.fillScreen(GxEPD_WHITE);
 	//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-	
+
 
 	statVar.varioGauge.value = vario_filter/100;
-	Gauge_enable(&statVar.varioGauge);
-	Gauge_update(&statVar.varioGauge);
+	statVar.AGLGauge.value = (alt_filter/100) - ground_level;
+	statVar.altitudeGauge.value = (alt_filter/100);
+	statVar.tempGauge.value = enviromental_data.temperature/100;
+	statVar.humidGauge.value = enviromental_data.humidity/100;
+	statVar.speedGauge.value = fix.speed_kph();
+	statVar.headingGauge.value = fix.heading();
+	statVar.windGauge.value = wind_speed_mps;
+	statVar.windDirGauge.value = wind_direction;
+	
+	printGauges();
+	
+	
 
-	/*display.setCursor(20, 60);
-	display.print("spd:");
-	display.print(fix.speed_kph(),1);
-	display.setCursor(20,80);
-	display.print("hdg:");
-	display.print(fix.heading(),1);
-	*/
-	display.setCursor(10,90);
-	display.print(var_localtime->tm_hour);
+
+	display.setFont(&FreeMonoBold9pt7b);
+	display.setCursor(5,12);
+	if(var_localtime.tm_hour < 10) display.print("0");
+	display.print(var_localtime.tm_hour);
 	display.print(":");
-	display.print(var_localtime->tm_min);
+	if(var_localtime.tm_min < 10) display.print("0");
+	display.print(var_localtime.tm_min);
 	display.print(":");
-	display.print(var_localtime->tm_sec);
-	display.setCursor(10,110);
+	if(var_localtime.tm_sec < 10) display.print("0");
+	display.print(var_localtime.tm_sec);
+
 	
+	display.setFont();
 	
-	if(statVar.ena_vector & ENA_TRACKLOG){
-		time_t flighttime_t = rtc.getEpoch() - var_takeofftime;
-		struct tm *flighttime;
-		flighttime = gmtime(&flighttime_t);
-		display.print(flighttime->tm_hour);
-		display.print(":");
-		display.print(flighttime->tm_min);
-		display.print(":");
-		display.print(flighttime->tm_sec);
+	draw_antenna(100, 0);
+	display.setCursor(113,5);
+	//	display.setFont();
+	if(statVar.ena_vector & ENA_GPS){
+		if(fix.valid.location)
+		display.print("3D");
+		else if(fix.valid.time)
+		display.print("time");
+		else
+		display.print("No");
 	}
-	else
-	display.print("stopped");
+	else		display.print("OFF");
+	
+	if(statVar.ena_vector & ENA_TRACKLOG)	draw_floppy(150, 0);
+	
+	
+	
+	
+	display.setCursor(176,3);
+
+	display.print(battery_SOC, 0);
+	display.print("%");
+	display.drawLine(170, 0, 198, 0, GxEPD_BLACK);
+	display.drawLine(170, 12, 198, 12, GxEPD_BLACK);
+	display.drawLine(170, 0, 170, 12, GxEPD_BLACK);
+	display.drawLine(198, 0, 198, 12, GxEPD_BLACK);
+	display.drawLine(169, 3, 169, 9, GxEPD_BLACK);
+	display.drawLine(168, 3, 168, 9, GxEPD_BLACK);
+	
+	display.setCursor(10,110);
+	display.setFont(&FreeMonoBold12pt7b);
+	
+	
+	/*
+	if(statVar.ena_vector & ENA_TRACKLOG){
+	time_t flighttime_t = rtc.getEpoch() - var_takeofftime;
+	struct tm *flighttime;
+	flighttime = gmtime(&flighttime_t);
+	display.print(flighttime->tm_hour);
+	display.print(":");
+	display.print(flighttime->tm_min);
+	display.print(":");
+	display.print(flighttime->tm_sec);
+	}
+	else	display.print("stopped");
+	*/
+	
+	/*
 	
 	display.setCursor(10,130);
 	//display.print(alt_filter);
@@ -119,23 +177,15 @@ display.fillScreen(GxEPD_WHITE);
 	display.print(wind_direction, 0);
 	
 	
-	display.setCursor(10,170);
-	display.print("alt:");
-	display.print(alt_filter/100);
+
 	
 	display.setCursor(10,150);
 	display.print("spd:");
 	display.print(fix.speed_kph(), 1);
 	display.print("/");
 	display.print(fix.heading(), 0);
+	*/
 
-
-	display.setFont(&FreeMonoBold9pt7b);
-	
-	display.setCursor(5, 190);
-	display.print("temp:");
-	display.print(enviromental_data.temperature/100.0);
-	display.print("degC");
 
 
 	
@@ -156,9 +206,10 @@ display.fillScreen(GxEPD_WHITE);
 	display.setFont(&FreeMonoBold12pt7b);
 
 	
-//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
 	
-	display.partiallyUpdateScreen();
+	//display.partiallyUpdateScreen();
+	display.display(true);
 	
 
 	redraw = 0;
@@ -174,8 +225,8 @@ void setup() {
 	rtc.setTime(23, 59, 40);
 	rtc.setDate(1, 1, 2014);
 	
-		pinMode(HEAT, OUTPUT);
-		digitalWrite(HEAT, 0);
+	pinMode(HEAT, OUTPUT);
+	digitalWrite(HEAT, 0);
 	
 	pinMode(POWER_ENA, OUTPUT);
 	digitalWrite(POWER_ENA, 1);
@@ -263,7 +314,7 @@ void setup() {
 
 
 	analogWrite(DAC, statVar.BuzzerVolume);
-
+	Wire.begin();
 
 	display.init(0);
 
@@ -271,19 +322,19 @@ void setup() {
 	display.setTextColor(GxEPD_BLACK);
 
 	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-	display.update();
+	display.display();
 	
 	display.setRotation(0);
 
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
+	display.display(true);
 	display.setTextWrap(0);
 	
 	display.setCursor(10, 20);
 	display.print("display ok");
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	display.display(true);
 
 	
-	Wire.begin();
+
 	
 	display.setCursor(10, 40);
 	if(max17055.checkFunct()){
@@ -296,7 +347,7 @@ void setup() {
 	else{
 		display.print("max17055 NOK");
 	}
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	display.display(true);
 
 	
 
@@ -310,7 +361,7 @@ void setup() {
 		display.print("BMX160 NOK");
 	}
 	//present_devices += BMX160_PRESENT;
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	display.display(true);
 	
 	
 	display.setCursor(10, 80);
@@ -322,7 +373,7 @@ void setup() {
 	else{
 		display.print("lps33 NOK");
 	}
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	display.display(true);
 	
 	
 	display.setCursor(10, 100);
@@ -333,7 +384,7 @@ void setup() {
 	else{
 		display.print("si7021 NOK");
 	}
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	display.display(true);
 	
 	display.setCursor(10, 120);
 	if(digitalRead(SD_DETECT) == 0){
@@ -344,7 +395,7 @@ void setup() {
 		display.print("no SD card");
 	}
 	pinMode(SD_DETECT, INPUT);
-	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	display.display(true);
 	
 
 
@@ -361,39 +412,38 @@ void setup() {
 	delay(1000);
 	
 	
-
+setVariablesDefault();
 
 
 	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
 	
 	
-	statVar.varioGauge.size_X = 130;
-	statVar.varioGauge.size_Y = 40;
-	statVar.varioGauge.offset_X = 10;
-	statVar.varioGauge.offset_Y = 30;
-	statVar.varioGauge.font = 2;
-	statVar.varioGauge.frame = 1;
-	statVar.varioGauge.decimals = 1;
-	statVar.varioGauge.ena = 1;
-	statVar.varioGauge.value = 1.5;
-	String("Vario").toCharArray(statVar.varioGauge.name_shown, 10);
-	String("m/s").toCharArray(statVar.varioGauge.units, 4);
+
 	
+	
+	// 	while(!SerialUSB.available());
+	//
+	// 	for(int i = -201; i < 200; i +=50){
+	// 		SerialUSB.print(i);
+	// 		SerialUSB.print(",");
+	// 		alt_agl_debug((float)i/100, 16.500f);
+	// 	}
 
 
 
 }
 
 void loop() {
+//SerialUSB.print(*keypad(3));
 
 	if (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){
 			case PRESS:
 			MenuEntry(&topmenu);
-			display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-			display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, false);
-
-			display.update();
+			display.fillScreen(GxEPD_WHITE);
+			//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+			//display.display(true);
+			display.display();
 			break;
 			
 			case DOWN:
@@ -416,10 +466,11 @@ void loop() {
 		}
 
 	}
-	uint64_t t_start = micros();
-	routine();
-					uint64_t t_stop = micros();
-				//	SerialUSB.println((uint32_t)((t_stop-t_start)/1000));
+	
+	uint64_t t_start_first = micros();
+	routine(0);
+	uint64_t t_stop_first = micros();
+	//	SerialUSB.println((uint32_t)((t_stop-t_start)/1000));
 
 
 
@@ -461,17 +512,17 @@ void loop() {
 		//   unsigned long fn = micros();
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;
-		var_localtime = gmtime(&tempTime);
+		var_localtime = *gmtime(&tempTime);
+		
 		//	unsigned long fn2 = micros();
 		//	SerialUSB.println(fn2-fn);		//time check, takes around 5ms
 		
 		//	SerialUSB.println(mktime(var_localtime));
-		
+		t_start_first = micros();
 		displayUpdate();
-		
-		if(max17055.getAverageVoltage() < 2.95){
-			powerOff();
-		}
+		t_stop_first = micros();
+		//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
+
 		
 		
 		/*
@@ -505,8 +556,21 @@ void loop() {
 		
 		
 	}
+	else if(counter500ms>28 && counter500ms < 100){
+		uint64_t t_start_second = micros();
+		displayUpdate();
+		uint64_t t_stop_second = micros();
+		counter500ms = 1000;
+		//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
+		//	SerialUSB.print(",");
+		//	SerialUSB.println((uint32_t)((t_stop_second-t_start_second)/1000));
+		//routine();
+		
+	}
 	else{
-		delay(100);
+		//SerialUSB.println(counter500ms);
+		delay(10);
+
 	}
 	
 	
@@ -518,78 +582,52 @@ void loop() {
 }
 
 
-
-void Gauge_enable(Gauge *gau) {
-	if (gau->ena == 1) {
-		if (gau->frame == 1) {
-			display.drawRect(gau->offset_X, gau->offset_Y, gau->size_X, gau->size_Y, GxEPD_BLACK);
-			//      display.fillRect(0, 0, 199, 199, GxEPD_BLACK);
-			//         display.drawRect(offset_X-1, offset_Y-1, size_X+1, size_Y+1, GxEPD_WHITE);
-		}
-		if (gau->name_shown[0] != '\0') {
-			display.fillRect(gau->offset_X + 5 , gau->offset_Y - 11, strlen(gau->name_shown) * 12, 13, GxEPD_WHITE);
-			display.setCursor(gau->offset_X + 8, gau->offset_Y);
-			display.setFont(&FreeMonoBold9pt7b);
-
-			display.print(gau->name_shown);
-
-			display.setFont(&FreeMonoBold12pt7b);
-
-		}
-		if (gau->units[0] != '\0') {
-			display.setFont(&FreeMonoBold9pt7b);
-			switch (gau->font) {
-				case (0):
-				display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
-				break;
-				case (1):
-				display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
-				break;
-				case (2):
-				display.setCursor(gau->offset_X + 5, gau->offset_Y + 25);
-				break;
-				case (3):
-				display.setCursor(gau->offset_X + 5, gau->offset_Y + 32);
-				break;
-			}
-			display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + gau->size_Y - 17);
-			display.print(gau->units);
-			display.setFont(&FreeMonoBold12pt7b);
-
-		}
-
-
-	}
+void draw_antenna(int x_orig, int y_orig){
+	display.drawLine(x_orig + 4, y_orig, x_orig + 7, y_orig, GxEPD_BLACK);
+	display.drawLine(x_orig, y_orig+4, x_orig, y_orig+7, GxEPD_BLACK);
+	display.drawLine(x_orig+1, y_orig+3, x_orig+3, y_orig+1, GxEPD_BLACK);
+	
+	display.drawLine(x_orig+2, y_orig+5, x_orig+5, y_orig+2, GxEPD_BLACK);
+	display.drawPixel(x_orig+2, y_orig+6, GxEPD_BLACK);
+	display.drawPixel(x_orig+6, y_orig+2, GxEPD_BLACK);
+	
+	display.drawLine(x_orig+6, y_orig+4, x_orig+4, y_orig+6, GxEPD_BLACK);
+	
+	display.drawLine(x_orig+10, y_orig+3, x_orig+3, y_orig+10, GxEPD_BLACK);
+	display.drawLine(x_orig+10, y_orig+4, x_orig+10, y_orig+7, GxEPD_BLACK);
+	display.drawLine(x_orig+4, y_orig+10, x_orig+7, y_orig+10, GxEPD_BLACK);
+	
+	display.drawPixel(x_orig+11, y_orig+11, GxEPD_BLACK);
+	display.drawPixel(x_orig+10, y_orig+10, GxEPD_BLACK);
+	display.drawPixel(x_orig+10, y_orig+11, GxEPD_BLACK);
+	display.drawPixel(x_orig+9, y_orig+11, GxEPD_BLACK);
+	display.drawPixel(x_orig+9, y_orig+9, GxEPD_BLACK);
+	display.drawPixel(x_orig+9, y_orig+8, GxEPD_BLACK);
+	display.drawPixel(x_orig+8, y_orig+9, GxEPD_BLACK);
+	display.drawPixel(x_orig+6, y_orig+6, GxEPD_BLACK);
+	display.drawPixel(x_orig+11, y_orig+12, GxEPD_BLACK);
+	display.drawPixel(x_orig+10, y_orig+12, GxEPD_BLACK);
+	display.drawPixel(x_orig+9, y_orig+12, GxEPD_BLACK);
 }
 
+void draw_floppy(int x_orig, int y_orig){
+	display.drawLine(x_orig, y_orig, x_orig + 11, y_orig, GxEPD_BLACK);
+	display.drawLine(x_orig, y_orig, x_orig, y_orig+10, GxEPD_BLACK);
+	display.drawLine(x_orig+11, y_orig, x_orig + 11, y_orig+11, GxEPD_BLACK);
+	display.drawLine(x_orig+1, y_orig+11, x_orig + 11, y_orig+11, GxEPD_BLACK);
+	display.drawLine(x_orig+2, y_orig+1, x_orig + 2, y_orig+6, GxEPD_BLACK);
+	display.drawLine(x_orig+9, y_orig+1, x_orig + 9, y_orig+6, GxEPD_BLACK);
+	display.drawLine(x_orig+2, y_orig+6, x_orig + 9, y_orig+6, GxEPD_BLACK);
+	
+	display.drawLine(x_orig+3, y_orig+8, x_orig + 8, y_orig+8, GxEPD_BLACK);
+	display.drawPixel(x_orig+3, y_orig+9, GxEPD_BLACK);
+	display.drawPixel(x_orig+3, y_orig+10, GxEPD_BLACK);
+	display.drawPixel(x_orig+6, y_orig+9, GxEPD_BLACK);
+	display.drawPixel(x_orig+6, y_orig+10, GxEPD_BLACK);
+	display.drawPixel(x_orig+7, y_orig+10, GxEPD_BLACK);
+	display.drawPixel(x_orig+7, y_orig+9, GxEPD_BLACK);
+	display.drawPixel(x_orig+8, y_orig+9, GxEPD_BLACK);
+	display.drawPixel(x_orig+8, y_orig+10, GxEPD_BLACK);
 
-
-
-void Gauge_update(Gauge *gau) {
-	switch (gau->font) {
-		case (0):
-		display.setFont(&FreeMonoBold9pt7b);
-		display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
-		break;
-		case (1):
-		display.setFont(&FreeMonoBold12pt7b);
-		display.setCursor(gau->offset_X + 5, gau->offset_Y + 22);
-		break;
-		case (2):
-		display.setFont(&FreeMonoBold18pt7b);
-		display.setCursor(gau->offset_X + 5, gau->offset_Y + 28);
-		break;
-		case (3):
-		display.setFont(&FreeMonoBold24pt7b);
-		display.setCursor(gau->offset_X + 5, gau->offset_Y + 35);
-		break;
-	}
-	display.fillRect(gau->offset_X + 1, gau->offset_Y + 1, gau->size_X - 2 - strlen(gau->units) * 12, gau->size_Y - 2, GxEPD_WHITE);
-	//display.setCursor(offset_X + 5, offset_Y + 22);
-	if(gau->value >=0)
-	display.print("+");
-	display.print(gau->value, gau->decimals);
-	display.setFont(&FreeMonoBold12pt7b);
 }
-
 

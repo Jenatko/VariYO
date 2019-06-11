@@ -9,6 +9,8 @@
 #ifndef NUMPAD_H_
 #define NUMPAD_H_
 
+
+
 #define NUMPAD_BUTTON_SIZE 36
 #define NUMPAD_LEFT_OFFSET 30
 #define NUMPAD_BOTTOM_OFFSET 195
@@ -17,6 +19,7 @@ int numpad(int initial_number);
 void numpadInit(int number);
 void printNumpadButton(int index, int pressed);
 
+void keypad(char* dest, int leng);
 
 
 

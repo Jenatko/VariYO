@@ -168,7 +168,8 @@ src/routine.d src/routine.o: ../src/routine.cpp ../src/routine.h \
  ../src/periph/BMM150_bosch_driver/bmm150_defs.h \
  ../src/periph/BME280_bosch_driver/bme280.h \
  ../src/periph/BME280_bosch_driver/bme280_defs.h \
- ..\\..\ArduinoCore\include\libraries\wire/Wire.h ../src/Variables.h \
+ ..\\..\ArduinoCore\include\libraries\wire/Wire.h \
+ ../src/periph/MAX17055.h ../src/powerModes.h ../src/Variables.h \
  ../src/lib/CircleFit/CircleFitByTaubin.h ../src/lib/CircleFit/circle.h \
  ../src/lib/CircleFit/data.h ../src/lib/CircleFit/mystuff.h \
  ../src/lib/MadgwickAHRS/MadgwickAHRS.h \
@@ -546,6 +547,10 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 ../src/periph/BME280_bosch_driver/bme280_defs.h:
 
 ..\\..\ArduinoCore\include\libraries\wire/Wire.h:
+
+../src/periph/MAX17055.h:
+
+../src/powerModes.h:
 
 ../src/Variables.h:
 

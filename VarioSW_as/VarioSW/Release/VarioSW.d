@@ -153,20 +153,21 @@ VarioSW.d VarioSW.o: .././VarioSW.cpp ../src/SPI_IRQ.h \
  ..\\..\ArduinoCore\include\core/USB/samd21_host.h \
  ..\\..\ArduinoCore\include\core/wiring_private.h ../src/definitions.h \
  ../src/periph/button_control.h ../src/periph/../definitions.h \
- ../src/Menu.h ../src/numpad.h ../src/lib/RTCZero/RTCZero.h \
- ../src/periph/buzzer.h ../src/roundbuff.h ../src/routine.h \
- ../src/lib/NeoGPS/src/NMEAGPS.h ../src/lib/NeoGPS/src/CosaCompat.h \
- ../src/lib/NeoGPS/src/GPSfix.h ../src/lib/NeoGPS/src/NeoGPS_cfg.h \
- ../src/lib/NeoGPS/src/GPSfix_cfg.h ../src/lib/NeoGPS/src/NeoTime.h \
- ../src/lib/NeoGPS/src/Location.h ../src/lib/NeoGPS/src/NMEAGPS_cfg.h \
- ../src/lib/NeoGPS/src/NMEAGPSprivate.h ../src/lib/NeoGPS/src/GPSport.h \
- ../src/lib/NeoGPS/src/Streamers.h ../src/lib/kalmanfilter3.h \
- ../src/periph/MAX17055.h ../src/periph/EEPROM.h \
- ..\\..\ArduinoCore\include\core/arduino.h ../src/Variables.h \
+ ../src/Menu.h ../src/Variables.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h \
  ../src/periph/BME280_bosch_driver/bme280_defs.h \
- ../src/lib/CircleFit/data.h ../src/lib/CircleFit/circle.h \
+ ../src/lib/CircleFit/data.h ..\\..\ArduinoCore\include\core/arduino.h \
+ ../src/lib/CircleFit/circle.h ../src/numpad.h \
+ ../src/lib/RTCZero/RTCZero.h ../src/periph/buzzer.h ../src/roundbuff.h \
+ ../src/routine.h ../src/lib/NeoGPS/src/NMEAGPS.h \
+ ../src/lib/NeoGPS/src/CosaCompat.h ../src/lib/NeoGPS/src/GPSfix.h \
+ ../src/lib/NeoGPS/src/NeoGPS_cfg.h ../src/lib/NeoGPS/src/GPSfix_cfg.h \
+ ../src/lib/NeoGPS/src/NeoTime.h ../src/lib/NeoGPS/src/Location.h \
+ ../src/lib/NeoGPS/src/NMEAGPS_cfg.h \
+ ../src/lib/NeoGPS/src/NMEAGPSprivate.h ../src/lib/NeoGPS/src/GPSport.h \
+ ../src/lib/NeoGPS/src/Streamers.h ../src/lib/kalmanfilter3.h \
+ ../src/periph/MAX17055.h ../src/periph/EEPROM.h ../src/Variables.h \
  ../src/powerModes.h ..\\..\ArduinoCore\include\libraries\wire/Wire.h \
  ../src/periph/MEMS.h ../src/periph/BMI160_bosch_driver/bmi160_bosch.h \
  ../src/periph/BMI160_bosch_driver/bmi160_defs.h \
@@ -174,15 +175,10 @@ VarioSW.d VarioSW.o: .././VarioSW.cpp ../src/SPI_IRQ.h \
  ../src/periph/BMM150_bosch_driver/bmm150_defs.h \
  ../src/periph/BME280_bosch_driver/bme280.h \
  ../src/periph/BME280_bosch_driver/bme280_defs.h ../src/chess.h \
- ../src/lib/GxEPD-master/GxEPD.h ../src/lib/GxEPD-master/GxIO/GxIO.h \
- ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
+ ../src/lib/GxEPD2/GxEPD2_BW.h ../src/lib/Adafruit_GFX/Adafruit_GFX.h \
  ..\\..\ArduinoCore\include\core/Print.h \
- ../src/lib/Adafruit_GFX/gfxfont.h ../src/lib/GxEPD-master/GxFont_GFX.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h \
- ../src/lib/GxEPD-master/GxGDEP015OC1/../GxEPD.h \
- ../src/lib/GxEPD-master/GxIO/GxIO_SPI/GxIO_SPI.h \
- ../src/lib/GxEPD-master/GxIO/GxIO_SPI/../GxIO.h \
- ../src/lib/GxEPD-master/GxIO/GxIO.h \
+ ../src/lib/Adafruit_GFX/gfxfont.h ../src/lib/GxEPD2/GxEPD2_EPD.h \
+ ../src/lib/GxEPD2/GxEPD2.h ../src/lib/GxEPD2/GxEPD2_154.h \
  ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold24pt7b.h \
  ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold18pt7b.h \
  ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold12pt7b.h \
@@ -505,6 +501,20 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/Menu.h:
 
+../src/Variables.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
+
+../src/periph/BME280_bosch_driver/bme280_defs.h:
+
+../src/lib/CircleFit/data.h:
+
+..\\..\ArduinoCore\include\core/arduino.h:
+
+../src/lib/CircleFit/circle.h:
+
 ../src/numpad.h:
 
 ../src/lib/RTCZero/RTCZero.h:
@@ -543,19 +553,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/periph/EEPROM.h:
 
-..\\..\ArduinoCore\include\core/arduino.h:
-
 ../src/Variables.h:
-
-c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\time.h:
-
-c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-none-eabi\include\machine\time.h:
-
-../src/periph/BME280_bosch_driver/bme280_defs.h:
-
-../src/lib/CircleFit/data.h:
-
-../src/lib/CircleFit/circle.h:
 
 ../src/powerModes.h:
 
@@ -577,9 +575,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/chess.h:
 
-../src/lib/GxEPD-master/GxEPD.h:
-
-../src/lib/GxEPD-master/GxIO/GxIO.h:
+../src/lib/GxEPD2/GxEPD2_BW.h:
 
 ../src/lib/Adafruit_GFX/Adafruit_GFX.h:
 
@@ -587,17 +583,11 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\arm\arm-gnu-toolchain\arm-no
 
 ../src/lib/Adafruit_GFX/gfxfont.h:
 
-../src/lib/GxEPD-master/GxFont_GFX.h:
+../src/lib/GxEPD2/GxEPD2_EPD.h:
 
-../src/lib/GxEPD-master/GxGDEP015OC1/GxGDEP015OC1.h:
+../src/lib/GxEPD2/GxEPD2.h:
 
-../src/lib/GxEPD-master/GxGDEP015OC1/../GxEPD.h:
-
-../src/lib/GxEPD-master/GxIO/GxIO_SPI/GxIO_SPI.h:
-
-../src/lib/GxEPD-master/GxIO/GxIO_SPI/../GxIO.h:
-
-../src/lib/GxEPD-master/GxIO/GxIO.h:
+../src/lib/GxEPD2/GxEPD2_154.h:
 
 ../src/lib/Adafruit_GFX/Fonts/FreeMonoBold24pt7b.h:
 

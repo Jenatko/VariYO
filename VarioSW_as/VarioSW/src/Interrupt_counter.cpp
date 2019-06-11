@@ -111,9 +111,9 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			az_corr = (float)(az-statVar.offsetAccelZ) * statVar.gainErrorAccelZ;
 
 			
-			mx_cor = mx*1000000 + statVar.offsetMagX;
-			my_cor = my*1000000 + statVar.offsetMagY;
-			mz_cor = mz*1000000 + statVar.offsetMagZ;
+			mx_cor = mx*1000000 - statVar.offsetMagX;
+			my_cor = my*1000000 - statVar.offsetMagY;
+			mz_cor = mz*1000000 - statVar.offsetMagZ;
 			mx_cor /= statVar.gainErrorMagX;
 			my_cor /= statVar.gainErrorMagY;
 			mz_cor /= statVar.gainErrorMagZ;
@@ -198,6 +198,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	
 	
 	pocitadlo++;
+	counter500ms++;
 
 	if(pocitadlo%20 == 0){
 		//Mag_print_angles();

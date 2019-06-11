@@ -9,7 +9,7 @@
 #ifndef POWERMODES_H_
 #define POWERMODES_H_
 
-void powerOff(void) ;
+void powerOff(int lowVoltage = 0) ;
 void allLow(void);
 void reinitializePins(void);
 void wakeUp(void);
