@@ -22,15 +22,15 @@
 typedef struct Gauge{
 	float value;
 	uint16_t settings;
-	uint8_t decimals;
+	//uint8_t decimals;
 	uint8_t size_X;
 	uint8_t size_Y;
 	uint8_t offset_X;
 	uint8_t offset_Y;
-	uint8_t frame;
-	uint8_t font;
-	uint8_t ena;
-	uint8_t showPlusSign;
+	//uint8_t frame;
+	//uint8_t font;
+	//uint8_t ena;
+	//uint8_t showPlusSign;
 	char name_shown[10];
 	char units[4];
 } Gauge;
