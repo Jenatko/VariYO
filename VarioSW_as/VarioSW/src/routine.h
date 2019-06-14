@@ -29,5 +29,9 @@ void redrawRoutine(void);
 
 void alt_agl_debug(float lat, float lon);
 
+float calcDistanceFromCoordinates(double latHome, double lonHome, double latDest, double lonDest);
+
+float calcHeadingFromCoordinates(double latHome, double lonHome, double latDest, double lonDest);
+
 
 #endif /* ROUTINE_H_ */

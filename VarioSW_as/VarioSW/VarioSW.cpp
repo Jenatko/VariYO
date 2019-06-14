@@ -80,6 +80,7 @@ int pocitadlo = 0;
 
 
 
+
 void draw_antenna(int x_oirg, int y_orig);
 void draw_floppy(int x_orig, int y_orig);
 
