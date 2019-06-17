@@ -585,3 +585,36 @@ void alt_agl_debug(float lat, float lon){
 	
 	
 }
+
+float calcDistanceFromCoordinates(double latHome, double lonHome, double latDest, double lonDest) {
+	double pi = 3.141592653589793;
+	int R = 6371; //Radius of the Earth
+	latHome = (pi/180)*(latHome);
+	latDest = (pi/180)*(latDest);
+	double differenceLon = (pi/180)*(lonDest - lonHome);
+	double differenceLat = (latDest - latHome);
+	double a = sin(differenceLat/2) * sin(differenceLat/2) +
+	cos(latHome) * cos(latDest) *
+	sin(differenceLon/2) * sin(differenceLon/2);
+	double c = 2 * atan2(sqrt(a), sqrt(1-a));
+	double distance = R * c;
+//	SerialUSB.println(distance);
+
+	return distance;
+}
+
+float calcHeadingFromCoordinates(double latHome, double lonHome, double latDest, double lonDest) {
+
+	double pi = 3.141592653589793;
+	int R = 6371; //Radius of the Earth
+	latHome = (pi/180)*(latHome);
+	latDest = (pi/180)*(latDest);
+	double differenceLon = (pi/180)*(lonDest - lonHome);
+	double differenceLat = (latDest - latHome);
+	float heading = atan2(sin(differenceLon) * cos(latDest), cos(latHome)*sin(latDest)-sin(latHome)*cos(latDest)*cos(differenceLon));
+	heading *=180/pi;
+	if(heading<0) heading +=360;
+//	SerialUSB.println(heading);
+	return heading;
+
+}

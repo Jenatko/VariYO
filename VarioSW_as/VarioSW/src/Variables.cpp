@@ -85,7 +85,7 @@ void setVariablesDefault(){
 
 	};
 	
-	statVar.varioGauge.settings = GAUGE_FRAME | GAUGE_ENA | GAUGE_SHOW_PLUS_SIGN | GAUGE_DIGITS_1 | GAUGE_FONT_2;
+	statVar.varioGauge.settings = GAUGE_FRAME | GAUGE_ENA | GAUGE_SHOW_PLUS_SIGN | GAUGE_DIGITS_2 | GAUGE_FONT_2 | GAUGE_VALIDS;
 	statVar.varioGauge.size_X = 130;
 	statVar.varioGauge.size_Y = 40;
 	statVar.varioGauge.offset_X = 0;

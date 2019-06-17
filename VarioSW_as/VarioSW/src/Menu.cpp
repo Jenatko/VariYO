@@ -51,7 +51,7 @@ char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 ac
 char system_menu_name[15] = "System";
 int  system_menu_id = 0x14;
 
-char gauge_menu_list[][15] = {"enable", "position", "size", "frame", "decimals", "name", "units", "font", "Showing + sgn"};
+char gauge_menu_list[][15] = {"enable", "position", "size", "frame", "decimals", "name", "units", "font", "Showing + sgn", "fixed decimal"};
 char gauge_menu_name[15] = "Gauge";
 int  gauge_menu_id = 0x15;
 
@@ -724,7 +724,13 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		//decimals
 		else if (selected == 4){
-			gaugepointer->decimals = numpad(gaugepointer->decimals);
+			int number = numpad((gaugepointer->settings & GAUGE_DIGITS_MASK)>>2);
+			if(number > 7)
+			number = 7;
+			else if(number < 0)
+			number = 0;
+			gaugepointer->settings &= ~GAUGE_DIGITS_MASK;
+			gaugepointer->settings |= 4*number;
 			PrepareMenu(menuPointer);
 		}
 		//name
@@ -781,6 +787,21 @@ void menuSelector(menu *menuPointer, int selected) {
 			}
 			menu_init();
 		}
+		//fixed decimals vs fixed number of digits
+		else if (selected == 9){
+			if (gaugepointer->settings & GAUGE_VALIDS)
+			{
+				strncpy(gauge_menu_list[9], "fixed decimal", 15);
+				strncpy(gauge_menu_list[4], "no. decimals", 15);
+				gaugepointer->settings &= ~GAUGE_VALIDS;
+			}
+			else{
+				strncpy(gauge_menu_list[9], "fixed digits", 15);
+				strncpy(gauge_menu_list[4], "no. digits", 15);
+				gaugepointer->settings |= GAUGE_VALIDS;
+			}
+			menu_init();
+		}
 
 	}
 
@@ -802,6 +823,15 @@ void setGaugeMenu(Gauge *gaugePointer){
 
 	if (gaugepointer->settings & GAUGE_SHOW_PLUS_SIGN)	strncpy(gauge_menu_list[8], "showing + sgn", 15);
 	else strncpy(gauge_menu_list[8], "not showing +", 15);
+	
+	if(gaugepointer->settings & GAUGE_VALIDS){strncpy(
+		gauge_menu_list[9], "fixed digits", 15);
+		strncpy(gauge_menu_list[4], "no. digits", 15);
+	}
+	else{
+				strncpy(gauge_menu_list[9], "fixed decimal", 15);
+				strncpy(gauge_menu_list[4], "no. decimals", 15);
+	}
 
 	
 	menu_init();
@@ -1205,7 +1235,7 @@ void Gauge_enable(Gauge *gau) {
 		}
 		if (gau->units[0] != '\0') {
 			display.setFont(&FreeMonoBold9pt7b);
-			switch (gau->font) {
+			switch (gau->settings & GAUGE_FONT_MASK) {
 				case (0):
 				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 20);
 				break;
@@ -1255,47 +1285,48 @@ void Gauge_update(Gauge *gau) {
 		}
 		//display.fillRect(gau->offset_X + 1, gau->offset_Y + 1, gau->size_X - 2 - strlen(gau->units) * 12, gau->size_Y - 2, GxEPD_WHITE);
 		//display.setCursor(offset_X + 5, offset_Y + 22);
-		int ahoj = gau->settings;
-		SerialUSB.println(ahoj, HEX);
-		if(ahoj & GAUGE_VALIDS){
-			//to be done, not so simple as i thought :-D
+		
+		if(gau->settings & GAUGE_SHOW_PLUS_SIGN){
+			if(gau->value >=0)
+			display.print("+");
+		}
+		if(gau->settings & GAUGE_VALIDS){
 			
-			/*
-			char test[50];
-			float cislo = gau->value;
-			unsigned long start = micros();
+
 			
-			sprintf(test, "%+.2g", cislo*1000000);
-			unsigned long stop = micros();
-			SerialUSB.println(stop-start);
-			display.print(test);
-			
+			int digits = (gau->settings & GAUGE_DIGITS_MASK)>>2;
+			int rem_for_decimal = 0;
 			int valid_pow = 1;
-			int digits = ((gau->settings & GAUGE_DIGITS_MASK) >> 2);
-			for(int i = 0; i <digits; i++) valid_pow *=10;
+			
+			
 
+			for(int i = 0; i < digits; i++ ) valid_pow *= 10;
+			
+			if(round(gau->value) >= valid_pow)
+			gau->value = valid_pow - 1;
+			else if(round(gau->value) <= -valid_pow)
+			gau->value = -valid_pow + 1;
+			
+			for(int j = valid_pow; j >= 1; j/=10){
+				if(abs(gau->value) >= (j-0.05)){
+					display.print(gau->value, rem_for_decimal-1);
+					break;
+				}
+				if(j == 1){
+					display.print(gau->value, rem_for_decimal-1);
+					break;
+					
+				}
+				rem_for_decimal++;
+				
+			}
 
-
-
-
-			if(abs(gau->value) >= valid_pow) display.print(gau->value, digits-7);
-			else if(abs(gau->value) >= valid_pow/10.0f) display.print(gau->value, digits-6);
-			else if(abs(gau->value) >= valid_pow/100.0f) display.print(gau->value, digits-5);
-			else if(abs(gau->value) >= valid_pow/1000.0f) display.print(gau->value, digits-4);
-			else if(abs(gau->value) >= valid_pow/10000.0f) display.print(gau->value, digits-3);
-			else if(abs(gau->value) >= valid_pow/100000.0f) display.print(gau->value, digits-2);
-			else if(abs(gau->value) >= valid_pow/1000000.0f) display.print(gau->value, digits-1);
-			else display.print(gau->value, digits);
-
-			*/
-			display.print(gau->value, 2);
+			
+			
 			
 		}
 		else{
-			if(gau->settings & GAUGE_SHOW_PLUS_SIGN){
-				if(gau->value >=0)
-				display.print("+");
-			}
+
 			display.print(gau->value, (gau->settings & GAUGE_DIGITS_MASK) >> 2);
 			
 		}
