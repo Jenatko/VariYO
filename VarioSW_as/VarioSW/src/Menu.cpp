@@ -23,6 +23,7 @@
 #include "GPSfix.h"
 #include "chess.h"
 #include "kalmanfilter3.h"
+#include "Interrupt_counter.h"
 
 #include "MadgwickAHRS.h"
 
@@ -47,7 +48,7 @@ char menu3_list[][15] = {"BMIX60", "LPS33,SI7021", "MAX17055", "GPS", "set Defau
 char menu3_name[15] = "3. Debug";
 int  menu3_id = 0x13;
 
-char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off", "gauges"};
+char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off", "gauges", "collect Acc"};
 char system_menu_name[15] = "System";
 int  system_menu_id = 0x14;
 
@@ -454,8 +455,58 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		if (selected == 6){
 			MenuEntry(&gauges_menu);
+		}
+		if (selected == 7){
+			int no_samples = 14;
+			int averaging = 100;
+			int ISR_counter_old = counter_incremented_every_ISR;
+			int enavectorold = statVar.ena_vector;
+			int16_t x[no_samples];
+			int16_t y[no_samples];
+			int16_t z[no_samples];
+			statVar.ena_vector &= ~ENA_BUZZER;
+			int volume_old = statVar.BuzzerVolume;
+			statVar.BuzzerVolume = 80;
+			analogWrite(DAC, 80);
+			pinPeripheral(BUZZER_PIN, PIO_TIMER);
+			buzzerFreq(300);
 			
+			for (int i = 0; i < no_samples; i++){
+				buzzerEna(1);
+				long avgx = 0;
+				long avgy = 0;
+				long avgz = 0;
+				
+				for(int j = 0; j < averaging; j++){
+					while(ISR_counter_old == counter_incremented_every_ISR);
+					
+					avgx += ax;
+					avgy += ay;
+					avgz += az;
+					ISR_counter_old = counter_incremented_every_ISR;
+				}
+				x[i] = avgx/averaging;
+				y[i] = avgy/averaging;
+				z[i] = avgz/averaging;
+				
+				
+				buzzerEna(0);
+				delay(2000);
+				
+				
+			}
+			for (int i = 0; i < no_samples; i++){
+				SerialUSB.print(x[i]);
+				SerialUSB.print(",");
+				SerialUSB.print(y[i]);
+				SerialUSB.print(",");
+				SerialUSB.println(z[i]);
+
+			}
 			
+			statVar.ena_vector = enavectorold;
+			pinMode(BUZZER_PIN, OUTPUT);
+			statVar.BuzzerVolume = volume_old;
 		}
 	}
 	//-------------Altimeter menu
@@ -829,8 +880,8 @@ void setGaugeMenu(Gauge *gaugePointer){
 		strncpy(gauge_menu_list[4], "no. digits", 15);
 	}
 	else{
-				strncpy(gauge_menu_list[9], "fixed decimal", 15);
-				strncpy(gauge_menu_list[4], "no. decimals", 15);
+		strncpy(gauge_menu_list[9], "fixed decimal", 15);
+		strncpy(gauge_menu_list[4], "no. decimals", 15);
 	}
 
 	

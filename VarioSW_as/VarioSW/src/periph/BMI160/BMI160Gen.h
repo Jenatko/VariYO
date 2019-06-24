@@ -4,6 +4,7 @@
 //#define BMI160GEN_USE_CURIEIMU
 #include "CurieIMU.h"
 
+#include "variables.h"
 
 class BMI160GenClass : public CurieIMUClass {
     public:
@@ -25,6 +26,6 @@ class BMI160GenClass : public CurieIMUClass {
 };
 
 extern BMI160GenClass BMI160;
-extern int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz;
+
 
 #endif /* _BMI160GEN_H_ */

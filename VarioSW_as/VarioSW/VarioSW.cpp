@@ -71,18 +71,22 @@ GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*D
 //GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
 
 
+#include <SD.h>
 
 
 
 
 
-int pocitadlo = 0;
+volatile int counter_incremented_every_ISR = 0;
 
 
 
 
 void draw_antenna(int x_oirg, int y_orig);
 void draw_floppy(int x_orig, int y_orig);
+
+
+
 
 
 void displayUpdate(void){
@@ -319,6 +323,7 @@ void setup() {
 
 	display.init(0);
 
+
 	display.setFont(&FreeMonoBold12pt7b);
 	display.setTextColor(GxEPD_BLACK);
 
@@ -328,6 +333,7 @@ void setup() {
 	display.setRotation(0);
 
 	display.display(true);
+		SerialUSB.println("pycovole");
 	display.setTextWrap(0);
 	
 	display.setCursor(10, 20);
@@ -391,6 +397,7 @@ void setup() {
 	if(digitalRead(SD_DETECT) == 0){
 		display.print("SD present");
 		present_devices |= SD_PRESENT;
+		SD.begin(SD_CS);
 	}
 	else{
 		display.print("no SD card");
@@ -413,7 +420,7 @@ void setup() {
 	delay(1000);
 	
 	
-setVariablesDefault();
+//setVariablesDefault();
 
 
 	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
@@ -434,8 +441,10 @@ setVariablesDefault();
 
 }
 
+
+
 void loop() {
-//SerialUSB.print(*keypad(3));
+
 
 	if (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){
