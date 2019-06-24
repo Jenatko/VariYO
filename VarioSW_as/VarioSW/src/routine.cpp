@@ -557,7 +557,7 @@ void alt_agl(){
 
 				x1inter = (1-fractx) * x1y1 + fractx*x2y1;
 				x2inter = (1-fractx) * x1y2 + fractx*x2y2;
-				interpolation = fracty* x1inter	+ (1-fracty)* x2inter;
+				interpolation = (1-fracty)* x1inter	+ fracty* x2inter;
 
 				ground_level_interpol = interpolation;
 				
@@ -602,91 +602,6 @@ void alt_agl(){
 	
 }
 
-
-
-void alt_agl_debug(float lat, float lon){
-	
-
-	int int_lat = lat;
-	int int_lon = lon;
-	
-
-	
-	
-	
-	
-	float temp_lat  = round(1201.0f-((float)lat - int_lat)*1200.0f);
-	float temp_lon = round(((float)lon - int_lon)*1200.0f);
-	
-	//int row = 1201-(fix.latitude() - int_lat)*1201;
-	//int col = (fix.longitude() - int_lon)*1201;
-	
-	int row = (int)temp_lat;
-	int col = (int)temp_lon;
-	
-	char cesta_char2[20];
-
-
-
-	
-
-	String cesta = ("/HGT/");
-	if(lat < 0){
-		cesta.concat("S");
-		int_lat--;
-	}
-	else{
-		cesta.concat("N");
-	}
-	if(int_lat < 10 && int_lat > -10){
-		cesta.concat("0");
-	}
-	cesta.concat(String(abs(int_lat)));
-	
-	if(lon < 0){
-		cesta.concat("W");
-		int_lon--;
-	}
-	else{
-		cesta.concat("E");
-	}
-	if(int_lon < 10 && int_lon > -10){
-		cesta.concat("0");
-	}
-	if(int_lon < 100 && int_lon > -100){
-		cesta.concat("0");
-	}
-	cesta.concat(String(abs(int_lon)));
-	cesta.concat(".HGT");
-	
-	SerialUSB.println(cesta);
-	
-	
-	//cesta = ("/N49E016.HGT");
-	cesta.toCharArray(cesta_char2, 20);
-	SerialUSB.println(cesta_char2);
-	if(!HeightData){
-		
-		HeightData = SD.open(cesta_char2, FILE_READ);
-	}
-	if(HeightData){
-		HeightData.seek(((row-1)*1201+col)*2);
-
-		int lsbs = HeightData.read();
-		int msbs = HeightData.read();
-
-		
-		ground_level = (lsbs << 8)+msbs;
-		
-		//SerialUSB.println(HeightData.read());
-		//SerialUSB.println(HeightData.read());
-		HeightData.close();
-	}
-	else;
-	//	SerialUSB.println("not open");
-	
-	
-}
 
 
 
