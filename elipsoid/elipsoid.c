@@ -1,4 +1,4 @@
-
+    
 #include <stdio.h>
 #include <stdlib.h>
  
@@ -24,14 +24,12 @@ float * submatrix(float *M, int n, int k){
  
 float determinant(float *M, int n){
         
-    printf("--> Det n=%d\n", n);
     if (n < 1){
         printf("This shold not be possible!\n");
         return 1;
     }
     
     if (n == 1) {
-        printf("result=%f\n", M[0]);
         return M[0];
     }
     
@@ -44,7 +42,6 @@ float determinant(float *M, int n){
         free(subM);
     }
     
-    printf("<-- Det n=%d, result=%f\n", n, result);
     return result;
 }
 
@@ -109,7 +106,6 @@ D = [ x .* x + y .* y - 2 * z .* z, ...
 d2 = x .* x + y .* y + z .* z; % the RHS of the llsq problem (y's)
 u = ( D' * D ) \ ( D' * d2 );  % solution to the normal equations
 */
- 
 int fit_elipsoid(float *x, float *y, float *z, int n, float *res) {
 
     /**
@@ -131,8 +127,7 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res) {
     
     /**
      * The right hand side */
-    float * d2;
-    d2 = (float *) malloc(sizeof(float) * n);
+    float * d2 = (float *) malloc(sizeof(float) * n);
     for (int i = 0; i < n; ++i) {
         d2[i] = x[i] * x[i] + y[i] * y[i] + z[i] * z[i];
     }
@@ -147,7 +142,6 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res) {
             }
         }
     }
-    
     //Symmetric matrix
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < i; ++j) {
@@ -164,16 +158,56 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res) {
         }
     }
     
+    free(D);
+
     
-    float sum = 0;
-    for (int i = 0; i < n; ++i) {
-        sum += D[9*i];
+    /**
+     * Solve the lin system
+     */
+    float u[9] = {0};    
+    int flag = solve_lin_system((float *)M, d, 9, u);
+    
+    if (flag) {
+        return flag;
     }
     
-    free(D);
+    float v[10] = {0};
+    /*    
+    v(1) = u(1) +     u(2) - 1;
+    v(2) = u(1) - 2 * u(2) - 1;
+    v(3) = u(2) - 2 * u(1) - 1;
+    v( 4 : 10 ) = u( 3 : 9 );
+    */
+    v[0] = u[0] +     u[1] - 1;
+    v[1] = u[0] - 2 * u[1] - 1;
+    v[2] = u[1] - 2 * u[0] - 1;
     
-    res[0] = sum;
-    return 0;
+    for (int i=3; i<10; ++i){
+        v[i] = u[i-1];
+    }
+    
+    /**
+    % form the algebraic form of the ellipsoid
+    A = [ v(1) v(4) v(5) v(7); ...
+      v(4) v(2) v(6) v(8); ...
+      v(5) v(6) v(3) v(9); ...
+      v(7) v(8) v(9) v(10) ];
+      */
+    float A[16] = {
+        v(1), v(4), v(5), v(7), 
+        v(4), v(2), v(6), v(8),
+        v(5), v(6), v(3), v(9),
+        v(7), v(8), v(9), v(10)
+    };
+    
+    /*
+    % find the center of the ellipsoid
+    center = -A( 1:3, 1:3 ) \ v( 7:9 );
+    */
+    
+    
+    
+    return flag;
 }
 
 
@@ -241,8 +275,8 @@ void testLinSolv(){
 
 int main(){
      
-    testLinSolv();
-    /*
+    //testLinSolv();
+    
     float x[10] = {1,2,3,4,5,6,7,8,9,0};
     float y[10] = {0,1,2,3,4,5,6,7,8,9};
     float z[10] = {1,2,3,4,5,6,7,8,9,10};
@@ -251,9 +285,9 @@ int main(){
     int ret = fit_elipsoid(x, y, z, 10, res);
     
     printf("Hello world!\n");
-    printf("The result is: %f, %f, %f, return code: %d\n", res[0], res[1], res[2], ret);
+    printf("The result is: %f, %f, %f,\n%f %f %f\n %f %f %f\n return code: %d\n", res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], ret);
     return 0;
-    */
+    
  }
  
  

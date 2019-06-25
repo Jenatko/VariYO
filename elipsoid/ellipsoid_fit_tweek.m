@@ -1,4 +1,4 @@
-function [ center, radii, evecs, v, chi2 ] = ellipsoid_fit( X, equals )
+function [ center, radii, evecs, v, chi2 ] = ellipsoid_fit_tweek( X, equals )
 %
 % Fit an ellispoid/sphere/paraboloid/hyperboloid to a set of xyz data points:
 %
@@ -180,7 +180,9 @@ T( 4, 1:3 ) = center';
 R = T * A * T';
 
 % solve the eigenproblem
-[ evecs, evals ] = eig( R( 1:3, 1:3 ) / -R( 4, 4 ) );
+%[ evecs, evals ] = eig( R( 1:3, 1:3 ) / -R( 4, 4 ) );       % orig
+[ evecs, evals ] = eig( A( 1:3, 1:3 ) / (A(4,4) + center' * A(1:3, 4)));       % tweek
+
 radii = sqrt( 1 ./ diag( abs( evals ) ) );
 sgns = sign( diag( evals ) );
 radii = radii .* sgns;
