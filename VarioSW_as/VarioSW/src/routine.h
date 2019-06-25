@@ -27,7 +27,6 @@ void alt_agl(void);
 
 void redrawRoutine(void);
 
-void alt_agl_debug(float lat, float lon);
 
 float calcDistanceFromCoordinates(double latHome, double lonHome, double latDest, double lonDest);
 

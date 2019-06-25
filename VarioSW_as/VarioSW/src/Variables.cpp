@@ -16,7 +16,7 @@ StaticVariables statVar;
 double myRealAltitude= 200;
 volatile float altChange;
 volatile int counter500ms = 0;
-int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor;
+volatile int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor;
 float yaw, pitch, roll;
 float a_vertical_imu;
 float alt_filter, vario_filter, alt_baro;
@@ -43,6 +43,8 @@ float wind_direction;
 Data movement_vector_data(WIND_RBUFF_SIZE);
 Circle movement_circle_fit;
 
+
+float ground_level_interpol;
 
 
 

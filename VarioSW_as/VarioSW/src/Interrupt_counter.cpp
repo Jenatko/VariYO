@@ -126,22 +126,22 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			gx_avg = ((gx_avg<<5)- gx_avg+gx)>>5;
 			gy_avg = ((gy_avg<<5)- gy_avg +gy)>>5;
 			gz_avg = ((gz_avg<<5)- gz_avg+gz)>>5;
-					
+			
 			//Mahony_filter.updateIMU(gx/131.2f, gy/131.2f, gz/131.2f, ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
-		//	digitalWrite(SRAM_CS, 0);
+			//	digitalWrite(SRAM_CS, 0);
 			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*0.0174533f), gy*(1/131.2f*0.0174533f), gz*(1/131.2f*0.0174533f), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
 			//	digitalWrite(SRAM_CS, 1);
 
 		}
 
-	
+		
 		//yaw = Mahony_filter.getYaw();
 		//pitch = Mahony_filter.getPitch();
 		//roll = Mahony_filter.getRoll();
 
 
 		
-	//	digitalWrite(SRAM_CS, 1);
+		//	digitalWrite(SRAM_CS, 1);
 		
 		//a_vertical_imu = az/16384.0*cos(roll*0.01745329)*cos(pitch*0.01745329) - ax/16384.0*sin(pitch*0.01745329) + ay/16384.0*sin(roll*0.01745329)*cos(pitch*0.01745329);
 		
@@ -161,7 +161,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 		//SerialUSB.println(alt_baro);
 		kalmanFilter3_update(alt_baro, a_vertical_imu*1000.0f-1000.0f, (float)1/60.0f, &alt_filter, &vario_filter);
-		buzzerAltitudeDiff((int)vario_filter);
+
 	}
 	
 	/*
@@ -182,10 +182,13 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 
 	
 	//generate short beep bursts, long beep or be silent
-	if (buzzer_counter < buzzer_on_preiod)
-	buzzerEna(1);
-	else
-	buzzerEna(0);
+	if(statVar.ena_vector & ENA_BUZZER){
+				buzzerAltitudeDiff((int)vario_filter);
+		if (buzzer_counter < buzzer_on_preiod)
+		buzzerEna(1);
+		else
+		buzzerEna(0);
+	}
 	
 
 	
@@ -197,10 +200,10 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	buttons.buttonUpdate();
 	
 	
-	pocitadlo++;
+	counter_incremented_every_ISR++;
 	counter500ms++;
 
-	if(pocitadlo%20 == 0){
+	if(counter_incremented_every_ISR%20 == 0){
 		//Mag_print_angles();
 		//	print_mag();
 	}

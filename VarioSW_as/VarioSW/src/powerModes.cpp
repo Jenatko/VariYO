@@ -77,6 +77,7 @@ void powerOff(int lowVoltage) {
 	delay(10);
 	if(digitalRead(SD_DETECT) == 0){
 		present_devices |= SD_PRESENT;
+		SD.begin(SD_CS);
 	}
 	else{
 		present_devices &= ~SD_PRESENT;
@@ -208,6 +209,8 @@ void massStorageEna() {
 	pinMode(SD_CS, OUTPUT);
 	digitalWrite(SD_CS, 1);
 
+
+		SD.begin(SD_CS);
 
 	
 	display.init(0);

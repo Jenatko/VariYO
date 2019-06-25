@@ -18,7 +18,7 @@ extern volatile float altChange;
 extern float yaw, pitch, roll;
 extern float a_vertical_imu;
 
-extern int pocitadlo;
+extern volatile int counter_incremented_every_ISR;
 
 
 
