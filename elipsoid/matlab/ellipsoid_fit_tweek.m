@@ -180,8 +180,11 @@ T( 4, 1:3 ) = center';
 R = T * A * T';
 
 % solve the eigenproblem
-%[ evecs, evals ] = eig( R( 1:3, 1:3 ) / -R( 4, 4 ) );       % orig
-[ evecs, evals ] = eig( A( 1:3, 1:3 ) / (A(4,4) + center' * A(1:3, 4)));       % tweek
+[ evecs2, evals2 ] = eig( R( 1:3, 1:3 ) / -R( 4, 4 ) );       % orig
+%[ evecs, evals ] = eig( -A( 1:3, 1:3 ) / (A(4,4) + center' * A(1:3, 4)));       % tweek
+[ evecs, evals ] = eig( A( 1:3, 1:3 ) );       % tweek2
+
+evals = -evals / (A(4,4) + center' * A(1:3, 4));
 
 radii = sqrt( 1 ./ diag( abs( evals ) ) );
 sgns = sign( diag( evals ) );

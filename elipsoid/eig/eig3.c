@@ -12,13 +12,13 @@
 
 #define n 3
 
-static double hypot2(double x, double y) {
+static float hypot2(float x, float y) {
   return sqrt(x*x+y*y);
 }
 
 // Symmetric Householder reduction to tridiagonal form.
 
-static void tred2(double V[n][n], double d[n], double e[n]) {
+static void tred2(float V[n][n], float d[n], float e[n]) {
 
 //  This is derived from the Algol procedures tred2 by
 //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
@@ -35,8 +35,8 @@ static void tred2(double V[n][n], double d[n], double e[n]) {
 
     // Scale to avoid under/overflow.
 
-    double scale = 0.0;
-    double h = 0.0;
+    float scale = 0.0;
+    float h = 0.0;
     for (int k = 0; k < i; k++) {
       scale = scale + fabs(d[k]);
     }
@@ -55,8 +55,8 @@ static void tred2(double V[n][n], double d[n], double e[n]) {
         d[k] /= scale;
         h += d[k] * d[k];
       }
-      double f = d[i-1];
-      double g = sqrt(h);
+      float f = d[i-1];
+      float g = sqrt(h);
       if (f > 0) {
         g = -g;
       }
@@ -84,7 +84,7 @@ static void tred2(double V[n][n], double d[n], double e[n]) {
         e[j] /= h;
         f += e[j] * d[j];
       }
-      double hh = f / (h + h);
+      float hh = f / (h + h);
       for (int j = 0; j < i; j++) {
         e[j] -= hh * d[j];
       }
@@ -106,13 +106,13 @@ static void tred2(double V[n][n], double d[n], double e[n]) {
   for (int i = 0; i < n-1; i++) {
     V[n-1][i] = V[i][i];
     V[i][i] = 1.0;
-    double h = d[i+1];
+    float h = d[i+1];
     if (h != 0.0) {
       for (int k = 0; k <= i; k++) {
         d[k] = V[k][i+1] / h;
       }
       for (int j = 0; j <= i; j++) {
-        double g = 0.0;
+        float g = 0.0;
         for (int k = 0; k <= i; k++) {
           g += V[k][i+1] * V[k][j];
         }
@@ -135,7 +135,7 @@ static void tred2(double V[n][n], double d[n], double e[n]) {
 
 // Symmetric tridiagonal QL algorithm.
 
-static void tql2(double V[n][n], double d[n], double e[n]) {
+static void tql2(float V[n][n], float d[n], float e[n]) {
 
 //  This is derived from the Algol procedures tql2, by
 //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
@@ -147,9 +147,9 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
   }
   e[n-1] = 0.0;
 
-  double f = 0.0;
-  double tst1 = 0.0;
-  double eps = pow(2.0,-52.0);
+  float f = 0.0;
+  float tst1 = 0.0;
+  float eps = pow(2.0,-52.0);
   for (int l = 0; l < n; l++) {
 
     // Find small subdiagonal element
@@ -173,16 +173,16 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
 
         // Compute implicit shift
 
-        double g = d[l];
-        double p = (d[l+1] - g) / (2.0 * e[l]);
-        double r = hypot2(p,1.0);
+        float g = d[l];
+        float p = (d[l+1] - g) / (2.0 * e[l]);
+        float r = hypot2(p,1.0);
         if (p < 0) {
           r = -r;
         }
         d[l] = e[l] / (p + r);
         d[l+1] = e[l] * (p + r);
-        double dl1 = d[l+1];
-        double h = g - d[l];
+        float dl1 = d[l+1];
+        float h = g - d[l];
         for (int i = l+2; i < n; i++) {
           d[i] -= h;
         }
@@ -191,12 +191,12 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
         // Implicit QL transformation.
 
         p = d[m];
-        double c = 1.0;
-        double c2 = c;
-        double c3 = c;
-        double el1 = e[l+1];
-        double s = 0.0;
-        double s2 = 0.0;
+        float c = 1.0;
+        float c2 = c;
+        float c3 = c;
+        float el1 = e[l+1];
+        float s = 0.0;
+        float s2 = 0.0;
         for (int i = m-1; i >= l; i--) {
           c3 = c2;
           c2 = c;
@@ -234,7 +234,7 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
 
   for (int i = 0; i < n-1; i++) {
     int k = i;
-    double p = d[i];
+    float p = d[i];
     for (int j = i+1; j < n; j++) {
       if (d[j] < p) {
         k = j;
@@ -253,8 +253,8 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
   }
 }
 
-void eigen_decomposition(double A[n][n], double V[n][n], double d[n]) {
-  double e[n];
+void eigen_decomposition(float A[n][n], float V[n][n], float d[n]) {
+  float e[n];
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       V[i][j] = A[i][j];
