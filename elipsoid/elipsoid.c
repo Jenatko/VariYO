@@ -5,7 +5,7 @@
  
 #include "eig/eig3.h"
 
-#define VERBOSE 0
+#define VERBOSE 1
 
  
 float sign(float x) {
@@ -365,7 +365,7 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_align
 
 #if VERBOSE
     printf("R = \n");
-    print_matrix(B, 4, 4);
+    print_matrix( (float *) B, 3, 3);
     
     printf("center = \n");
     print_matrix(center, 3, 1);
@@ -417,6 +417,10 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_align
     res[ 9] = radii[0];
     res[10] = radii[1];
     res[11] = radii[2];            
+
+    res[12] = center[0];
+    res[13] = center[1];
+    res[14] = center[2];            
 
     return flag;
 }
@@ -572,10 +576,10 @@ static const char solution[] =  "\n\
     float y[12] = {0,2,0,-.1,-.8, 0.0,-1.9,  2.004, .01, .8, 0.01, 1.9};
     float z[12] = {0,0,3,  0,0.0,-3.1, 2.9,  3.04 ,  0, .01, 3.3, -2.9};
      
-    float res[12] = {0};
+    float res[15] = {0};
     int ret = fit_elipsoid(x, y, z, 12, res, 0);
     
-    printf("The result is:\n eig_v = \n\n %f %f %f\n %f %f %f\n %f %f %f\n\n radii = %f\t%f\t%f\n\n  return code: %d\n", res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], ret);
+    printf("The result is:\n eig_v = \n\n %f %f %f\n %f %f %f\n %f %f %f\n\n radii = %f\t%f\t%f\n\n center = %f\t%f\t%f\n\n return code: %d\n", res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], ret);
     
     printf("%s\n", solution);
 }
