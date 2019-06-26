@@ -110,119 +110,6 @@ void print_matrix(float *M, int ni, int nj){
     printf("\n");
 }
 
-int compute_v(float *x, float *y, float *z, int n, float v[10]) {
-     /*
-    D = [ x .* x + y .* y - 2 * z .* z, ...
-            x .* x + z .* z - 2 * y .* y, ...
-            2 * x .* y, ...
-            2 * x .* z, ...
-            2 * y .* z, ...
-            2 * x, ...
-            2 * y, ...
-            2 * z, ...
-            1 + 0 * x ];  % ndatapoints x 9 ellipsoid parameterspo
-            
-            % solve the normal system of equations
-    d2 = x .* x + y .* y + z .* z; % the RHS of the llsq problem (y's)
-    u = ( D' * D ) \ ( D' * d2 );  % solution to the normal equations
-    */
-    
-    /**
-     * The overdetermined system to be solved. */
-    float * D;
-    D = (float *) malloc(sizeof(float) * n * 9);
-    
-    for (int i = 0; i < n; ++i) {
-        D[9 * i + 0] = x[i] * x[i] + y[i] * y[i] - 2 * z[i] * z[i];
-        D[9 * i + 1] = x[i] * x[i] + z[i] * z[i] - 2 * y[i] * y[i];
-        D[9 * i + 2] = 2 * x[i] * y[i];
-        D[9 * i + 3] = 2 * x[i] * z[i];
-        D[9 * i + 4] = 2 * y[i] * z[i];
-        D[9 * i + 5] = 2 * x[i];                // optimize away
-        D[9 * i + 6] = 2 * y[i];                // optimize away
-        D[9 * i + 7] = 2 * z[i];                // optimize away
-        D[9 * i + 8] = 1;                       // same here
-    }
-    
-    /**
-     * The right hand side */
-    float * d2 = (float *) malloc(sizeof(float) * n);
-    for (int i = 0; i < n; ++i) {
-        d2[i] = x[i] * x[i] + y[i] * y[i] + z[i] * z[i];
-    }
-    
-    /**
-     * Matrix to be solved M = D' * D */
-    float M[9][9] = {0};
-    for (int i = 0; i < 9; ++i) {
-        for (int j = i; j < 9; ++j) {
-            for (int k = 0; k < n; ++k) {
-                M[i][j] += D[9 * k + i] * D[9 * k + j];
-            }
-        }
-    }
-    
-#if VERBOSE
-    printf("M = \n");
-    print_matrix((float *) M, 9, 9);
-#endif
-    
-    //Symmetric matrix
-    for (int i = 0; i < 9; ++i) {
-        for (int j = 0; j < i; ++j) {
-            M[i][j] = M[j][i];
-        }
-    }
-    
-    /**
-     * The right hand side */
-    float d[9] = {0};
-    for (int j = 0; j < 9; ++j) {
-        for (int k = 0; k < n; ++k) {
-            d[j] += D[9 * k + j] * d2[k];
-        }
-    }
-    free(D);
-    free(d2);
-    
-#if VERBOSE
-    printf("M = \n");
-    print_matrix((float *) M, 9, 9);
-    printf("d = \n");
-    print_matrix(d, 9, 1);
-#endif
-    
-    /**
-     * Solve the lin system
-     */
-    float u[9] = {0};    
-    int flag = solve_lin_system((float *) M, d, 9, u);
-    
-    if (flag) {
-        return flag;
-    }
-    
-    /*    
-    v(1) = u(1) +     u(2) - 1;
-    v(2) = u(1) - 2 * u(2) - 1;
-    v(3) = u(2) - 2 * u(1) - 1;
-    v( 4 : 10 ) = u( 3 : 9 );
-    */
-    v[0] = u[0] +     u[1] - 1;
-    v[1] = u[0] - 2 * u[1] - 1;
-    v[2] = u[1] - 2 * u[0] - 1;
-    
-    for (int i=3; i<10; ++i){
-        v[i] = u[i-1];
-    }
-    
-#if VERBOSE    
-    printf("v = \n");
-    print_matrix(v, 1, 10);
-#endif
-    
-    return flag;
-}
 
 float D_6_k_i(float *x, float *y, float *z, int k, int i) {
     switch (k) {
@@ -315,77 +202,41 @@ int compute_axis_aligned_v(float *x, float *y, float *z, int n, float v[10]) {
 }
 
 /**
- * Elipsoid fit of an array of points
+ * Axis algined elipsoid fit of an array of points
  * @param x |
  * @param y | - coordinate arrays of @param n floating points
  * @param z |
  * @param n length of coord arrays
- * @param res return array of length 12, first 9 entries is row major eigenvector matrix, last three are corresponding radii
+ * @param res return array of length 6, rx, ry, rz, cx, cy, cz
  */
-int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_aligned) {
-
-   float v[10] = {0};
-   
-   int flag = 0;
-   if (axis_aligned) {
-       flag = compute_axis_aligned_v(x, y, z, n, v);
-   } else {
-       flag = compute_v(x, y, z, n, v);
-   }
-    /**
-    % form the algebraic form of the ellipsoid
-    A = [ v(1) v(4) v(5) v(7); ...
-      v(4) v(2) v(6) v(8); ...
-      v(5) v(6) v(3) v(9); ...
-      v(7) v(8) v(9) v(10) ];
-
-    float A[16] = {
-        v[0], v[3], v[4], v[6], 
-        v[3], v[1], v[5], v[7],
-        v[4], v[5], v[2], v[8],
-        v[6], v[7], v[8], v[9]
-    };
-    */
+int fit_elipsoid(float *x, float *y, float *z, int n, float res_cent[3], float res_radii[3]) {
     
-    /*
-    % find the center of the ellipsoid
-    center = -A( 1:3, 1:3 ) \ v( 7:9 );
-    */
-    float B[3][3] = {
-        {-v[0], -v[3], -v[4]},
-        {-v[3], -v[1], -v[5]},
-        {-v[4], -v[5], -v[2]}
-    };
-    float b[3] = { v[6], v[7], v[8] }; 
-    float center[3] = {0};
-    flag = solve_lin_system((float *) B, b, 3, center);
+    float v[10] = {0};
+   
+    int flag = 0;
+   
+    flag = compute_axis_aligned_v(x, y, z, n, v);
     if (flag) {
         return flag;
     }
+   
+    float center[3] = {0};
+    
+    if (v[0] == 0.0 || v[1] == 0.0 || v[2] == 0.0) {
+        return -1;
+    }
+    
+    center[0] = - v[6] / v[0];
+    center[1] = - v[7] / v[1];
+    center[2] = - v[8] / v[2];
 
 #if VERBOSE
-    printf("R = \n");
-    print_matrix( (float *) B, 3, 3);
-    
     printf("center = \n");
     print_matrix(center, 3, 1);
 #endif
     
-    float eig_vec[3][3] = {0};
-    float eig_val[3] = {0};
+    float eig_val[3] = {-v[0], -v[1], -v[2]};
     
-    /**
-     * % solve the eigenproblem
-     * %[ evecs, evals ] = eig( R( 1:3, 1:3 ) / R( 4, 4 ) );       % orig
-     * Tweek: R(4,4) = (A(4,4) + center' * A(1:3, 4)))
-     * Divide eigenvalues by R(4,4) in the end.
-     */
-    eigen_decomposition(B, eig_vec, eig_val);
-    
-    for (int i=0; i<9; ++i) {
-        res[i] = ((float *) eig_vec)[i];
-    }
-        
     float R44 = v[9]    + center[0] * v[6]
                         + center[1] * v[7]
                         + center[2] * v[8];   
@@ -401,7 +252,6 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_align
      * sgns = sign( diag( evals ) );
      * radii = radii .* sgns;
      */
-    
     float radii[3] = {0};
     for (int i=0; i<3; ++i) {
         float signum = sign(eig_val[i]);
@@ -414,18 +264,22 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_align
         }
     }
 
-    res[ 9] = radii[0];
-    res[10] = radii[1];
-    res[11] = radii[2];            
+    res_radii[0] = radii[0];
+    res_radii[1] = radii[1];
+    res_radii[2] = radii[2];            
 
-    res[12] = center[0];
-    res[13] = center[1];
-    res[14] = center[2];            
+    res_cent[0] = center[0];
+    res_cent[1] = center[1];
+    res_cent[2] = center[2];            
 
     return flag;
 }
 
+/******************************
+ * TESTING
+ */
 
+#ifdef TEST
 void testSubM(float * M2) {
     
     for (int i = 0; i<3; ++i){
@@ -550,38 +404,17 @@ static const char solution[] = "\
 
 void test_elipsoid() {
     
-static const char solution[] =  "\n\
-/******************              \n\
-* Matlab solution:               \n\
-* evecs =                        \n\
-*                                \n\
-*     0.7011   -0.0028    0.7130 \n\
-*     0.0162   -0.9997   -0.0198 \n\
-*     0.7128    0.0254   -0.7009 \n\
-*                                \n\
-* evals =                        \n\
-*                                \n\
-*   -29.4582         0         0 \n\
-*          0    0.2765         0 \n\
-*          0         0   30.6813 \n\
-*                                \n\
-* radii =                        \n\
-*                                \n\
-*    -0.1842                     \n\
-*     1.9018                     \n\
-*     0.1805                     \n\
-* */";
     
     float x[12] = {1,0,0,-.9, .4, 0.0, 0.0,  0.01 ,-.99,-.4, 0.0,  0.0};
     float y[12] = {0,2,0,-.1,-.8, 0.0,-1.9,  2.004, .01, .8, 0.01, 1.9};
     float z[12] = {0,0,3,  0,0.0,-3.1, 2.9,  3.04 ,  0, .01, 3.3, -2.9};
      
-    float res[15] = {0};
-    int ret = fit_elipsoid(x, y, z, 12, res, 0);
+    float res_radii[3] = {0};
+    float res_cent[3] = {0};
+    int ret = fit_elipsoid(x, y, z, 12, res_cent, res_radii);
     
-    printf("The result is:\n eig_v = \n\n %f %f %f\n %f %f %f\n %f %f %f\n\n radii = %f\t%f\t%f\n\n center = %f\t%f\t%f\n\n return code: %d\n", res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], ret);
+    //printf("The result is:\n eig_v = \n\n %f %f %f\n %f %f %f\n %f %f %f\n\n radii = %f\t%f\t%f\n\n center = %f\t%f\t%f\n\n return code: %d\n", res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], res[12], res[13], res[14], ret);
     
-    printf("%s\n", solution);
 }
 
 /*
@@ -595,4 +428,4 @@ int main(){
  }
  */
  
- 
+#endif

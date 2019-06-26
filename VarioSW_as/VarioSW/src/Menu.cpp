@@ -472,7 +472,8 @@ void menuSelector(menu *menuPointer, int selected) {
 			float xf[no_samples];
 			float yf[no_samples];
 			float zf[no_samples];
-			float result[15];
+			float fit_center[3] = {0};
+            float fit_radius[3] = {1};
 			statVar.ena_vector &= ~ENA_BUZZER;
 			int volume_old = statVar.BuzzerVolume;
 			statVar.BuzzerVolume = 80;
@@ -544,21 +545,19 @@ void menuSelector(menu *menuPointer, int selected) {
 			*/
 			
 			long microa = micros();
-			fit_elipsoid(xf,yf,zf,no_samples, result, 1);
-			long microb = micros();
-			
-			int res_order[3];
-			
+			int flag = fit_elipsoid(xf,yf,zf,no_samples, fit_center, fit_radius);
 
-			
-			
-					statVar.gainErrorAccelX  = result[neco1];
-					statVar.offsetAccelX = result[12]*16384;
-					statVar.gainErrorAccelY = result[neco2];
-					statVar.offsetAccelY = result[13]*16384;
-					statVar.gainErrorAccelZ = result[neco3];
-					statVar.offsetAccelZ = result[14]*16384;
-			
+			long microb = micros();
+            if (!flag) {
+                statVar.gainErrorAccelX = fit_radius[0];
+                statVar.gainErrorAccelY = fit_radius[1];
+                statVar.gainErrorAccelZ = fit_radius[2];
+                
+                statVar.offsetAccelY = fit_center[0]*16384;
+                statVar.offsetAccelX = fit_center[1]*16384;
+                statVar.offsetAccelZ = fit_center[2]*16384;
+                
+            }
 			
 			SerialUSB.println(microb-microa);
 			
