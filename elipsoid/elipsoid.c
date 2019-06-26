@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
  
+#include "eig/eig3.h"
  
 float * submatrix(float *M, int n, int k){
     float * subM = (float *) malloc((n-1) * (n-1) * sizeof (float));
@@ -194,10 +195,10 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res) {
       v(7) v(8) v(9) v(10) ];
       */
     float A[16] = {
-        v(1), v(4), v(5), v(7), 
-        v(4), v(2), v(6), v(8),
-        v(5), v(6), v(3), v(9),
-        v(7), v(8), v(9), v(10)
+        v[0], v[3], v[4], v[6], 
+        v[3], v[1], v[5], v[7],
+        v[4], v[5], v[2], v[8],
+        v[6], v[7], v[8], v[9]
     };
     
     /*
@@ -273,10 +274,47 @@ void testLinSolv(){
     
 }
 
-int main(){
-     
-    //testLinSolv();
+void test_eig(){
     
+    double A[3][3] = {
+            10, 5, 1,
+            5, 7, 2,
+            1, 2, 3
+    };
+
+    double V[3][3] = {0};
+
+    double d[3] = {0};
+
+    eigen_decomposition(A, V, d);
+
+    printf("A =\n");
+    for (int i = 0; i<3; ++i) {
+        for (int j = 0; j<3; ++j){
+            printf("%f\t", A[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+
+    printf("V =\n");
+    for (int i = 0; i<3; ++i) {
+        for (int j = 0; j<3; ++j){
+            printf("%f\t", V[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+
+    printf("d =\n");
+    for (int j = 0; j<3; ++j){
+        printf("%f\t", d[j]);
+    }
+    printf("\n");
+
+}
+
+void test_elipsoid() {
     float x[10] = {1,2,3,4,5,6,7,8,9,0};
     float y[10] = {0,1,2,3,4,5,6,7,8,9};
     float z[10] = {1,2,3,4,5,6,7,8,9,10};
@@ -286,6 +324,12 @@ int main(){
     
     printf("Hello world!\n");
     printf("The result is: %f, %f, %f,\n%f %f %f\n %f %f %f\n return code: %d\n", res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], ret);
+}
+
+int main(){
+     
+    //testLinSolv();
+    test_eig();
     return 0;
     
  }
