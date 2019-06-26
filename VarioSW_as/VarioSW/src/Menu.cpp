@@ -26,6 +26,7 @@
 #include "Interrupt_counter.h"
 
 #include "MadgwickAHRS.h"
+#include "elipsoid.h"
 
 
 char listTopMenu[][15] = {"0. Peripher", "1. System", "2. Vario", "3. Debug", "Start Trcklog", "MassStorage1", "Power Off"};
@@ -387,7 +388,10 @@ void menuSelector(menu *menuPointer, int selected) {
 		//power off
 		else if (selected == 6) {
 			powerOff();
-			buttons.getButtonPressed();
+			while (buttons.getFlag())
+			{			buttons.getButtonPressed();
+			}
+
 			PrepareMenu(menuPointer);
 		}
 	}
@@ -456,20 +460,27 @@ void menuSelector(menu *menuPointer, int selected) {
 		if (selected == 6){
 			MenuEntry(&gauges_menu);
 		}
+		//ellipsoid calibration
 		if (selected == 7){
-			int no_samples = 14;
+			int no_samples = 6;
 			int averaging = 100;
 			int ISR_counter_old = counter_incremented_every_ISR;
 			int enavectorold = statVar.ena_vector;
 			int16_t x[no_samples];
 			int16_t y[no_samples];
 			int16_t z[no_samples];
+			float xf[no_samples];
+			float yf[no_samples];
+			float zf[no_samples];
+			float result[15];
 			statVar.ena_vector &= ~ENA_BUZZER;
 			int volume_old = statVar.BuzzerVolume;
 			statVar.BuzzerVolume = 80;
-			analogWrite(DAC, 80);
+			
+			analogWrite(DAC, 50);
 			pinPeripheral(BUZZER_PIN, PIO_TIMER);
 			buzzerFreq(300);
+
 			
 			for (int i = 0; i < no_samples; i++){
 				buzzerEna(1);
@@ -488,13 +499,69 @@ void menuSelector(menu *menuPointer, int selected) {
 				x[i] = avgx/averaging;
 				y[i] = avgy/averaging;
 				z[i] = avgz/averaging;
+				for(int i = 0; i < no_samples; i++){
+					xf[i] = x[i]/16384.0;
+					yf[i] = y[i]/16384.0;
+					zf[i] = z[i]/16384.0;/*
+					xf[i] = x[i];
+					yf[i] = y[i];
+					zf[i] = z[i];
+					*/
+				}
 				
 				
 				buzzerEna(0);
 				delay(2000);
-				
+
+
 				
 			}
+			/*
+			xf[0] = 2;
+			yf[0] = 0;
+			zf[0] = 0;
+			
+			xf[1] = 1;
+			yf[1] = 1;
+			zf[1] = 0;
+			
+			xf[2] = 1;
+			yf[2] = 0;
+			zf[2] = 1;
+			
+			xf[3] = 0;
+			yf[3] = 0;
+			zf[3] = 0;
+			
+			xf[4] = 1;
+			yf[4] = -1;
+			zf[4] = 0;
+			
+			xf[5] = 1;
+			yf[5] = 0;
+			zf[5] = -1;
+			
+			*/
+			
+			long microa = micros();
+			fit_elipsoid(xf,yf,zf,no_samples, result, 1);
+			long microb = micros();
+			
+			int res_order[3];
+			
+
+			
+			
+					statVar.gainErrorAccelX  = result[neco1];
+					statVar.offsetAccelX = result[12]*16384;
+					statVar.gainErrorAccelY = result[neco2];
+					statVar.offsetAccelY = result[13]*16384;
+					statVar.gainErrorAccelZ = result[neco3];
+					statVar.offsetAccelZ = result[14]*16384;
+			
+			
+			SerialUSB.println(microb-microa);
+			
 			for (int i = 0; i < no_samples; i++){
 				SerialUSB.print(x[i]);
 				SerialUSB.print(",");
@@ -503,7 +570,19 @@ void menuSelector(menu *menuPointer, int selected) {
 				SerialUSB.println(z[i]);
 
 			}
-			
+			for (int i = 0; i < no_samples; i++){
+				SerialUSB.print(xf[i]);
+				SerialUSB.print(",");
+				SerialUSB.print(yf[i]);
+				SerialUSB.print(",");
+				SerialUSB.println(zf[i]);
+
+			}
+			for (int i = 0; i < 15; i++){
+
+				SerialUSB.println(result[i], 5);
+
+			}
 			statVar.ena_vector = enavectorold;
 			pinMode(BUZZER_PIN, OUTPUT);
 			statVar.BuzzerVolume = volume_old;

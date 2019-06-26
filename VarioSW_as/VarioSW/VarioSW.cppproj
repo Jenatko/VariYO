@@ -98,6 +98,8 @@
       <Value>../src/periph/BMI160_bosch_driver</Value>
       <Value>../src/periph/BMM150_bosch_driver</Value>
       <Value>../src/periph/BME280_bosch_driver</Value>
+      <Value>../src/lib/ellipsoid</Value>
+      <Value>../src/lib/ellipsoid/eig</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -153,6 +155,8 @@
       <Value>../src/periph/BMM150_bosch_driver</Value>
       <Value>../src/lib/MadgwickAHRS</Value>
       <Value>../src/lib/GxEPD2</Value>
+      <Value>../src/lib/ellipsoid</Value>
+      <Value>../src/lib/ellipsoid/eig</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -521,6 +525,18 @@
     <Compile Include="src\lib\CircleFit\Utilities.cpp">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\lib\ellipsoid\eig\eig3.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\ellipsoid\eig\eig3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\ellipsoid\elipsoid.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\ellipsoid\elipsoid.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\lib\GxEPD2\GxEPD2.h">
       <SubType>compile</SubType>
     </Compile>
@@ -842,6 +858,7 @@
     <Folder Include="src\lib\" />
     <Folder Include="src\lib\Adafruit_GFX\" />
     <Folder Include="src\lib\Adafruit_GFX\Fonts\" />
+    <Folder Include="src\lib\ellipsoid\eig" />
     <Folder Include="src\lib\NeoGPS\" />
     <Folder Include="src\lib\NeoGPS\extras\" />
     <Folder Include="src\lib\NeoGPS\extras\configs\" />
@@ -858,6 +875,7 @@
     <Folder Include="src\lib\CircleFit" />
     <Folder Include="src\lib\MadgwickAHRS" />
     <Folder Include="src\lib\GxEPD2" />
+    <Folder Include="src\lib\ellipsoid" />
     <Folder Include="src\lib\RTCZero" />
     <Folder Include="src\periph" />
     <Folder Include="src\periph\BMI160_bosch_driver" />

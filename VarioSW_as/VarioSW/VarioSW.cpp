@@ -333,7 +333,7 @@ void setup() {
 	display.setRotation(0);
 
 	display.display(true);
-		SerialUSB.println("pycovole");
+
 	display.setTextWrap(0);
 	
 	display.setCursor(10, 20);
