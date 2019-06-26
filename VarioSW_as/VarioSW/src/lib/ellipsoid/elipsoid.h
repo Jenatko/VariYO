@@ -10,7 +10,7 @@
 #define ELIPSOID_H_
 
 
-int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_aligned);
+int fit_elipsoid(float *x, float *y, float *z, int n, float res_cent[3], float res_radii[3]);
 
 
 #endif /* ELLIPSOID_H_ */

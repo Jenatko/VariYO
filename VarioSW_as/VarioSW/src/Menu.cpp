@@ -49,7 +49,7 @@ char menu3_list[][15] = {"BMIX60", "LPS33,SI7021", "MAX17055", "GPS", "set Defau
 char menu3_name[15] = "3. Debug";
 int  menu3_id = 0x13;
 
-char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off", "gauges", "collect Acc"};
+char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off", "gauges", "calib Accel"};
 char system_menu_name[15] = "System";
 int  system_menu_id = 0x14;
 
@@ -549,12 +549,12 @@ void menuSelector(menu *menuPointer, int selected) {
 
 			long microb = micros();
             if (!flag) {
-                statVar.gainErrorAccelX = fit_radius[0];
-                statVar.gainErrorAccelY = fit_radius[1];
-                statVar.gainErrorAccelZ = fit_radius[2];
+                statVar.gainErrorAccelX = 1/fit_radius[0];
+                statVar.gainErrorAccelY = 1/fit_radius[1];
+                statVar.gainErrorAccelZ = 1/fit_radius[2];
                 
-                statVar.offsetAccelY = fit_center[0]*16384;
-                statVar.offsetAccelX = fit_center[1]*16384;
+                statVar.offsetAccelX = fit_center[0]*16384;
+                statVar.offsetAccelY = fit_center[1]*16384;
                 statVar.offsetAccelZ = fit_center[2]*16384;
                 
             }
@@ -579,7 +579,7 @@ void menuSelector(menu *menuPointer, int selected) {
 			}
 			for (int i = 0; i < 15; i++){
 
-				SerialUSB.println(result[i], 5);
+			//	SerialUSB.println(result[i], 5);
 
 			}
 			statVar.ena_vector = enavectorold;
