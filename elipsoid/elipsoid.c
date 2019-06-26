@@ -224,78 +224,54 @@ int compute_v(float *x, float *y, float *z, int n, float v[10]) {
     return flag;
 }
 
+float D_6_k_i(float *x, float *y, float *z, int k, int i) {
+    switch (k) {
+        case 0: return x[i] * x[i] + y[i] * y[i] - 2 * z[i] * z[i];
+        case 1: return x[i] * x[i] + z[i] * z[i] - 2 * y[i] * y[i];
+        case 2: return 2 * x[i];                // optimize away
+        case 3: return 2 * y[i];                // optimize away
+        case 4: return 2 * z[i];                // optimize away
+        case 5: return 1;                       // same here
+        default: return 0;
+    }
+}
+
 int compute_axis_aligned_v(float *x, float *y, float *z, int n, float v[10]) {
-     /*
-    D = [ x .* x + y .* y - 2 * z .* z, ...
-          x .* x + z .* z - 2 * y .* y, ...
-          2 * x, ...
-          2 * y, ... 
-          2 * z, ... 
-          1 + 0 * x ];  % ndatapoints x 6 ellipsoid parameters
-    % fit ellipsoid in the form Ax^2 + By^2 + Cz^2 + 2Gx + 2Hy + 2Iz = 1,
-    % where A = B or B = C or A = C
-    
-            % solve the normal system of equations
-    d2 = x .* x + y .* y + z .* z; % the RHS of the llsq problem (y's)
-    u = ( D' * D ) \ ( D' * d2 );  % solution to the normal equations
-    */
-    
+        
     /**
-     * The overdetermined system to be solved. */
-    float * D;
-    D = (float *) malloc(sizeof(float) * n * 6);
-    
+     * The right hand side 
+     */
+    float d[6] = {0};
+
     for (int i = 0; i < n; ++i) {
-        D[6 * i + 0] = x[i] * x[i] + y[i] * y[i] - 2 * z[i] * z[i];
-        D[6 * i + 1] = x[i] * x[i] + z[i] * z[i] - 2 * y[i] * y[i];
-        D[6 * i + 2] = 2 * x[i];                // optimize away
-        D[6 * i + 3] = 2 * y[i];                // optimize away
-        D[6 * i + 4] = 2 * z[i];                // optimize away
-        D[6 * i + 5] = 1;                       // same here
+        float d2_k = x[i] * x[i] + y[i] * y[i] + z[i] * z[i];
+    
+        d[0] += d2_k * (x[i] * x[i] + y[i] * y[i] - 2 * z[i] * z[i]);
+        d[1] += d2_k * (x[i] * x[i] + z[i] * z[i] - 2 * y[i] * y[i]);
+        d[2] += d2_k * 2 * x[i];                // optimize away
+        d[3] += d2_k * 2 * y[i];                // optimize away
+        d[4] += d2_k * 2 * z[i];                // optimize away
+        d[5] += d2_k;                       // same here
     }
     
-    /**
-     * The right hand side */
-    float * d2 = (float *) malloc(sizeof(float) * n);
-    for (int i = 0; i < n; ++i) {
-        d2[i] = x[i] * x[i] + y[i] * y[i] + z[i] * z[i];
-    }
     
     /**
      * Matrix to be solved M = D' * D */
     float M[6][6] = {0};
-    for (int i = 0; i < 6; ++i) {
-        for (int j = i; j < 6; ++j) {
-            for (int k = 0; k < n; ++k) {
-                M[i][j] += D[6 * k + i] * D[6 * k + j];
+    for (int k = 0; k < n; ++k) {
+        for (int i = 0; i < 6; ++i) {
+            for (int j = i; j < 6; ++j) {
+                M[i][j] += D_6_k_i(x,y,z, i, k) * D_6_k_i(x,y,z, j, k);
             }
         }
     }
-    
-#if VERBOSE
-    printf("M = \n");
-    print_matrix((float *) M, 6, 6);
-#endif
-    
     //Symmetric matrix
     for (int i = 0; i < 6; ++i) {
         for (int j = 0; j < i; ++j) {
             M[i][j] = M[j][i];
         }
     }
-    
-    /**
-     * The right hand side */
-    float d[6] = {0};
-    
-    for (int k = 0; k < n; ++k) {
-        for (int j = 0; j < 6; ++j) {
-            d[j] += D[6 * k + j] * d2[k];
-        }
-    }
-    free(D);
-    free(d2);
-    
+        
 #if VERBOSE
     printf("M = \n");
     print_matrix((float *) M, 6, 6);
@@ -400,7 +376,7 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_align
     
     /**
      * % solve the eigenproblem
-     * %[ evecs, evals ] = eig( R( 1:3, 1:3 ) / -R( 4, 4 ) );       % orig
+     * %[ evecs, evals ] = eig( R( 1:3, 1:3 ) / R( 4, 4 ) );       % orig
      * Tweek: R(4,4) = (A(4,4) + center' * A(1:3, 4)))
      * Divide eigenvalues by R(4,4) in the end.
      */
@@ -414,7 +390,7 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_align
                         + center[1] * v[7]
                         + center[2] * v[8];   
 
-#if VERBOSE
+#if 1
     printf("R(4,4) = %f\n", R44);
     printf("eig_val: (%f, %f, %f)\n\n", eig_val[0] / R44, eig_val[1] / R44, eig_val[2] / R44);
 #endif
@@ -431,7 +407,7 @@ int fit_elipsoid(float *x, float *y, float *z, int n, float *res, int axis_align
         float signum = sign(eig_val[i]);
         float abs_val = signum * eig_val[i];
         if ( abs_val >  0.000001) {
-            radii[i] = - signum / sqrt(abs_val / R44);
+            radii[i] = signum / sqrt(abs_val / R44);
         } else {
             printf("Bad eigenvalue %d: %f\n", i, eig_val[i]);
             flag = -1;
@@ -597,7 +573,7 @@ static const char solution[] =  "\n\
     float z[12] = {0,0,3,  0,0.0,-3.1, 2.9,  3.04 ,  0, .01, 3.3, -2.9};
      
     float res[12] = {0};
-    int ret = fit_elipsoid(x, y, z, 12, res, 1);
+    int ret = fit_elipsoid(x, y, z, 12, res, 0);
     
     printf("The result is:\n eig_v = \n\n %f %f %f\n %f %f %f\n %f %f %f\n\n radii = %f\t%f\t%f\n\n  return code: %d\n", res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[9], res[10], res[11], ret);
     

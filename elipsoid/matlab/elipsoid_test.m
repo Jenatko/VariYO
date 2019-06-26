@@ -19,17 +19,17 @@ X = [   10, 5, 1;...
 
 
 %% Test determinant
-det(M2)
+% det(M2)
 
 %% test lin solver
-M \ b
+% M \ b
 
 %% test eig
-[e_vec, e_val] = eig(X)
+% [e_vec, e_val] = eig(X)
 
 %% test elipsoid fit
-[center, radii, evecs, pars ] = ellipsoid_fit([x', y', z']);
-[center2, radii2, evecs2, pars2 ] = ellipsoid_fit_tweek([x', y', z']);
+[center, radii, evecs, pars ] = ellipsoid_fit([x', y', z'], "0");
+[center2, radii2, evecs2, pars2 ] = ellipsoid_fit_tweek([x', y', z'], '0');
 
 any ([...
 center' - center2',...
