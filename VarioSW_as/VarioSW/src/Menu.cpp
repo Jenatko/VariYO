@@ -27,7 +27,7 @@
 
 #include "MadgwickAHRS.h"
 #include "elipsoid.h"
-
+#include "compass.h"
 
 char listTopMenu[][15] = {"0. Peripher", "1. System", "2. Vario", "3. Debug", "Start Trcklog", "MassStorage1", "Power Off"};
 char topMenuName[15] = "TopMenu";
@@ -45,11 +45,11 @@ char menu2_list[][15] = {"2.0 Thres. up", "2.1 Thresh. dn", "Equation rise", "Eq
 char menu2_name[15] = "Vario";
 int  menu2_id = 0x12;
 
-char menu3_list[][15] = {"BMIX60", "LPS33,SI7021", "MAX17055", "GPS", "set Default","print EEPROM", "32kHz test", "Print accel"};
+char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "set Default","print EEPROM", "32kHz test", "Print accel"};
 char menu3_name[15] = "3. Debug";
 int  menu3_id = 0x13;
 
-char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off", "gauges", "calib Accel"};
+char system_menu_list[][15] = {"4.0 Time zone", "4.1 Chess", "4.2 Zvar", "4.3 accelvar", "4.4 saveEEPROM", "heater off", "gauges", "calib Accel", "calib mag"};
 char system_menu_name[15] = "System";
 int  system_menu_id = 0x14;
 
@@ -460,150 +460,30 @@ void menuSelector(menu *menuPointer, int selected) {
 		if (selected == 6){
 			MenuEntry(&gauges_menu);
 		}
-		//ellipsoid calibration
+		//accelerometer calibration
 		if (selected == 7){
-			int no_samples = 6;
-			int averaging = 100;
-			int ISR_counter_old = counter_incremented_every_ISR;
-			int enavectorold = statVar.ena_vector;
-			int16_t x[no_samples];
-			int16_t y[no_samples];
-			int16_t z[no_samples];
-			float xf[no_samples];
-			float yf[no_samples];
-			float zf[no_samples];
-			float fit_center[3] = {0};
-            float fit_radius[3] = {1};
-			statVar.ena_vector &= ~ENA_BUZZER;
-			int volume_old = statVar.BuzzerVolume;
-			statVar.BuzzerVolume = 80;
-			
-			analogWrite(DAC, 50);
-			pinPeripheral(BUZZER_PIN, PIO_TIMER);
-			buzzerFreq(300);
-
-			
-			for (int i = 0; i < no_samples; i++){
-				buzzerEna(1);
-				long avgx = 0;
-				long avgy = 0;
-				long avgz = 0;
-				
-				for(int j = 0; j < averaging; j++){
-					while(ISR_counter_old == counter_incremented_every_ISR);
-					
-					avgx += ax;
-					avgy += ay;
-					avgz += az;
-					ISR_counter_old = counter_incremented_every_ISR;
-				}
-				x[i] = avgx/averaging;
-				y[i] = avgy/averaging;
-				z[i] = avgz/averaging;
-				for(int i = 0; i < no_samples; i++){
-					xf[i] = x[i]/16384.0;
-					yf[i] = y[i]/16384.0;
-					zf[i] = z[i]/16384.0;/*
-					xf[i] = x[i];
-					yf[i] = y[i];
-					zf[i] = z[i];
-					*/
-				}
-				
-				
-				buzzerEna(0);
-				delay(2000);
-
-
-				
-			}
-			/*
-			xf[0] = 2;
-			yf[0] = 0;
-			zf[0] = 0;
-			
-			xf[1] = 1;
-			yf[1] = 1;
-			zf[1] = 0;
-			
-			xf[2] = 1;
-			yf[2] = 0;
-			zf[2] = 1;
-			
-			xf[3] = 0;
-			yf[3] = 0;
-			zf[3] = 0;
-			
-			xf[4] = 1;
-			yf[4] = -1;
-			zf[4] = 0;
-			
-			xf[5] = 1;
-			yf[5] = 0;
-			zf[5] = -1;
-			
-			*/
-			
-			long microa = micros();
-			int flag = fit_elipsoid(xf,yf,zf,no_samples, fit_center, fit_radius);
-
-			long microb = micros();
-            if (!flag) {
-                statVar.gainErrorAccelX = 1/fit_radius[0];
-                statVar.gainErrorAccelY = 1/fit_radius[1];
-                statVar.gainErrorAccelZ = 1/fit_radius[2];
-                
-                statVar.offsetAccelX = fit_center[0]*16384;
-                statVar.offsetAccelY = fit_center[1]*16384;
-                statVar.offsetAccelZ = fit_center[2]*16384;
-                
-            }
-			
-			SerialUSB.println(microb-microa);
-			
-			for (int i = 0; i < no_samples; i++){
-				SerialUSB.print(x[i]);
-				SerialUSB.print(",");
-				SerialUSB.print(y[i]);
-				SerialUSB.print(",");
-				SerialUSB.println(z[i]);
-
-			}
-			for (int i = 0; i < no_samples; i++){
-				SerialUSB.print(xf[i]);
-				SerialUSB.print(",");
-				SerialUSB.print(yf[i]);
-				SerialUSB.print(",");
-				SerialUSB.println(zf[i]);
-
-			}
-			for (int i = 0; i < 15; i++){
-
-			//	SerialUSB.println(result[i], 5);
-
-			}
-			statVar.ena_vector = enavectorold;
-			pinMode(BUZZER_PIN, OUTPUT);
-			statVar.BuzzerVolume = volume_old;
+			calibrateAccelerometer();
+		}
+		//magnetometer calibration
+		if (selected == 8){
+			calibrateMagnetometer();
+			compass();
+			PrepareMenu(menuPointer);
 		}
 	}
 	//-------------Altimeter menu
 
 	if (menuPointer->menu_id == 0x11) {
 		if (selected == 0){
-			SerialUSB.println(alt_baro);
 			setSeaPressureFromAltitude(numpad(alt_baro/100), enviromental_data.pressure);
 			SerialUSB.println("setsealevel");
 		}
 		else if (selected == 1){
-			SerialUSB.println("putsealevel");
 			setSeaPressure(numpad(statVar.Psea));
-			//	ms5611.putSeaLevel(numpad(ms5611.readSeaPressure()));
 		}
-		// ms5611.putSeaLevel(numpad((int)ms5611.readSeaPressure));
 		PrepareMenu(menuPointer);
 	}
-	
+
 
 	//-----------Vario menu
 	if (menuPointer->menu_id == 0x12) {
@@ -624,7 +504,7 @@ void menuSelector(menu *menuPointer, int selected) {
 		PrepareMenu(menuPointer);
 		// ms5611.putSeaLevel(numpad((int)ms5611.readSeaPressure));
 	}
-	
+
 	//----------debug menu
 	if (menuPointer->menu_id == 0x13) {
 		//BMI160
@@ -706,13 +586,13 @@ void menuSelector(menu *menuPointer, int selected) {
 		setGaugeMenu(gaugepointer);
 		MenuEntry(&gauge_menu);
 	}
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 	//----------gauge menu
 	if (menuPointer->menu_id == 0x15) {
 		//enable
@@ -1487,4 +1367,146 @@ void printGauges(){
 	Gauge_update(&statVar.windDirGauge);
 	
 
+}
+
+
+void calibrateMagnetometer(){
+	
+	int no_samples = 100;
+	int ISR_counter_old = counter_incremented_every_ISR;
+	int enavectorold = statVar.ena_vector;
+	int16_t x[no_samples];
+	int16_t y[no_samples];
+	int16_t z[no_samples];
+	float xf[no_samples];
+	float yf[no_samples];
+	float zf[no_samples];
+	float fit_center[3] = {0};
+	float fit_radius[3] = {1};
+	statVar.ena_vector &= ~ENA_BUZZER;
+	int volume_old = statVar.BuzzerVolume;
+	statVar.BuzzerVolume = 80;
+	
+	analogWrite(DAC, 50);
+	pinPeripheral(BUZZER_PIN, PIO_TIMER);
+	buzzerFreq(300);
+
+	buzzerEna(1);
+	int i = 0;
+	while (i < no_samples){
+
+		while(ISR_counter_old == counter_incremented_every_ISR);
+		if(counter_incremented_every_ISR % 10 ==0){
+			
+			xf[i] = mx/100.0;
+			yf[i] = my/100.0;
+			zf[i] = mz/100.0;
+			ISR_counter_old = counter_incremented_every_ISR;
+			i++;
+			
+			
+			
+
+		}
+
+
+		
+	}
+
+	buzzerEna(0);
+
+	int flag = fit_elipsoid(xf,yf,zf,no_samples, fit_center, fit_radius);
+
+	if (!flag) {
+		statVar.gainErrorMagX = fit_radius[0]*100000;
+		statVar.gainErrorMagY = fit_radius[1]*100000;
+		statVar.gainErrorMagZ = fit_radius[2]*100000;
+		
+		statVar.offsetMagX = fit_center[0]*100000000;
+		statVar.offsetMagY = fit_center[1]*100000000;
+		statVar.offsetMagZ = fit_center[2]*100000000;
+		
+	}
+	statVar.ena_vector = enavectorold;
+	pinMode(BUZZER_PIN, OUTPUT);
+	statVar.BuzzerVolume = volume_old;
+	
+}
+
+void calibrateAccelerometer(){
+	
+	int no_samples = 6;
+			int averaging = 100;
+			int ISR_counter_old = counter_incremented_every_ISR;
+			int enavectorold = statVar.ena_vector;
+			int16_t x[no_samples];
+			int16_t y[no_samples];
+			int16_t z[no_samples];
+			float xf[no_samples];
+			float yf[no_samples];
+			float zf[no_samples];
+			float fit_center[3] = {0};
+			float fit_radius[3] = {1};
+			statVar.ena_vector &= ~ENA_BUZZER;
+			int volume_old = statVar.BuzzerVolume;
+			statVar.BuzzerVolume = 80;
+			
+			analogWrite(DAC, 50);
+			pinPeripheral(BUZZER_PIN, PIO_TIMER);
+			buzzerFreq(300);
+
+			
+			for (int i = 0; i < no_samples; i++){
+				buzzerEna(1);
+				long avgx = 0;
+				long avgy = 0;
+				long avgz = 0;
+				
+				for(int j = 0; j < averaging; j++){
+					while(ISR_counter_old == counter_incremented_every_ISR);
+					
+					avgx += ax;
+					avgy += ay;
+					avgz += az;
+					ISR_counter_old = counter_incremented_every_ISR;
+				}
+				x[i] = avgx/averaging;
+				y[i] = avgy/averaging;
+				z[i] = avgz/averaging;
+				for(int i = 0; i < no_samples; i++){
+					xf[i] = x[i]/16384.0;
+					yf[i] = y[i]/16384.0;
+					zf[i] = z[i]/16384.0;/*
+					xf[i] = x[i];
+					yf[i] = y[i];
+					zf[i] = z[i];
+					*/
+				}
+				
+				
+				buzzerEna(0);
+				delay(2000);
+
+
+				
+			}
+
+			
+
+			int flag = fit_elipsoid(xf,yf,zf,no_samples, fit_center, fit_radius);
+
+			if (!flag) {
+				statVar.gainErrorAccelX = 1/fit_radius[0];
+				statVar.gainErrorAccelY = 1/fit_radius[1];
+				statVar.gainErrorAccelZ = 1/fit_radius[2];
+				
+				statVar.offsetAccelX = fit_center[0]*16384;
+				statVar.offsetAccelY = fit_center[1]*16384;
+				statVar.offsetAccelZ = fit_center[2]*16384;
+				
+			}
+			statVar.ena_vector = enavectorold;
+			pinMode(BUZZER_PIN, OUTPUT);
+			statVar.BuzzerVolume = volume_old;
+	
 }

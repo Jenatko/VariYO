@@ -43,7 +43,7 @@
       </ToolNumber>
       <ToolName xmlns="">Custom Programming Tool</ToolName>
     </custom>
-    <CustomProgrammingToolCommand>python D:\Data\Bastelni\Vario\VarioSW_as\programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
+    <CustomProgrammingToolCommand>python C:\Data\PCB\sw\VariYO\programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
     <CustomProgrammingToolTimeout>10</CustomProgrammingToolTimeout>
     <AsfFrameworkConfig>
       <framework-data xmlns="">
@@ -157,6 +157,7 @@
       <Value>../src/lib/GxEPD2</Value>
       <Value>../src/lib/ellipsoid</Value>
       <Value>../src/lib/ellipsoid/eig</Value>
+      <Value>../src/lib/Compass</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -525,6 +526,12 @@
     <Compile Include="src\lib\CircleFit\Utilities.cpp">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\lib\Compass\compass.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\Compass\compass.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\lib\ellipsoid\eig\eig3.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -876,6 +883,7 @@
     <Folder Include="src\lib\MadgwickAHRS" />
     <Folder Include="src\lib\GxEPD2" />
     <Folder Include="src\lib\ellipsoid" />
+    <Folder Include="src\lib\Compass" />
     <Folder Include="src\lib\RTCZero" />
     <Folder Include="src\periph" />
     <Folder Include="src\periph\BMI160_bosch_driver" />

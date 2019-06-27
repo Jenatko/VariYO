@@ -55,6 +55,9 @@ void Gauge_enable(Gauge *gau);
 void setGaugeMenu(Gauge *gaugePointer);
 void printGauges();
 
+void calibrateMagnetometer();
+void calibrateAccelerometer();
+
 extern double myRealAltitude;
 
 
