@@ -63,9 +63,6 @@ void setSeaPressure(int pressure);
 
 void setSeaPressureFromAltitude(int altitude, unsigned int pressure);
 
-//recalculate taylor coeffficients for altitude calculation based on new pressure
-void recalculateTaylor(void);
-
 //calculate altitude from pressure stored in StatVar.enviromental_data
 float getAltitude();
 

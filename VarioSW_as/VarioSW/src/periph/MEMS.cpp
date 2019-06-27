@@ -528,76 +528,25 @@ void baro_readPressure(){
 }
 
 
-void setSeaPressureFromAltitude(int altitude, unsigned int pressure){
-	
+void setSeaPressureFromAltitude(int altitude, unsigned int pressure){	
 	statVar.Psea = (double)pressure/100.0 *  pow((1.0 - 0.0065 * altitude / (enviromental_data.temperature / 100 + 0.0065 * altitude + 273.15)), -5.257)  ;
-	recalculateTaylor();
 }
 
 void setSeaPressure(int pressure) {
-
 	statVar.Psea = pressure  ;
-	recalculateTaylor();
-
 }
 
-void recalculateTaylor(){
 
-	
-	/*
-	float a_power = pow(statVar.Psea, 0.189573);
-	float temp = enviromental_data.temperature / 100 + 273.15;
-	
-	C0 = (17.6968 * a_power - 153.84) * temp;
-	C1 = (-0.000037276 * a_power * temp);
-	C2 = (2.46347e-10 * a_power * temp);
-	C3 = (-1.99776e-15 * a_power * temp);
-	C4 = (1.77e-20 * a_power * temp);
-	C5 = (-1.6479e-25 * a_power * temp);
-	*/
-	
-	
-	
-	
-	
-	/*
-	C0 = pow(1.3, 0.189573)/1;
-	C1 = 0.18957*pow(1.3, -0.81043)/1;
-	C2 = -0.15364*pow(1.3, -1.81043)/2;
-	C3 = 0.275145*pow(1.3, -2.81043)/6;
-	C4 = -0.78171*pow(1.3, -3.81043)/24;
-	*/
-	/*
-	C0 = 1.05099483835522;
-	C1 = 0.153261726531934;
-	C2 = -0.0477720927877293;
-	C3 = 0.0221763811870283;
-	C4 = -0.0119855962404455;
-	*/
-
-	
-	
-}
 
 
 float getAltitude(){
-	//recalculateTaylor();
-	/*
-	
-	double pressure = enviromental_data.pressure/100;
-	return (C0
-	+ C1 * (pressure - 90000)
-	+ C2 * (pressure - 90000) * (pressure - 90000)
-	+ C3 * (pressure - 90000) * (pressure - 90000) * (pressure - 90000)
-	+ C4 * (pressure - 90000) * (pressure - 90000) * (pressure - 90000) * (pressure - 90000)
-	+ C5 * (pressure - 90000) * (pressure - 90000) * (pressure - 90000) * (pressure - 90000) * (pressure - 90000));
-	
-	*/
+
 	
 	
 	float diff = statVar.Psea*100.0f/(enviromental_data.pressure) - 1.3f;
 	float diff2 = diff * diff;
 	
+	//some crazy taylor series magic, bcs aint nobody has time for pow()
 	float power = (1.05099483835522f
 	+ 0.153261726531934f * diff
 	+ -0.0477720927877293f * diff2

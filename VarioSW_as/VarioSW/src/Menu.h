@@ -34,7 +34,7 @@ void drawMenuSimple(menu *menuPointer);
 
 void menuSelector(menu *menuPointer, int selected);
 
-void debugBMI160(void);
+void debugBMX160(void);
 void debugBME280(void);
 void debugMAX17055(void);
 void debugGPS(void);
@@ -42,11 +42,11 @@ void debugXOSC32k(void);
 void printAccelerometerData(void);
 
 extern menu topmenu;
-extern menu menu0;
-extern menu menu1;
-extern menu menu2;
-extern menu menu3;
-extern menu system_menu;
+extern menu utilities_menu;
+extern menu altimemter_menu;
+extern menu vario_menu;
+extern menu debug_menu;
+extern menu settings_menu;
 extern menu gauge_menu;
 extern menu gauges_menu;
 
