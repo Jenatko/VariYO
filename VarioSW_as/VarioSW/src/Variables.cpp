@@ -14,12 +14,11 @@ StaticVariables statVar;
 
 
 double myRealAltitude= 200;
-volatile float altChange;
+volatile float altChange, vario_lowpassed;
 volatile int counter500ms = 0;
 volatile int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor;
 float yaw, pitch, roll;
-float a_vertical_imu;
-float alt_filter, vario_filter, alt_baro;
+float a_vertical_imu, alt_filter, vario_filter, alt_baro;
 int redraw = 0;
 int tracklog_stat = 0;
 //struct tm* var_localtime;
@@ -82,8 +81,12 @@ void setVariablesDefault(){
 		.gainErrorMagZ = 4444,
 		.offsetMagZ = 21860756,
 		
+		.vario_lowpass_coef = 10,
+		
 		.zvariance = 40 ,
 		.accelvariance = 10
+		
+		
 
 	};
 	

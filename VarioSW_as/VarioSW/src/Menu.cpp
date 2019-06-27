@@ -68,13 +68,15 @@ int  menu1_id = MENUID_ALTIMETER;
 #define MENUITEM_VARIO_EQ_SINK 3
 #define MENUITEM_VARIO_ZVAR 4
 #define MENUITEM_VARIO_ACCELVAR 5
-#define MENUITEM_VARIO_DATA_RISE 6
-#define MENUITEM_VARIO_DATA_SINK 7
-#define MENUITEM_VARIO_DATA_ZVAR 10
-#define MENUITEM_VARIO_DATA_ACCVAR 11
+#define MENUITEM_VARIO_AVERAGING 6
+#define MENUITEM_VARIO_DATA_RISE 7
+#define MENUITEM_VARIO_DATA_SINK 8
+#define MENUITEM_VARIO_DATA_ZVAR 11
+#define MENUITEM_VARIO_DATA_ACCVAR 12
+#define MENUITEM_VARIO_DATA_AVERAGING 13
 
 
-char menu2_list[][15] = {"Thres. up", "Thresh. dn", "Equation rise", "Equation sink", "Zvar", "accelvar", "rise_data", "sink_data","","","",""};
+char menu2_list[][15] = {"Thres. up", "Thresh. dn", "Equation rise", "Equation sink", "Zvar", "accelvar", "averaging", "rise_data", "sink_data","","","","", ""};
 char menu2_name[15] = "Vario";
 int  menu2_id = MENUID_VARIO;
 
@@ -132,17 +134,18 @@ int  gauge_menu_id = MENUID_GAUGE;
 
 #define MENUID_GAUGES 0x08
 #define MENUITEM_GAUGES_VARIO 0
-#define MENUITEM_GAUGES_ALTITUDE 1
-#define MENUITEM_GAUGES_AGL 2
-#define MENUITEM_GAUGES_SPEED 3
-#define MENUITEM_GAUGES_HEADING 4
-#define MENUITEM_GAUGES_WIND_SPEED 5
-#define MENUITEM_GAUGES_WIND_DIR 6
-#define MENUITEM_GAUGES_TEMPERATURE 7
-#define MENUITEM_GAUGES_HUMIDITY 8
+#define MENUITEM_GAUGES_VARIO_AVG 1
+#define MENUITEM_GAUGES_ALTITUDE 2
+#define MENUITEM_GAUGES_AGL 3
+#define MENUITEM_GAUGES_SPEED 4
+#define MENUITEM_GAUGES_HEADING 5
+#define MENUITEM_GAUGES_WIND_SPEED 6
+#define MENUITEM_GAUGES_WIND_DIR 7
+#define MENUITEM_GAUGES_TEMPERATURE 8
+#define MENUITEM_GAUGES_HUMIDITY 9
 
 
-char gauges_menu_list[][15] = {"Vario", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity"};
+char gauges_menu_list[][15] = {"Vario", "Vario avg", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity"};
 char gauges_menu_name[15] = "Gauges";
 int  gauges_menu_id = MENUID_GAUGES;
 
@@ -200,6 +203,9 @@ void menu_init() {
 	tmpstring =  String((float)statVar.accelvariance);
 	tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_ACCVAR], 15);
 	
+	tmpstring =  String((float)statVar.vario_lowpass_coef);
+	tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_AVERAGING], 15);
+	
 	if(statVar.ena_vector&ENA_GPS){
 		if(statVar.ena_vector&ENA_GPS_LOW_POWER)
 		strncpy(system_menu_list[MENUITEM_SETTINGS_GPS_POWER], "GPS low", 15);
@@ -207,9 +213,9 @@ void menu_init() {
 	}
 	else strncpy(system_menu_list[MENUITEM_SETTINGS_GPS_POWER], "GPS Off", 15);
 	
-			
-				if(statVar.ena_vector&ENA_BUZZER)strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer on", 15);
-				else strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer off", 15);
+	
+	if(statVar.ena_vector&ENA_BUZZER)strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer on", 15);
+	else strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer off", 15);
 
 	
 	
@@ -616,13 +622,19 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		else if (selected == MENUITEM_VARIO_EQ_SINK) {
 		}
-		if (selected == MENUITEM_VARIO_ZVAR){
+		else if (selected == MENUITEM_VARIO_ZVAR){
 			statVar.zvariance = numpad(statVar.zvariance);
 			kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
 		}
-		if (selected == MENUITEM_VARIO_ACCELVAR){
+		else if (selected == MENUITEM_VARIO_ACCELVAR){
 			statVar.accelvariance = numpad(statVar.accelvariance);
 			kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+		}
+		
+		else if (selected == MENUITEM_VARIO_AVERAGING){
+			statVar.vario_lowpass_coef = numpad(statVar.vario_lowpass_coef);
+			String tmpstring =  String(statVar.vario_lowpass_coef);
+			tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_AVERAGING], 15);
 		}
 
 		// ms5611.putSeaLevel(numpad((int)ms5611.readSeaPressure));
@@ -664,6 +676,9 @@ void menuSelector(menu *menuPointer, int selected) {
 		//BMI160
 		if (selected == MENUITEM_GAUGES_VARIO){
 			gaugepointer = &statVar.varioGauge;
+		}
+		if (selected == MENUITEM_GAUGES_VARIO_AVG){
+			gaugepointer = &statVar.varioAvgGauge;
 		}
 		if (selected == MENUITEM_GAUGES_ALTITUDE){
 			gaugepointer = &statVar.altitudeGauge;
@@ -1460,6 +1475,7 @@ void printGauges(){
 	Gauge_enable(&statVar.headingGauge);
 	Gauge_enable(&statVar.windDirGauge);
 	Gauge_enable(&statVar.windGauge);
+	Gauge_enable(&statVar.varioAvgGauge);
 	
 	Gauge_update(&statVar.varioGauge);
 	Gauge_update(&statVar.altitudeGauge);
@@ -1471,6 +1487,7 @@ void printGauges(){
 	Gauge_update(&statVar.headingGauge);
 	Gauge_update(&statVar.windGauge);
 	Gauge_update(&statVar.windDirGauge);
+	Gauge_update(&statVar.varioAvgGauge);
 	
 
 }

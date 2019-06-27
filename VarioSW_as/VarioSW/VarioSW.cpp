@@ -93,10 +93,10 @@ void displayUpdate(void){
 
 
 	display.fillScreen(GxEPD_WHITE);
-	//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 
 
 	statVar.varioGauge.value = vario_filter/100;
+		statVar.varioAvgGauge.value = vario_lowpassed/100;
 	statVar.AGLGauge.value = (alt_filter/100) - ground_level;
 	statVar.altitudeGauge.value = (alt_filter/100);
 	statVar.tempGauge.value = enviromental_data.temperature/100;
@@ -157,56 +157,7 @@ void displayUpdate(void){
 	display.setCursor(10,110);
 	display.setFont(&FreeMonoBold12pt7b);
 	
-	
-	/*
-	if(statVar.ena_vector & ENA_TRACKLOG){
-	time_t flighttime_t = rtc.getEpoch() - var_takeofftime;
-	struct tm *flighttime;
-	flighttime = gmtime(&flighttime_t);
-	display.print(flighttime->tm_hour);
-	display.print(":");
-	display.print(flighttime->tm_min);
-	display.print(":");
-	display.print(flighttime->tm_sec);
-	}
-	else	display.print("stopped");
-	*/
-	
-	/*
-	
-	display.setCursor(10,130);
-	//display.print(alt_filter);
-	display.print("wnd:");
-	display.print(wind_speed_mps, 1);
-	display.print("/");
-	display.print(wind_direction, 0);
-	
-	
 
-	
-	display.setCursor(10,150);
-	display.print("spd:");
-	display.print(fix.speed_kph(), 1);
-	display.print("/");
-	display.print(fix.heading(), 0);
-	*/
-
-
-
-	
-
-	/*
-	display.setCursor(5, 197);
-	display.print("y:");
-	display.print(yaw, 0);
-	display.setCursor(70, 197);
-	display.print("p:");
-	display.print(pitch, 0);
-	display.setCursor(140, 197);
-	display.print("r:");
-	display.print(roll, 0);
-
-	*/
 	
 	display.setFont(&FreeMonoBold12pt7b);
 
@@ -425,7 +376,7 @@ void setup() {
 
 	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
 	
-	
+	vario_lowpassed = 0;
 
 	
 	

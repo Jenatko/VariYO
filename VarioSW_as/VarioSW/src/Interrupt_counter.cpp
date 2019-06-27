@@ -161,7 +161,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 		//SerialUSB.println(alt_baro);
 		kalmanFilter3_update(alt_baro, a_vertical_imu*1000.0f-1000.0f, (float)1/60.0f, &alt_filter, &vario_filter);
-
+		vario_lowpassed = (vario_lowpassed * (statVar.vario_lowpass_coef-1)+ vario_filter)/statVar.vario_lowpass_coef;
 	}
 	
 	/*
