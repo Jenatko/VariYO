@@ -92,10 +92,24 @@ void counterInit() { // Set up the generic clock (GCLK4) used to clock timers
 
 void TC4_Handler()                              // Interrupt Service Routine (ISR) for timer TC4
 {
+	SPI_IRQ.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));
+	if(present_devices & LPS33_PRESENT){
+		//digitalWrite(SRAM_CS, 0);
+		baro_readPressure();
+		
+		//digitalWrite(SRAM_CS, 1);
+		
+		
+		alt_baro = getAltitude()*100;
+
+		
+		//SerialUSB.println(alt_baro);
+
+	}
 
 	//read_mag();
 	//IMU_read();
-	SPI_IRQ.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));
+	
 	if(present_devices & BMX160_PRESENT){
 		for(int i = 0; i < IMU_FifoBytesToRead(); i+=FIFO_FRAME_SIZE){
 			
@@ -131,8 +145,12 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			//	digitalWrite(SRAM_CS, 0);
 			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*0.0174533f), gy*(1/131.2f*0.0174533f), gz*(1/131.2f*0.0174533f), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
 			//	digitalWrite(SRAM_CS, 1);
+			a_vertical_imu = Madgwick_filter.getVertical(ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
+			kalmanFilter3_update(alt_baro, a_vertical_imu*1000.0f-1000.0f, (float)1/100.0f, &alt_filter, &vario_filter);
+			vario_lowpassed = (vario_lowpassed * (statVar.vario_lowpass_coef-1)+ vario_filter)/statVar.vario_lowpass_coef;
 
 		}
+		
 
 		
 		//yaw = Mahony_filter.getYaw();
@@ -145,24 +163,12 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 		//a_vertical_imu = az/16384.0*cos(roll*0.01745329)*cos(pitch*0.01745329) - ax/16384.0*sin(pitch*0.01745329) + ay/16384.0*sin(roll*0.01745329)*cos(pitch*0.01745329);
 		
-		a_vertical_imu = Madgwick_filter.getVertical(ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
+		
 		
 	}
+	SPI_IRQ.endTransaction();
 
-	if(present_devices & LPS33_PRESENT){
-		//digitalWrite(SRAM_CS, 0);
-		baro_readPressure();
-		SPI_IRQ.endTransaction();
-		//digitalWrite(SRAM_CS, 1);
-		
-		
-		alt_baro = getAltitude()*100;
 
-		
-		//SerialUSB.println(alt_baro);
-		kalmanFilter3_update(alt_baro, a_vertical_imu*1000.0f-1000.0f, (float)1/60.0f, &alt_filter, &vario_filter);
-		vario_lowpassed = (vario_lowpassed * (statVar.vario_lowpass_coef-1)+ vario_filter)/statVar.vario_lowpass_coef;
-	}
 	
 	/*
 	SerialUSB.print(flag_sec++);
@@ -183,7 +189,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	
 	//generate short beep bursts, long beep or be silent
 	if(statVar.ena_vector & ENA_BUZZER){
-				buzzerAltitudeDiff((int)vario_filter);
+		buzzerAltitudeDiff((int)vario_filter);
 		if (buzzer_counter < buzzer_on_preiod)
 		buzzerEna(1);
 		else

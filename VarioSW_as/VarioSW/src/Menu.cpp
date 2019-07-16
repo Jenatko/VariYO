@@ -261,12 +261,18 @@ int ButtonEvaluation(menu * menuPointer)
 		case UP:
 		selected -= 1;
 		if (selected < 0)
-		selected = menuPointer->velikost + selected;
+		if(menuPointer->is_detailed)
+			selected = menuPointer->velikost/2 + selected;
+			else
+			selected = menuPointer->velikost + selected;
 		break;
 
 		case DOWN:
 		selected += 1;
-		selected = selected % menuPointer->velikost;
+		if(menuPointer->is_detailed)
+			selected = selected % (menuPointer->velikost/2);
+		else
+					selected = selected % menuPointer->velikost;	
 		break;
 
 		case LEFT:
