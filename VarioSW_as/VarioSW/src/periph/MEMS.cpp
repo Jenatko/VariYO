@@ -93,7 +93,7 @@ int8_t IMU_init(){
 
 	/* Select the Output data rate, range of accelerometer sensor */
 	imu.accel_cfg.odr = BMI160_ACCEL_ODR_100HZ;
-	imu.accel_cfg.range = BMI160_ACCEL_RANGE_2G;
+	imu.accel_cfg.range = BMI160_ACCEL_RANGE_4G;
 	imu.accel_cfg.bw = BMI160_ACCEL_BW_NORMAL_AVG4;
 
 	/* Select the power mode of accelerometer sensor */

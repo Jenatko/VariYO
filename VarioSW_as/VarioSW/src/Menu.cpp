@@ -1010,9 +1010,9 @@ void debugBMX160(void){
 		display.setCursor(5, 40);
 		display.print("g");
 		display.setCursor(35, 40);
-		display.print(   pow(  ((float)ax*ax + (float)ay*ay + (float)az*az)/268.435456e6 , 0.5) , 3   );
+		display.print(   pow(  ((float)ax*ax + (float)ay*ay + (float)az*az)/IMU_BIT_PER_G/IMU_BIT_PER_G , 0.5) , 3   );
 		display.setCursor(120, 40);
-		display.print(   pow(  ((float)ax_corr*ax_corr + (float)ay_corr*ay_corr + (float)az_corr*az_corr)/268.435456e6 , 0.5) , 3   );
+		display.print(   pow(  ((float)ax_corr*ax_corr + (float)ay_corr*ay_corr + (float)az_corr*az_corr)/IMU_BIT_PER_G/IMU_BIT_PER_G , 0.5) , 3   );
 		
 		display.setCursor(5, 50);
 		display.print("gx");
@@ -1603,9 +1603,9 @@ void calibrateAccelerometer(){
 		y[i] = avgy/averaging;
 		z[i] = avgz/averaging;
 		for(int i = 0; i < no_samples; i++){
-			xf[i] = x[i]/16384.0;
-			yf[i] = y[i]/16384.0;
-			zf[i] = z[i]/16384.0;/*
+			xf[i] = x[i]/IMU_BIT_PER_G;
+			yf[i] = y[i]/IMU_BIT_PER_G;
+			zf[i] = z[i]/IMU_BIT_PER_G;/*
 			xf[i] = x[i];
 			yf[i] = y[i];
 			zf[i] = z[i];
@@ -1629,9 +1629,9 @@ void calibrateAccelerometer(){
 		statVar.gainErrorAccelY = 1/fit_radius[1];
 		statVar.gainErrorAccelZ = 1/fit_radius[2];
 		
-		statVar.offsetAccelX = fit_center[0]*16384;
-		statVar.offsetAccelY = fit_center[1]*16384;
-		statVar.offsetAccelZ = fit_center[2]*16384;
+		statVar.offsetAccelX = fit_center[0]*IMU_BIT_PER_G;
+		statVar.offsetAccelY = fit_center[1]*IMU_BIT_PER_G;
+		statVar.offsetAccelZ = fit_center[2]*IMU_BIT_PER_G;
 		
 	}
 	statVar.ena_vector = enavectorold;

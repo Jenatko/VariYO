@@ -122,11 +122,13 @@
 #define TRACKLOG_FILE_CLOSED 0
 #define TRACKLOG_FILE_OPEN 1
 
-#define RAD2DEG 57.29578
-#define DEG2RAD  0.01745329
+#define RAD2DEG 57.29578f
+#define DEG2RAD  0.01745329f
 
-#define KPH2MPS 0.2777777778
-#define MPS2KPH 3.6
+#define KPH2MPS 0.2777777778f
+#define MPS2KPH 3.6f
+
+#define IMU_BIT_PER_G	8192.0f   //for 4G range
 
 
 #define BMX160_PRESENT 1

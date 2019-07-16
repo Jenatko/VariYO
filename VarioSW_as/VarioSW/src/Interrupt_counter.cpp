@@ -107,6 +107,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 
 	}
 
+
 	//read_mag();
 	//IMU_read();
 	
@@ -143,14 +144,21 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			
 			//Mahony_filter.updateIMU(gx/131.2f, gy/131.2f, gz/131.2f, ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
 			//	digitalWrite(SRAM_CS, 0);
-			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*0.0174533f), gy*(1/131.2f*0.0174533f), gz*(1/131.2f*0.0174533f), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
+			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*DEG2RAD), gy*(1/131.2f*DEG2RAD), gz*(1/131.2f*DEG2RAD), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
 			//	digitalWrite(SRAM_CS, 1);
-			a_vertical_imu = Madgwick_filter.getVertical(ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
-			kalmanFilter3_update(alt_baro, a_vertical_imu*1000.0f-1000.0f, (float)1/100.0f, &alt_filter, &vario_filter);
+			a_vertical_imu = Madgwick_filter.getVertical(ax_corr/IMU_BIT_PER_G, ay_corr/IMU_BIT_PER_G, az_corr/IMU_BIT_PER_G);
+			kalmanFilter3_update(alt_baro, (a_vertical_imu*1.0f-1.0f)*980, (float)1/100.0f, &alt_filter, &vario_filter);
 			vario_lowpassed = (vario_lowpassed * (statVar.vario_lowpass_coef-1)+ vario_filter)/statVar.vario_lowpass_coef;
 
 		}
-		
+		/*
+			SerialUSB.print(alt_baro);
+			SerialUSB.print(",");*/
+				SerialUSB.println(a_vertical_imu, 3);
+			/*	SerialUSB.print(",");
+		SerialUSB.println(vario_filter);
+
+		*/
 
 		
 		//yaw = Mahony_filter.getYaw();
