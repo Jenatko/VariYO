@@ -29,6 +29,8 @@
 #include "elipsoid.h"
 #include "compass.h"
 
+#include "logger.h"
+
 
 #define MENUID_TOPMENU 0x01
 #define MENUITEM_TOPMENU_SETINGS 0
@@ -45,8 +47,9 @@ int topMenuID = MENUID_TOPMENU;
 #define MENUID_UTILITIES 0x02
 #define MENUITEM_UTILITIES_COMPASS 0
 #define MENUITEM_UTILITIES_CHESS 1
+#define MENUITEM_UTILITIES_LOGGER 2
 
-char menu0_list[][15] = {"Compass","Chess"};
+char menu0_list[][15] = {"Compass","Chess", "Logger"};
 char menu0_name[15] = "Utilities";
 int  menu0_id = MENUID_UTILITIES;
 
@@ -502,6 +505,9 @@ void menuSelector(menu *menuPointer, int selected) {
 		if (selected == MENUITEM_UTILITIES_COMPASS){
 			compass();
 		}
+				if (selected == MENUITEM_UTILITIES_LOGGER){
+					logger();
+				}
 	}
 	
 	//--------Settings menu---------

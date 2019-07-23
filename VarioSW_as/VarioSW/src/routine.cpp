@@ -32,8 +32,10 @@ gps_fix  fix;
 Sd2Card card;
 SdVolume volume;
 SdFile root;
+
 File tracklog;
 File HeightData;
+File loggerFile;
 
 
 

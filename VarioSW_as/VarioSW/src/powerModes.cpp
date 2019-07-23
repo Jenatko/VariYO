@@ -15,7 +15,7 @@
 
 extern File tracklog;
 
-void powerOff(int lowVoltage) {
+void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	if(tracklog_stat == 1){
 		tracklog.println("    </trkseg>");
 		tracklog.println("  </trk>");
@@ -56,7 +56,10 @@ void powerOff(int lowVoltage) {
 
 	DAC->CTRLA.bit.ENABLE=0;*/
 	allLow();
-	gpsBckpTimer();
+	if(GPS_BckpPwr)
+		gpsBckpTimer();
+		else
+			digitalWrite(GPS_BCKP, 0);
 	__WFI();
 	for(int i = 0; i < 100; i++){
 		if(digitalRead(BUTTON_CENTER)){   //go back to sleep if woken up by RTC timer (gps backup power turning off)

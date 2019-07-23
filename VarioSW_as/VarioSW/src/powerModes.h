@@ -9,7 +9,7 @@
 #ifndef POWERMODES_H_
 #define POWERMODES_H_
 
-void powerOff(int lowVoltage = 0) ;
+void powerOff(int lowVoltage = 0, int GPS_BckpPwr = 1) ;
 void allLow(void);
 void reinitializePins(void);
 void wakeUp(void);
