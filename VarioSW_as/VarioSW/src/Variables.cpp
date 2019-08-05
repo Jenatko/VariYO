@@ -45,6 +45,8 @@ Circle movement_circle_fit;
 
 float ground_level_interpol;
 
+int logger_ena;
+
 
 
 

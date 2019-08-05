@@ -490,9 +490,7 @@ void menuSelector(menu *menuPointer, int selected) {
 		//power off
 		else if (selected == MENUITEM_TOPMENU_POWEROFF) {
 			powerOff();
-			while (buttons.getFlag()){
-				buttons.getButtonPressed();
-			}
+
 
 		}
 	}

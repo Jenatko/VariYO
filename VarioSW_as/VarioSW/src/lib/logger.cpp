@@ -13,12 +13,10 @@
 #include "button_control.h"
 #include "MEMS.h"
 
-extern File loggerFile;
 
-volatile int loggagain = 1;
 
 void loggerISR(){
-	loggagain = 1;
+
 	
 }
 
@@ -29,39 +27,7 @@ void logger(){
 
 	rtc.attachInterrupt(loggerISR);
 	
-	//loggerFile = SD.open("logger.csv", FILE_WRITE);
-	
-	while(!buttons.getFlag()){
-		if(loggagain){
-			//rtc.setAlarmEpoch(rtc.getEpoch()+(5));
-			request_si7021();
-			while(!read_si7021());
-			loggerFile = SD.open("logger.csv", FILE_WRITE);
-			loggerFile.print(rtc.getDay());
-			loggerFile.print("/");
-			loggerFile.print(rtc.getMonth());
-			loggerFile.print("/20");
-			
-			loggerFile.print(rtc.getYear());
-			loggerFile.print(" ");
-
-
-			loggerFile.print(rtc.getHours());
-			loggerFile.print(":");
-			loggerFile.print(rtc.getMinutes());
-			loggerFile.print(":");
-			loggerFile.print(rtc.getSeconds());
-			loggerFile.print(",");
-			loggerFile.print(enviromental_data.temperature/100.0);
-			loggerFile.print(",");
-			loggerFile.print(enviromental_data.humidity/100.0);
-			loggerFile.print(",");
-			loggerFile.println(enviromental_data.pressure);
-			loggerFile.close();
-			
-			loggagain = 0;
-			
-		}
-	}
+	logger_ena = 1;
+	powerOff(0, 0);
 	
 }

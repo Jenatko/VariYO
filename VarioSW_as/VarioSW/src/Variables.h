@@ -111,6 +111,8 @@ extern uint8_t present_devices;
 
 extern float battery_voltage, battery_SOC;
 
+extern int logger_ena;
+
 
 
 
