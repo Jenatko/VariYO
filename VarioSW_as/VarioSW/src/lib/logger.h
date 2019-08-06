@@ -10,7 +10,8 @@
 #define LOGGER_H_
 
 
-void logger();
+
+void logger(int freq);
 
 
 #endif /* LOGGER_H_ */

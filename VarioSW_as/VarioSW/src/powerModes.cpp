@@ -17,6 +17,90 @@
 extern File tracklog;
 extern File loggerFile;
 
+void logger_routine(void){
+	
+				reinitializePins();
+				
+				pinMode(SD_DETECT, INPUT_PULLUP);
+				delay(100);
+				SD.begin(SD_CS);
+				/*
+				if(digitalRead(SD_DETECT) == 0){
+					present_devices |= SD_PRESENT;
+					SD.begin(SD_CS);
+				}
+				else{
+					present_devices &= ~SD_PRESENT;
+				}
+				*/
+				pinMode(SD_DETECT, INPUT);
+				float current = 0;
+				
+				/*
+				request_si7021();
+				if(present_devices & MAX17055_PRESENT){
+					current = max17055.getAverageCurrent();
+					battery_SOC = max17055.getSOC();
+					battery_voltage = max17055.getAverageVoltage();
+					
+					if(battery_voltage < 3){
+						rtc.detachInterrupt();
+						logger_ena = 0;
+						display.fillScreen(GxEPD_WHITE);
+						display.setCursor(20, 100);
+						display.print("Power Off");
+						display.setCursor(10, 120);
+						display.print("Battery empty");
+						display.display();
+						
+					}
+				}
+
+				for(int timeout = 0; timeout < 10; timeout++){
+					if(read_si7021()) break;
+					else delay(10);
+					if(timeout == 9) request_si7021();
+				}
+				for(int timeout = 0; timeout < 10; timeout++){
+					if(read_si7021()) break;
+					else delay(10);
+					
+				}
+				*/
+				loggerFile = SD.open("logger.csv", FILE_WRITE);
+				if(loggerFile){
+					loggerFile.print(rtc.getDay());
+					loggerFile.print("/");
+					loggerFile.print(rtc.getMonth());
+					loggerFile.print("/20");
+					
+					loggerFile.print(rtc.getYear());
+					loggerFile.print(" ");
+
+
+					loggerFile.print(rtc.getHours());
+					loggerFile.print(":");
+					loggerFile.print(rtc.getMinutes());
+					loggerFile.print(":");
+					loggerFile.print(rtc.getSeconds());
+					loggerFile.print(",");
+					loggerFile.print(enviromental_data.temperature/100.0);
+					loggerFile.print(",");
+					loggerFile.print(enviromental_data.humidity/100.0);
+					loggerFile.print(",");
+					loggerFile.print(battery_voltage);
+					loggerFile.print(",");
+					loggerFile.print(battery_SOC);
+					loggerFile.print(",");
+					loggerFile.println(current);
+					loggerFile.close();
+				}
+				allLow();
+				digitalWrite(GPS_BCKP, 0);
+				rtc.setAlarmEpoch(rtc.getEpoch()+(5));
+	
+}
+
 void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	if(tracklog_stat == 1){
 		tracklog.println("    </trkseg>");
@@ -33,8 +117,8 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	display.setCursor(20, 100);
 	display.print("Power Off");
 	if(lowVoltage){
-	display.setCursor(10, 120);
-	display.print("Battery empty");
+		display.setCursor(10, 120);
+		display.print("Battery empty");
 	}
 	display.display();
 	USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
@@ -58,71 +142,15 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 
 	DAC->CTRLA.bit.ENABLE=0;*/
 	allLow();
-	if(GPS_BckpPwr)
-		gpsBckpTimer();
-		else
-			digitalWrite(GPS_BCKP, 0);
+	if(GPS_BckpPwr) gpsBckpTimer();
+	else	digitalWrite(GPS_BCKP, 0);
+	
 	__WFI();
 	for(int i = 0; i < 100; i++){
 		if(digitalRead(BUTTON_CENTER)){   //go back to sleep if woken up by RTC timer (gps backup power turning off) or holding the button just for a while
 			
 			if(logger_ena){
-					reinitializePins();
-					
-					pinMode(SD_DETECT, INPUT_PULLUP);
-					delay(10);
-					if(digitalRead(SD_DETECT) == 0){
-						present_devices |= SD_PRESENT;
-						SD.begin(SD_CS);
-					}
-					else{
-						present_devices &= ~SD_PRESENT;
-					}
-					pinMode(SD_DETECT, INPUT);
-					
-					request_si7021();
-							if(present_devices & MAX17055_PRESENT){
-								battery_SOC = max17055.getSOC();
-								battery_voltage = max17055.getAverageVoltage();
-								
-								if(battery_voltage < 3){
-									rtc.detachInterrupt();
-									logger_ena = 0;
-										display.fillScreen(GxEPD_WHITE);
-										display.setCursor(20, 100);
-										display.print("Power Off");
-											display.setCursor(10, 120);
-											display.print("Battery empty");
-										display.display();
-									
-								}
-							}
-					
-					while(!read_si7021());
-					loggerFile = SD.open("logger.csv", FILE_WRITE);
-					loggerFile.print(rtc.getDay());
-					loggerFile.print("/");
-					loggerFile.print(rtc.getMonth());
-					loggerFile.print("/20");
-					
-					loggerFile.print(rtc.getYear());
-					loggerFile.print(" ");
-
-
-					loggerFile.print(rtc.getHours());
-					loggerFile.print(":");
-					loggerFile.print(rtc.getMinutes());
-					loggerFile.print(":");
-					loggerFile.print(rtc.getSeconds());
-					loggerFile.print(",");
-					loggerFile.print(enviromental_data.temperature/100.0);
-					loggerFile.print(",");
-					loggerFile.println(enviromental_data.humidity/100.0);
-					loggerFile.close();
-					
-					allLow();
-					digitalWrite(GPS_BCKP, 0);
-				
+				logger_routine();
 			}
 			__WFI();
 			i = 0;
@@ -169,9 +197,9 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	if(present_devices | SI7021_PRESENT)
 	request_si7021();
 	
-				while (buttons.getFlag()){
-					buttons.getButtonPressed();
-				}
+	while (buttons.getFlag()){
+		buttons.getButtonPressed();
+	}
 	
 
 }
@@ -278,7 +306,7 @@ void massStorageEna() {
 	digitalWrite(SD_CS, 1);
 
 
-		SD.begin(SD_CS);
+	SD.begin(SD_CS);
 
 	
 	display.init(0);

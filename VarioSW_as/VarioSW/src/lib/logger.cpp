@@ -20,10 +20,15 @@ void loggerISR(){
 	
 }
 
-void logger(){
+void logger(int freq){
 	
-	rtc.setAlarmEpoch(rtc.getEpoch()+(5));  //time of ephemirides validity
+	rtc.setAlarmEpoch(rtc.getEpoch()+(5));
+	if(freq == 0)
 	rtc.enableAlarm(rtc.MATCH_SS);
+		if(freq == 1)
+		rtc.enableAlarm(rtc.MATCH_MMSS);
+			if(freq == 2)
+			rtc.enableAlarm(rtc.MATCH_HHMMSS);
 
 	rtc.attachInterrupt(loggerISR);
 	

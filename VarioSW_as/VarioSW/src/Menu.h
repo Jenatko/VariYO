@@ -49,6 +49,7 @@ extern menu debug_menu;
 extern menu settings_menu;
 extern menu gauge_menu;
 extern menu gauges_menu;
+extern menu logger_menu;
 
 void Gauge_update(Gauge *gau);
 void Gauge_enable(Gauge *gau);

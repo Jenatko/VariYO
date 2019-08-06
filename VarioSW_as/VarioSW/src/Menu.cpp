@@ -53,6 +53,15 @@ char menu0_list[][15] = {"Compass","Chess", "Logger"};
 char menu0_name[15] = "Utilities";
 int  menu0_id = MENUID_UTILITIES;
 
+#define MENUID_LOGGER 0x09
+#define MENUITEM_LOGGER_MINUTE 0
+#define MENUITEM_LOGGER_HOUR 1
+#define MENUITEM_LOGGER_DAY 2
+
+char menulog_list[][15] = {"Every minute","Every hour", "Every day"};
+char menulog_name[15] = "Logger";
+int  menulog_id = MENUID_LOGGER;
+
 #define MENUID_ALTIMETER 0x03
 #define MENUITEM_ALTIMETER_SET_ALT 0
 #define MENUITEM_ALTIMETER_SET_SEAP 1
@@ -166,6 +175,7 @@ menu debug_menu;
 menu settings_menu;
 menu gauge_menu;
 menu gauges_menu;
+menu logger_menu;
 
 Gauge *gaugepointer = &statVar.varioGauge;
 
@@ -182,6 +192,11 @@ void menu_init() {
 	utilities_menu.velikost = sizeof(menu0_list) / sizeof(menu0_list[0]);
 	utilities_menu.jmeno_menu = menu0_name;
 	utilities_menu.menu_id = menu0_id;
+	
+	logger_menu.pole = menulog_list;
+	logger_menu.velikost = sizeof(menulog_list) / sizeof(menulog_list[0]);
+	logger_menu.jmeno_menu = menulog_name;
+	logger_menu.menu_id = menulog_id;
 
 	altimemter_menu.pole = menu1_list;
 	altimemter_menu.velikost = sizeof(menu1_list) / sizeof(menu1_list[0]);
@@ -265,17 +280,17 @@ int ButtonEvaluation(menu * menuPointer)
 		selected -= 1;
 		if (selected < 0)
 		if(menuPointer->is_detailed)
-			selected = menuPointer->velikost/2 + selected;
-			else
-			selected = menuPointer->velikost + selected;
+		selected = menuPointer->velikost/2 + selected;
+		else
+		selected = menuPointer->velikost + selected;
 		break;
 
 		case DOWN:
 		selected += 1;
 		if(menuPointer->is_detailed)
-			selected = selected % (menuPointer->velikost/2);
+		selected = selected % (menuPointer->velikost/2);
 		else
-					selected = selected % menuPointer->velikost;	
+		selected = selected % menuPointer->velikost;
 		break;
 
 		case LEFT:
@@ -503,9 +518,22 @@ void menuSelector(menu *menuPointer, int selected) {
 		if (selected == MENUITEM_UTILITIES_COMPASS){
 			compass();
 		}
-				if (selected == MENUITEM_UTILITIES_LOGGER){
-					logger();
-				}
+		if (selected == MENUITEM_UTILITIES_LOGGER){
+			MenuEntry(&logger_menu);
+		}
+	}
+	
+	//--------logger menu---------
+	if (menuPointer->menu_id == MENUID_LOGGER) {
+		if (selected == MENUITEM_LOGGER_MINUTE){
+			logger(0);
+		}
+		if (selected == MENUITEM_LOGGER_HOUR){
+			logger(1);
+		}
+		if (selected == MENUITEM_LOGGER_DAY){
+			logger(2);
+		}
 	}
 	
 	//--------Settings menu---------
