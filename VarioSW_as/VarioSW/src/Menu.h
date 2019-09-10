@@ -12,9 +12,9 @@
 #include "Variables.h"
 
 typedef struct {
-	char (*pole)[15];
-	char *jmeno_menu;
-	int velikost;
+	char (*items_array)[15];
+	char *menu_name;
+	int no_items;
 	int menu_id;
 	int selected = 0;
 	int selected_old = 0;

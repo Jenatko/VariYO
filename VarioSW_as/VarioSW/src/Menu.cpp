@@ -183,46 +183,46 @@ Gauge *gaugepointer = &statVar.varioGauge;
 void menu_init() {
 
 
-	topmenu.pole = listTopMenu;
-	topmenu.velikost = sizeof(listTopMenu) / sizeof(listTopMenu[0]);
-	topmenu.jmeno_menu = topMenuName;
+	topmenu.items_array = listTopMenu;
+	topmenu.no_items = sizeof(listTopMenu) / sizeof(listTopMenu[0]);
+	topmenu.menu_name = topMenuName;
 	topmenu.menu_id = topMenuID;
 
-	utilities_menu.pole = menu0_list;
-	utilities_menu.velikost = sizeof(menu0_list) / sizeof(menu0_list[0]);
-	utilities_menu.jmeno_menu = menu0_name;
+	utilities_menu.items_array = menu0_list;
+	utilities_menu.no_items = sizeof(menu0_list) / sizeof(menu0_list[0]);
+	utilities_menu.menu_name = menu0_name;
 	utilities_menu.menu_id = menu0_id;
 	
-	logger_menu.pole = menulog_list;
-	logger_menu.velikost = sizeof(menulog_list) / sizeof(menulog_list[0]);
-	logger_menu.jmeno_menu = menulog_name;
+	logger_menu.items_array = menulog_list;
+	logger_menu.no_items = sizeof(menulog_list) / sizeof(menulog_list[0]);
+	logger_menu.menu_name = menulog_name;
 	logger_menu.menu_id = menulog_id;
 
-	altimemter_menu.pole = menu1_list;
-	altimemter_menu.velikost = sizeof(menu1_list) / sizeof(menu1_list[0]);
-	altimemter_menu.jmeno_menu = menu1_name;
+	altimemter_menu.items_array = menu1_list;
+	altimemter_menu.no_items = sizeof(menu1_list) / sizeof(menu1_list[0]);
+	altimemter_menu.menu_name = menu1_name;
 	altimemter_menu.menu_id = menu1_id;
 
-	vario_menu.pole = menu2_list;
+	vario_menu.items_array = menu2_list;
 	vario_menu.is_detailed = true;
 	String tmpstring =  String((float)statVar.th_rise / 100);
 	tmpstring.concat(" m/s");
-	tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_RISE], 15);
+	tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_RISE], 15);
 
 	tmpstring =  String((float)statVar.th_sink / 100);
 	tmpstring.concat(" m/s");
-	tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_SINK], 15);
+	tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_SINK], 15);
 	
-	vario_menu.pole = menu2_list;
+	vario_menu.items_array = menu2_list;
 	vario_menu.is_detailed = true;
 	tmpstring =  String((float)statVar.zvariance);
-	tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_ZVAR], 15);
+	tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_ZVAR], 15);
 
 	tmpstring =  String((float)statVar.accelvariance);
-	tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_ACCVAR], 15);
+	tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_ACCVAR], 15);
 	
 	tmpstring =  String((float)statVar.vario_lowpass_coef);
-	tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_AVERAGING], 15);
+	tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_AVERAGING], 15);
 	
 	if(statVar.ena_vector&ENA_GPS){
 		if(statVar.ena_vector&ENA_GPS_LOW_POWER)
@@ -238,29 +238,29 @@ void menu_init() {
 	
 	
 
-	vario_menu.velikost = sizeof(menu2_list) / sizeof(menu2_list[0]);
-	vario_menu.jmeno_menu = menu2_name;
+	vario_menu.no_items = sizeof(menu2_list) / sizeof(menu2_list[0]);
+	vario_menu.menu_name = menu2_name;
 	vario_menu.menu_id = menu2_id;
 
-	debug_menu.pole = menu3_list;
-	debug_menu.velikost = sizeof(menu3_list) / sizeof(menu3_list[0]);
-	debug_menu.jmeno_menu = menu3_name;
+	debug_menu.items_array = menu3_list;
+	debug_menu.no_items = sizeof(menu3_list) / sizeof(menu3_list[0]);
+	debug_menu.menu_name = menu3_name;
 	debug_menu.menu_id = menu3_id;
 
-	settings_menu.pole = system_menu_list;
-	settings_menu.velikost = sizeof(system_menu_list) / sizeof(system_menu_list[0]);
-	settings_menu.jmeno_menu = system_menu_name;
+	settings_menu.items_array = system_menu_list;
+	settings_menu.no_items = sizeof(system_menu_list) / sizeof(system_menu_list[0]);
+	settings_menu.menu_name = system_menu_name;
 	settings_menu.menu_id = system_menu_id;
 
 
-	gauge_menu.pole = gauge_menu_list;
-	gauge_menu.velikost = sizeof(gauge_menu_list) / sizeof(gauge_menu_list[0]);
-	gauge_menu.jmeno_menu = gauge_menu_name;
+	gauge_menu.items_array = gauge_menu_list;
+	gauge_menu.no_items = sizeof(gauge_menu_list) / sizeof(gauge_menu_list[0]);
+	gauge_menu.menu_name = gauge_menu_name;
 	gauge_menu.menu_id = gauge_menu_id;
 	
-	gauges_menu.pole = gauges_menu_list;
-	gauges_menu.velikost = sizeof(gauges_menu_list) / sizeof(gauges_menu_list[0]);
-	gauges_menu.jmeno_menu = gauges_menu_name;
+	gauges_menu.items_array = gauges_menu_list;
+	gauges_menu.no_items = sizeof(gauges_menu_list) / sizeof(gauges_menu_list[0]);
+	gauges_menu.menu_name = gauges_menu_name;
 	gauges_menu.menu_id = gauges_menu_id;
 
 }
@@ -280,17 +280,17 @@ int ButtonEvaluation(menu * menuPointer)
 		selected -= 1;
 		if (selected < 0)
 		if(menuPointer->is_detailed)
-		selected = menuPointer->velikost/2 + selected;
+		selected = menuPointer->no_items/2 + selected;
 		else
-		selected = menuPointer->velikost + selected;
+		selected = menuPointer->no_items + selected;
 		break;
 
 		case DOWN:
 		selected += 1;
 		if(menuPointer->is_detailed)
-		selected = selected % (menuPointer->velikost/2);
+		selected = selected % (menuPointer->no_items/2);
 		else
-		selected = selected % menuPointer->velikost;
+		selected = selected % menuPointer->no_items;
 		break;
 
 		case LEFT:
@@ -382,25 +382,25 @@ void drawMenuSimple(menu *menuPointer) {
 	//write new text
 	display.setTextColor(GxEPD_BLACK);
 	display.setCursor(10, 20);
-	display.print(menuPointer->jmeno_menu);
+	display.print(menuPointer->menu_name);
 
 	for (int i = 0; i < 5; i++) {
 
-		temp = (menuPointer->selected - 2 + i) % menuPointer->velikost;
+		temp = (menuPointer->selected - 2 + i) % menuPointer->no_items;
 		if (temp < 0)
-		temp = menuPointer->velikost + temp;
+		temp = menuPointer->no_items + temp;
 		if (i == 2) {
 
 			display.setTextColor(GxEPD_WHITE);
 			display.setCursor(10, 60 + 32 * i);
-			display.print(menuPointer->pole[temp]);
+			display.print(menuPointer->items_array[temp]);
 			display.setTextColor(GxEPD_BLACK);
 			continue;
 
 		}
 
 		display.setCursor(10, 60 + 32 * i);
-		display.print(menuPointer->pole[temp]);
+		display.print(menuPointer->items_array[temp]);
 		// display.print(temp);
 
 	}
@@ -411,18 +411,18 @@ void drawMenuSimple(menu *menuPointer) {
 	display.setTextColor(GxEPD_WHITE);
 	for (int i = 0; i < 5; i++) {
 		display.setCursor(10, 60 + 32 * i);
-		temp = (menuPointer->selected - 2 + i) % menuPointer->velikost;
-		if (temp < 0)		temp = menuPointer->velikost + temp;
+		temp = (menuPointer->selected - 2 + i) % menuPointer->no_items;
+		if (temp < 0)		temp = menuPointer->no_items + temp;
 		if (i == 2) {
 			display.setTextColor(GxEPD_BLACK);
-			display.print(menuPointer->pole[temp]);
+			display.print(menuPointer->items_array[temp]);
 			display.setTextColor(GxEPD_WHITE);
 			continue;
 		}
-		display.print(menuPointer->pole[temp]);
+		display.print(menuPointer->items_array[temp]);
 	}
 	display.setCursor(10, 20);
-	display.print(menuPointer->jmeno_menu);
+	display.print(menuPointer->menu_name);
 	display.setTextColor(GxEPD_BLACK);
 }
 
@@ -433,21 +433,21 @@ void drawMenuDetailed(menu *menuPointer) {
 
 	for (int i = 0; i < 6; i++) {
 
-		temp = (menuPointer->selected - 1 + i) % ((menuPointer->velikost) / 2);
+		temp = (menuPointer->selected - 1 + i) % ((menuPointer->no_items) / 2);
 		if (temp < 0)
-		temp = (menuPointer->velikost) / 2 + temp;
+		temp = (menuPointer->no_items) / 2 + temp;
 		if (i < 3) {
 			if (i == 1 ) {
 
 				display.setTextColor(GxEPD_WHITE);
 				display.setCursor(10, 58 + 58 * i);
-				display.print(menuPointer->pole[temp]);
+				display.print(menuPointer->items_array[temp]);
 				display.setTextColor(GxEPD_BLACK);
 
 				display.setFont(&FreeMonoBold9pt7b);
 				display.setTextColor(GxEPD_WHITE);
 				display.setCursor(80, 78 + 58 * (i));
-				display.print(menuPointer->pole[temp + (menuPointer->velikost) / 2]);
+				display.print(menuPointer->items_array[temp + (menuPointer->no_items) / 2]);
 				display.setTextColor(GxEPD_BLACK);
 				display.setFont(&FreeMonoBold12pt7b);
 				continue;
@@ -455,11 +455,11 @@ void drawMenuDetailed(menu *menuPointer) {
 			}
 
 			display.setCursor(10, 58 + 58 * i);
-			display.print(menuPointer->pole[temp]);
+			display.print(menuPointer->items_array[temp]);
 
 			display.setFont(&FreeMonoBold9pt7b);
 			display.setCursor(80, 78 + 58 * (i));
-			display.print(menuPointer->pole[temp + (menuPointer->velikost) / 2]);
+			display.print(menuPointer->items_array[temp + (menuPointer->no_items) / 2]);
 			// display.print(temp);
 			display.setFont(&FreeMonoBold12pt7b);
 		}
@@ -672,7 +672,7 @@ void menuSelector(menu *menuPointer, int selected) {
 		else if (selected == MENUITEM_VARIO_AVERAGING){
 			statVar.vario_lowpass_coef = numpad(statVar.vario_lowpass_coef);
 			String tmpstring =  String(statVar.vario_lowpass_coef);
-			tmpstring.toCharArray(vario_menu.pole[MENUITEM_VARIO_DATA_AVERAGING], 15);
+			tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_AVERAGING], 15);
 		}
 
 		// ms5611.putSeaLevel(numpad((int)ms5611.readSeaPressure));

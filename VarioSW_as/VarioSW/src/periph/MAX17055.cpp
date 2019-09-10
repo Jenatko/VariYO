@@ -1,6 +1,63 @@
+/**********************************************************************
+*
+* MIT License
+*
+* Copyright (c) 2018 Awot Ghirmai
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*
+* Authors:
+* Awot Ghirmai; ghirmai.awot@gmail.com
+* Ole Dreessen; ole.dreessen@maximintegrated.com
+*
+**********************************************************************/
+
+
 #include <MAX17055.h>
 #include <Wire.h>
  
+ 
+ /**********************************************************************
+ * @brief MAX17055 - The MAX17055 is a low 7?A operating current fuel gauge that implements
+ * Maxim ModelGauge™ m5 EZ algorithm. ModelGauge m5 EZ makes fuel gauge implementation
+ * easy by eliminating battery characterization requirements and simplifying host software interaction.
+ * The ModelGauge m5 EZ robust algorithm provides tolerance against battery diversity for most
+ * lithium batteries and applications. ModelGauge m5 EZ algorithm combines the short-term
+ * accuracy and linearity of a coulomb counter with the longterm stability of a voltage-based fuel
+ * gauge, along with temperature compensation to provide industry-leading fuel gauge accuracy.
+ * The MAX17055 automatically compensates for cell aging, temperature, and discharge rate, and
+ * provides accurate state of charge (SOC in %) and remaining capacity in milliampere-hours (mAh).
+ * As the battery approaches the critical region near empty, the ModelGauge m5 algorithm invokes
+ * a special compensation that eliminates any error. It also provides three methods for reporting
+ * the age of the battery: reduction in capacity, increase in battery resistance, and cycle odometer.
+ * The MAX17055 provides precision measurements of current, voltage, and temperature. Temperature
+ * of the battery pack is measured using an internal temperature measurement or external thermistor.
+ * A 2-wire I2C interface provides access to data and control registers. The MAX17055 is available
+ * in a tiny, lead-free 0.4mm pitch 1.4mm x 1.5mm, 9-pin WLP package, and a 2mm x 2.5mm, 10-pin
+ * TDFN package.
+ *
+ * Ressources can be found at
+ * https://www.maximintegrated.com/en/products/power/battery-management/MAX17055.html
+ * https://www.maximintegrated.com/en/app-notes/index.mvp/id/6365
+ * https://www.maximintegrated.com/en/app-notes/index.mvp/id/6358
+ **********************************************************************/
+
 
 // Constructors 
 MAX17055::MAX17055(void)

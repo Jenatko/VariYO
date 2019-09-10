@@ -278,7 +278,7 @@ void setup() {
 	display.setFont(&FreeMonoBold12pt7b);
 	display.setTextColor(GxEPD_BLACK);
 
-	display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+	display.fillScreen(GxEPD_WHITE);
 	display.display();
 	
 	display.setRotation(0);
@@ -345,10 +345,12 @@ void setup() {
 	display.display(true);
 	
 	display.setCursor(10, 120);
+	int ahoj;
 	if(digitalRead(SD_DETECT) == 0){
 		display.print("SD present");
 		present_devices |= SD_PRESENT;
-		SD.begin(SD_CS);
+		ahoj = SD.begin(SD_CS);
+		display.print(ahoj);
 	}
 	else{
 		display.print("no SD card");
