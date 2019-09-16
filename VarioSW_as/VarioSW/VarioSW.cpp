@@ -71,7 +71,9 @@ GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*D
 //GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
 
 
-#include <SD.h>
+#include "SdFat.h"
+
+SdFat SD;
 
 
 
@@ -96,7 +98,7 @@ void displayUpdate(void){
 
 
 	statVar.varioGauge.value = vario_filter/100;
-		statVar.varioAvgGauge.value = vario_lowpassed/100;
+	statVar.varioAvgGauge.value = vario_lowpassed/100;
 	statVar.AGLGauge.value = (alt_filter/100) - ground_level;
 	statVar.altitudeGauge.value = (alt_filter/100);
 	statVar.tempGauge.value = enviromental_data.temperature/100;
@@ -178,14 +180,17 @@ void setup() {
 
 
 	rtc.begin();
-	rtc.setTime(23, 59, 40);
-	rtc.setDate(1, 1, 2014);
+	rtc.setTime(0, 0, 0);
+	rtc.setDate(1, 1, 19);
 	
 	pinMode(HEAT, OUTPUT);
 	digitalWrite(HEAT, 0);
 	
 	pinMode(POWER_ENA, OUTPUT);
 	digitalWrite(POWER_ENA, 1);
+	
+	pinMode(PB22, OUTPUT);
+	digitalWrite(PB22, 1);
 	
 	delay(100);
 	digitalWrite(POWER_ENA, 0);
@@ -347,9 +352,10 @@ void setup() {
 	display.setCursor(10, 120);
 	int ahoj;
 	if(digitalRead(SD_DETECT) == 0){
-		display.print("SD present");
+		display.print("SD present ");
 		present_devices |= SD_PRESENT;
-		ahoj = SD.begin(SD_CS);
+		
+		ahoj = SD.begin(SD_CS, SD_SCK_MHZ(8));
 		display.print(ahoj);
 	}
 	else{
@@ -373,7 +379,7 @@ void setup() {
 	delay(1000);
 	
 	
-//setVariablesDefault();
+	//setVariablesDefault();
 
 
 	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
@@ -397,7 +403,6 @@ void setup() {
 
 
 void loop() {
-
 
 	if (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){

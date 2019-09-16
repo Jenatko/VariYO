@@ -9,13 +9,15 @@
 #include "wiring_private.h"
 #include "EEPROM.h"
 #include "Variables.h"
-#include "SD.h"
+#include "SdFat.h"
 #include "MEMS.h"
 #include "RTCZero.h"
 #include "MAX17055.h"
 
-extern File tracklog;
-extern File loggerFile;
+extern SdFile tracklog;
+extern SdFile loggerFile;
+
+extern SdFat SD;
 
 void logger_routine(void){
 				pinMode(PB22, OUTPUT);
@@ -35,7 +37,7 @@ void logger_routine(void){
 
 	//display.print("2");
 	//display.display(true);
-	int ahoj = SD.begin(SD_CS);
+	int ahoj = SD.begin(SD_CS, SD_SCK_MHZ(8));
 	//display.print(ahoj);
 	//display.display(true);
 	if(ahoj){
@@ -91,7 +93,7 @@ void logger_routine(void){
 		//display.print("b");
 		//display.display(true);
 		request_si7021();
-		delay(50);
+		//delay(50);
 		for(int timeout = 0; timeout < 10; timeout++){
 			if(read_si7021()) break;
 			else delay(10);
@@ -100,10 +102,10 @@ void logger_routine(void){
 		//display.print("c");
 		//display.display(true);
 		
-		loggerFile = SD.open("logger.csv", FILE_WRITE);
+		loggerFile.open("logger.csv", O_WRONLY | O_APPEND | O_CREAT);
 		//display.print("d");
 		//display.display(true);
-		if(loggerFile){
+		if(loggerFile.isOpen()){
 			//display.print("e");
 			//display.display(true);
 			loggerFile.print(rtc.getDay());
@@ -130,6 +132,7 @@ void logger_routine(void){
 			loggerFile.print(battery_SOC);
 			loggerFile.print(",");
 			loggerFile.println(ahoj);
+			loggerFile.sync();
 			loggerFile.close();
 		}
 	}
@@ -217,7 +220,7 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	delay(10);
 	if(digitalRead(SD_DETECT) == 0){
 		present_devices |= SD_PRESENT;
-		SD.begin(SD_CS);
+		SD.begin(SD_CS, SD_SCK_MHZ(8));
 	}
 	else{
 		present_devices &= ~SD_PRESENT;
@@ -375,7 +378,7 @@ void massStorageEna() {
 	digitalWrite(SD_CS, 1);
 
 
-	SD.begin(SD_CS);
+	SD.begin(SD_CS, SD_SCK_MHZ(8));
 
 	
 	display.init(0);

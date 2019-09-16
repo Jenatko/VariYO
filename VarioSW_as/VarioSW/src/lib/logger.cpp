@@ -8,7 +8,6 @@
 #include "definitions.h"
 #include "RTCZero.h"
 #include "powerModes.h"
-#include "SD.h"
 #include "Variables.h"
 #include "button_control.h"
 #include "MEMS.h"

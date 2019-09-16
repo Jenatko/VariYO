@@ -28,14 +28,13 @@
 NMEAGPS  gps;
 gps_fix  fix;
 
-#include <SD.h>
-Sd2Card card;
-SdVolume volume;
-SdFile root;
+#include "SdFat.h"
 
-File tracklog;
-File HeightData;
-File loggerFile;
+extern SdFat SD;
+
+SdFile tracklog;
+SdFile HeightData;
+SdFile loggerFile;
 
 
 
@@ -235,7 +234,8 @@ void update_tracklog(){
 					cesta.concat(String(".gpx"));
 					cesta.toCharArray(cesta_char, 40);
 					
-					tracklog = SD.open(cesta_char, FILE_WRITE);
+					tracklog.open(cesta_char, O_WRITE | O_CREAT);
+					
 					
 					tracklog.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n");
 					
@@ -247,7 +247,7 @@ void update_tracklog(){
 					
 				}
 			}
-			if (tracklog && position_updated){
+			if (tracklog.isOpen() && position_updated){
 				//update_tracklog = 0;
 				//	position_updated = 0;
 				//	SerialUSB.println("logging");
@@ -397,6 +397,7 @@ void update_tracklog(){
 					tracklog.println("    </trkseg>");
 					tracklog.println("  </trk>");
 					tracklog.println("</gpx>");
+					tracklog.sync();
 					tracklog.close();
 					tracklog_stat = TRACKLOG_FILE_CLOSED;
 					//	SerialUSB.println("closing file");
@@ -434,7 +435,8 @@ void update_wind(){
 }
 
 uint16_t getAGLfromFile(int row, int col){
-	HeightData.seek((row*1201+col)*2);
+	HeightData.seekSet(0);
+	HeightData.seekCur((row*1201+col)*2);
 	int lsbs = HeightData.read();
 	int msbs = HeightData.read();
 	return (lsbs << 8)+msbs;
@@ -500,12 +502,12 @@ void alt_agl(){
 
 			
 			//open corresponding HGT file if moved to different coordinates
-			if((int_lat != lat_last) || (int_lon != lon_last) || !HeightData){
+			if((int_lat != lat_last) || (int_lon != lon_last) || !HeightData.isOpen()){
 				SerialUSB.println("opening");
 				time_a = micros();
 
 
-				if(HeightData)	HeightData.close();
+				if(HeightData.isOpen())	HeightData.close();
 				if((int_lat != lat_last) || (int_lon != lon_last)) filenotpresent == 0;
 				if(filenotpresent == 0){
 					lat_last = int_lat;
@@ -542,15 +544,15 @@ void alt_agl(){
 					cesta.concat(".HGT");
 					cesta.toCharArray(cesta_char2, 20);
 					
-					HeightData = SD.open(cesta_char2, FILE_READ);
+					HeightData.open(cesta_char2, O_READ);
 					time_b = micros();
-					if(!HeightData) filenotpresent = 1;
+					if(!HeightData.isOpen()) filenotpresent = 1;
 				}
 				
 			}
 
 			
-			if(HeightData){
+			if(HeightData.isOpen()){
 				ground_level = getAGLfromFile(row, col);
 				x1y1 =  getAGLfromFile(y1, x1);
 				x2y1 =  getAGLfromFile(y1, x2);
