@@ -80,15 +80,14 @@ int  menu1_id = MENUID_ALTIMETER;
 #define MENUITEM_VARIO_EQ_SINK 3
 #define MENUITEM_VARIO_ZVAR 4
 #define MENUITEM_VARIO_ACCELVAR 5
-#define MENUITEM_VARIO_AVERAGING 6
-#define MENUITEM_VARIO_DATA_RISE 7
-#define MENUITEM_VARIO_DATA_SINK 8
-#define MENUITEM_VARIO_DATA_ZVAR 11
-#define MENUITEM_VARIO_DATA_ACCVAR 12
-#define MENUITEM_VARIO_DATA_AVERAGING 13
+#define MENUITEM_VARIO_DATA_RISE 6
+#define MENUITEM_VARIO_DATA_SINK 7
+#define MENUITEM_VARIO_DATA_ZVAR 10
+#define MENUITEM_VARIO_DATA_ACCVAR 11
+#define MENUITEM_VARIO_DATA_AVERAGING 12
 
 
-char menu2_list[][15] = {"Thres. up", "Thresh. dn", "Equation rise", "Equation sink", "Zvar", "accelvar", "averaging", "rise_data", "sink_data","","","","", ""};
+char menu2_list[][15] = {"Thres. up", "Thresh. dn", "Equation rise", "Equation sink", "Zvar", "accelvar", "rise_data", "sink_data","","","",""};
 char menu2_name[15] = "Vario";
 int  menu2_id = MENUID_VARIO;
 
@@ -686,11 +685,6 @@ void menuSelector(menu *menuPointer, int selected) {
 			kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
 		}
 		
-		else if (selected == MENUITEM_VARIO_AVERAGING){
-			statVar.vario_lowpass_coef = numpad(statVar.vario_lowpass_coef);
-			String tmpstring =  String(statVar.vario_lowpass_coef);
-			tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_AVERAGING], 15);
-		}
 
 		// ms5611.putSeaLevel(numpad((int)ms5611.readSeaPressure));
 	}

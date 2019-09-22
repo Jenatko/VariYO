@@ -72,10 +72,10 @@ void routine(int OnlyReadGPS){
 		byte fn;
 		do {
 			fn = SPI.transfer( 0xFF );
-	//		if(fn > 127 && fn != 0xff)
+			//		if(fn > 127 && fn != 0xff)
 
-	//		while(digitalRead(BUTTON_LEFT))
-	//		SerialUSB.println((int)fn);   //uncomment for sending GPS data over Serial (to work with u-center)
+			//		while(digitalRead(BUTTON_LEFT))
+			//		SerialUSB.println((int)fn);   //uncomment for sending GPS data over Serial (to work with u-center)
 		} while (gps.handle(fn) != NMEAGPS::DECODE_CHR_INVALID || fn != 0xff );
 		
 		digitalWrite(GPS_CS, 1);
@@ -94,15 +94,15 @@ void routine(int OnlyReadGPS){
 			//var_update_tracklog = 1;
 			//var_update_wind = 1;
 			
-				if(fix.valid.location)
-							updateGauge(&statVar.speedGauge, fix.speed_kph());
-				else  
-							updateGauge(&statVar.speedGauge, NAN);
-				
-				if(fix.valid.heading)	
-					updateGauge(&statVar.headingGauge, fix.heading());
-				else 
-					updateGauge(&statVar.headingGauge, NAN);
+			if(fix.valid.location)
+			updateGauge(&statVar.speedGauge, fix.speed_kph());
+			else
+			updateGauge(&statVar.speedGauge, NAN);
+			
+			if(fix.valid.heading)
+			updateGauge(&statVar.headingGauge, fix.heading());
+			else
+			updateGauge(&statVar.headingGauge, NAN);
 			
 			
 			

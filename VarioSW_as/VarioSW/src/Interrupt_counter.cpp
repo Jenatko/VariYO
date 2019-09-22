@@ -100,8 +100,6 @@ void counterInit() { // Set up the generic clock (GCLK4) used to clock timers
 
 void TC4_Handler()                              // Interrupt Service Routine (ISR) for timer TC4
 {
-					pinMode(BT_UART_TX, OUTPUT);
-					
 	SPI_IRQ.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));
 	if(present_devices & LPS33_PRESENT){
 		//digitalWrite(SRAM_CS, 0);
@@ -127,6 +125,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			//		SerialUSB.print(inFifoWaiting);
 			//	SerialUSB.print(",");
 			//	SerialUSB.println(i);
+			
 			IMU_ReadFrameFromFifo();
 			//	digitalWrite(SRAM_CS, 1);
 
@@ -157,7 +156,8 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			//	digitalWrite(SRAM_CS, 1);
 			a_vertical_imu = Madgwick_filter.getVertical(ax_corr/IMU_BIT_PER_G, ay_corr/IMU_BIT_PER_G, az_corr/IMU_BIT_PER_G);
 			kalmanFilter3_update(alt_baro, (a_vertical_imu*1.0f-1.0f)*980, (float)1/100.0f, &alt_filter, &vario_filter);
-			vario_lowpassed = (vario_lowpassed * (599)+ vario_filter)*(1.0f/600.0f);
+			 vario_lowpassed = (vario_lowpassed * (599)+ vario_filter)*(1.0f/600.0f);
+
 
 		}
 		/*
@@ -184,15 +184,13 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 	}
 	SPI_IRQ.endTransaction();
-
+	
 	updateGauge(&statVar.varioGauge, vario_filter*0.01f);
 	updateGauge(&statVar.varioAvgGauge, vario_filter*0.01f);
-	if(fix.valid.speed)	updateGauge(&statVar.glideRatioGauge, (fix.speed_kph()/3.6) / (vario_filter*0.01f));
-	else statVar.glideRatioGauge.value = NAN;
-	statVar.varioAvgGauge.value = vario_lowpassed*0.01f;
-
-
-	
+	if (fix.speed_kph() != 0)
+	updateGauge(&statVar.glideRatioGauge, vario_filter/(fix.speed_kph() * (100.0f / 3.6f)));
+	else
+	updateGauge(&statVar.glideRatioGauge, NAN);
 
 	
 	/*
@@ -244,7 +242,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	}
 
 
-
+	
 	//clear interrupt flags
 	REG_TC4_INTFLAG = TC_INTFLAG_MC1;
 	REG_TC4_INTFLAG = TC_INTFLAG_OVF;
