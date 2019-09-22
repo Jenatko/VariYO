@@ -15,7 +15,7 @@
 
 
 void loggerISR(){
-
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	
 }
 

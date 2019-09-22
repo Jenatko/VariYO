@@ -20,12 +20,12 @@ extern SdFile loggerFile;
 extern SdFat SD;
 
 void logger_routine(void){
-				pinMode(PB22, OUTPUT);
-			digitalWrite(PB22, 1);
+	pinMode(PB22, OUTPUT);
+	digitalWrite(PB22, 1);
 	
 	reinitializePins();
-			pinMode(PB22, OUTPUT);
-			digitalWrite(PB22, 1);
+	pinMode(PB22, OUTPUT);
+	digitalWrite(PB22, 1);
 	
 	//display.fillScreen(GxEPD_WHITE);
 	//display.setCursor(20, 20);
@@ -175,41 +175,46 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	EIC->WAKEUP.reg = EIC_WAKEUP_WAKEUPEN9;
 	//display.powerDown();
 	REG_TC4_INTENCLR = TC_INTENCLR_MC1 | TC_INTENCLR_MC0 | TC_INTENCLR_OVF;
-	attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
+	
+
+
 	// pinMode(BUTTON_LEFT, OUTPUT);
 	// pinMode(BUTTON_RIGHT, OUTPUT);
 	// pinMode(BUTTON_UP, OUTPUT);
 	// pinMode(BUTTON_DOWN, OUTPUT);
 	// pinMode(BUTTON_CENTER, INPUT_PULLUP);
-	/*USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
-	USB->HOST.CTRLA.bit.ENABLE=0;
-	USB->DEVICE.CTRLA.bit.ENABLE=0;
-	I2S->CTRLA.bit.ENABLE=0;
-
-	ADC->CTRLA.bit.ENABLE=0;
-
-	DAC->CTRLA.bit.ENABLE=0;*/
+	
 	allLow();
 	if(GPS_BckpPwr) gpsBckpTimer();
 	else	digitalWrite(GPS_BCKP, 0);
 	SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+	
+		REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;
+		REG_EIC_INTFLAG = EIC_INTFLAG_EXTINT9;
+	attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
 	__WFI();
-	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+	//SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	for(int i = 0; i < 100; i++){
 		if(digitalRead(BUTTON_CENTER)){   //go back to sleep if woken up by RTC timer (gps backup power turning off) or holding the button just for a while
 			
 			if(logger_ena){
 				logger_routine();
 			}
+			//attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
 			SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+			attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
 			__WFI();
-			SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+
 			i = 0;
 		}
 		delay(10);
 	}
 	logger_ena = 0;
 	rtc.detachInterrupt();
+	
+	//comment when i am super happy, slightly reduces consumption
+	USBDevice.init();
+	USBDevice.attach();
 
 	reinitializePins();
 	counterInit();
@@ -248,6 +253,21 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	if(present_devices | SI7021_PRESENT)
 	request_si7021();
 	
+	if(statVar.ena_vector & (ENA_GPS)){
+		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
+			GPS_low();
+			GPS_low();
+		}
+		else{
+			GPS_full();
+			GPS_full();
+		}
+	}
+	else{
+		GPS_off();
+				GPS_off();
+	}
+	
 	while (buttons.getFlag()){
 		buttons.getButtonPressed();
 	}
@@ -284,8 +304,8 @@ void allLow() {
 	digitalWrite(POWER_ENA, 1);
 	digitalWrite(HEAT, 0);
 	
-				pinMode(PB22, OUTPUT);  //BT uart tx
-			digitalWrite(PB22, 0);
+	pinMode(BT_UART_TX, OUTPUT);  //BT uart tx
+	digitalWrite(BT_UART_TX, 0);
 
 	
 }
@@ -296,7 +316,7 @@ void reinitializePins() {
 	digitalWrite(GPS_BCKP, 1);
 	pinMode(POWER_ENA, INPUT_PULLDOWN);
 	//digitalWrite(POWER_ENA, 0);
-	delay(50);
+	delay(150);
 	pinMode(POWER_ENA, OUTPUT);
 	digitalWrite(POWER_ENA, 0);
 	digitalWrite(EEPROM_CS, 1);
@@ -310,8 +330,8 @@ void reinitializePins() {
 	//pinMode(SD_CS, INPUT);
 	//digitalWrite(SD_RST, 1);
 	//delay(500);
-			pinMode(SD_CS, OUTPUT);
-			digitalWrite(SD_CS, 1);	
+	pinMode(SD_CS, OUTPUT);
+	digitalWrite(SD_CS, 1);
 
 	digitalWrite(SD_RST, 0);
 	digitalWrite(IMU_CS, 1);
@@ -330,7 +350,7 @@ void reinitializePins() {
 	pinPeripheral(MISO_PROG, PIO_SERCOM);
 	pinPeripheral(SCK_PROG, PIO_SERCOM);
 	
-		//delay(500);
+	//delay(500);
 	
 	SPI.begin();
 	
@@ -341,7 +361,7 @@ void reinitializePins() {
 
 void wakeUp() {
 	
-
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 
 	detachInterrupt(BUTTON_CENTER);
 	REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;

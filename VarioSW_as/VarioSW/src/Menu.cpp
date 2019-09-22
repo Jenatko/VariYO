@@ -138,8 +138,9 @@ int  system_menu_id = MENUID_SETTINGS;
 #define MENUITEM_GAUGE_FONT 7
 #define MENUITEM_GAUGE_PLUS_SIGN 8
 #define MENUITEM_GAUGE_FIXED_DECIMALS 9
+#define MENUITEM_GAUGE_AVERAGING 10
 
-char gauge_menu_list[][15] = {"enable", "position", "size", "frame", "decimals", "name", "units", "font", "Showing + sgn", "fixed decimal"};
+char gauge_menu_list[][15] = {"enable", "position", "size", "frame", "decimals", "name", "units", "font", "Showing + sgn", "fixed decimal", "averaging"};
 char gauge_menu_name[15] = "Gauge";
 int  gauge_menu_id = MENUID_GAUGE;
 
@@ -155,9 +156,12 @@ int  gauge_menu_id = MENUID_GAUGE;
 #define MENUITEM_GAUGES_WIND_DIR 7
 #define MENUITEM_GAUGES_TEMPERATURE 8
 #define MENUITEM_GAUGES_HUMIDITY 9
+#define MENUITEM_GAUGES_FLIGHT_TIME 10
+#define MENUITEM_GAUGES_LIFT_TO_DRAG 11
+#define MENUITEM_GAUGES_ALT_ABOVE_TAKEOFF 12
 
 
-char gauges_menu_list[][15] = {"Vario", "Vario avg", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity"};
+char gauges_menu_list[][15] = {"Vario", "Vario avg", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity", "Flight time", "Lift-to-drag", "Alt above TO"};
 char gauges_menu_name[15] = "Gauges";
 int  gauges_menu_id = MENUID_GAUGES;
 
@@ -232,7 +236,8 @@ void menu_init() {
 	else strncpy(system_menu_list[MENUITEM_SETTINGS_GPS_POWER], "GPS Off", 15);
 	
 	
-	if(statVar.ena_vector&ENA_BUZZER)strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer on", 15);
+	if(statVar.ena_vector&ENA_BUZZER && statVar.ena_vector&ENA_BUZZ_WHEN_LOGGING) strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzz in air", 15);
+	else if(statVar.ena_vector&ENA_BUZZER) strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer on", 15);
 	else strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer off", 15);
 
 	
@@ -355,8 +360,8 @@ void MenuEntry(menu *menuPointer){
 			break;
 		}
 		if(menuPointer->is_detailed != lastmenutype){
-			PrepareMenu(menuPointer);
-			lastmenutype = menuPointer->is_detailed;
+			//		PrepareMenu(menuPointer);
+			//		lastmenutype = menuPointer->is_detailed;
 		}
 		drawMenu(menuPointer);
 
@@ -489,11 +494,17 @@ void menuSelector(menu *menuPointer, int selected) {
 				strncpy(listTopMenu[MENUITEM_TOPMENU_START_TRACKLOG], "Stop Trcklog", 15);
 				statVar.ena_vector |= ENA_TRACKLOG;
 				var_takeofftime = rtc.getEpoch();
+				var_takeoffalt = alt_filter;
+				maxalt = alt_filter;
+				minalt = alt_filter;
+				maxrise10s = 0;
+				minsink10s = 0;
 
 			}
 			else{
 				strncpy(listTopMenu[MENUITEM_TOPMENU_START_TRACKLOG], "Start Trcklog", 15);
 				statVar.ena_vector &= ~(ENA_TRACKLOG);
+				showFlightSummary();
 			}
 
 		}
@@ -570,19 +581,25 @@ void menuSelector(menu *menuPointer, int selected) {
 
 		}
 		if (selected == MENUITEM_SETTINGS_BUZZER){
-			if(statVar.ena_vector&ENA_BUZZER){
-				statVar.ena_vector &= ~ENA_BUZZER;
-				strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer off", 15);
+			if((statVar.ena_vector&ENA_BUZZER)==0){
+				statVar.ena_vector |= ENA_BUZZER;
+				statVar.ena_vector |= ENA_BUZZ_WHEN_LOGGING;
+				strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzz in flig", 15);
+			}
+			else if(statVar.ena_vector&ENA_BUZZ_WHEN_LOGGING){
+				statVar.ena_vector &= ~ENA_BUZZ_WHEN_LOGGING;
+				strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer on", 15);
+				
 			}
 			else{
-				statVar.ena_vector |= ENA_BUZZER;
-				strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer on", 15);
+				statVar.ena_vector &= ~ENA_BUZZER;
+				strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer off", 15);
+				
 			}
 			
 		}
 		if (selected == MENUITEM_SETTINGS_TIME_ZONE){
 			statVar.TimeZone = numpad(statVar.TimeZone);
-			PrepareMenu(menuPointer);
 		}
 		if (selected == MENUITEM_SETTINGS_SAVE_EEPROM){
 			eepromWrite(0, statVar);
@@ -741,6 +758,15 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		if (selected == MENUITEM_GAUGES_HUMIDITY){
 			gaugepointer = &statVar.humidGauge;
+		}
+		if (selected == MENUITEM_GAUGES_FLIGHT_TIME){
+			gaugepointer = &statVar.flightTimeGauge;
+		}
+		if (selected == MENUITEM_GAUGES_LIFT_TO_DRAG){
+			gaugepointer = &statVar.glideRatioGauge;
+		}
+		if (selected == MENUITEM_GAUGES_ALT_ABOVE_TAKEOFF){
+			gaugepointer = &statVar.altAboveTakeoffGauge;
 		}
 		
 		
@@ -972,9 +998,17 @@ void menuSelector(menu *menuPointer, int selected) {
 			}
 
 		}
+		
+		else if (selected == MENUITEM_GAUGE_AVERAGING){
+			gaugepointer->averaging = numpad(gaugepointer->averaging);
+
+		}
+		
 
 	}
+	
 	menu_init();
+	display.setFont(&FreeMonoBold12pt7b);
 	PrepareMenu(menuPointer);
 }
 
@@ -1386,149 +1420,8 @@ void debugGPS(void){
 	
 }
 
-void Gauge_enable(Gauge *gau) {
-	if (gau->settings & GAUGE_ENA) {
-		if (gau->settings & GAUGE_FRAME) {
-			display.drawRect(gau->offset_X, gau->offset_Y, gau->size_X, gau->size_Y, GxEPD_BLACK);
-			//      display.fillRect(0, 0, 199, 199, GxEPD_BLACK);
-			//         display.drawRect(offset_X-1, offset_Y-1, size_X+1, size_Y+1, GxEPD_WHITE);
-		}
-		if (gau->name_shown[0] != '\0') {
-			//	display.fillRect(gau->offset_X + 5 , gau->offset_Y - 11, strlen(gau->name_shown) * 12, 13, GxEPD_WHITE);
-			display.setCursor(gau->offset_X + 8, gau->offset_Y);
-			display.setFont(&FreeMonoBold9pt7b);
-
-			display.print(gau->name_shown);
-
-			display.setFont(&FreeMonoBold12pt7b);
-
-		}
-		if (gau->units[0] != '\0') {
-			display.setFont(&FreeMonoBold9pt7b);
-			switch (gau->settings & GAUGE_FONT_MASK) {
-				case (0):
-				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 20);
-				break;
-				case (1):
-				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 20);
-				break;
-				case (2):
-				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 25);
-				break;
-				case (3):
-				display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + 32);
-				break;
-			}
-			//	display.setCursor(gau->offset_X + gau->size_X - strlen(gau->units) * 12, gau->offset_Y + gau->size_Y - 17);
-			display.print(gau->units);
-			display.setFont(&FreeMonoBold12pt7b);
-
-		}
 
 
-	}
-}
-
-
-void Gauge_update(Gauge *gau) {
-	//SerialUSB.println(gau->settings, HEX);
-	if (gau->settings & GAUGE_ENA) {
-		switch (gau->settings & GAUGE_FONT_MASK) {
-			case (0):
-			display.setFont(&FreeMonoBold9pt7b);
-			display.setCursor(gau->offset_X + 5, gau->offset_Y + 20);
-			break;
-			case (1):
-			display.setFont(&FreeMonoBold12pt7b);
-			display.setCursor(gau->offset_X + 5, gau->offset_Y + 22);
-			break;
-			case (2):
-			display.setFont(&FreeMonoBold18pt7b);
-			display.setCursor(gau->offset_X + 5, gau->offset_Y + 28);
-			break;
-			case (3):
-			display.setFont(&FreeMonoBold24pt7b);
-			display.setCursor(gau->offset_X + 5, gau->offset_Y + 35);
-			break;
-		}
-		//display.fillRect(gau->offset_X + 1, gau->offset_Y + 1, gau->size_X - 2 - strlen(gau->units) * 12, gau->size_Y - 2, GxEPD_WHITE);
-		//display.setCursor(offset_X + 5, offset_Y + 22);
-		
-		if(gau->settings & GAUGE_SHOW_PLUS_SIGN){
-			if(gau->value >=0)
-			display.print("+");
-		}
-		if(gau->settings & GAUGE_VALIDS){
-			
-
-			
-			int digits = (gau->settings & GAUGE_DIGITS_MASK)>>2;
-			int rem_for_decimal = 0;
-			int valid_pow = 1;
-			
-			
-
-			for(int i = 0; i < digits; i++ ) valid_pow *= 10;
-			
-			if(round(gau->value) >= valid_pow)
-			gau->value = valid_pow - 1;
-			else if(round(gau->value) <= -valid_pow)
-			gau->value = -valid_pow + 1;
-			
-			for(int j = valid_pow; j >= 1; j/=10){
-				if(abs(gau->value) >= (j-0.05)){
-					display.print(gau->value, rem_for_decimal-1);
-					break;
-				}
-				if(j == 1){
-					display.print(gau->value, rem_for_decimal-1);
-					break;
-					
-				}
-				rem_for_decimal++;
-				
-			}
-
-			
-			
-			
-		}
-		else{
-
-			display.print(gau->value, (gau->settings & GAUGE_DIGITS_MASK) >> 2);
-			
-		}
-		display.setFont(&FreeMonoBold12pt7b);
-	}
-}
-
-
-void printGauges(){
-	Gauge_enable(&statVar.varioGauge);
-	Gauge_enable(&statVar.altitudeGauge);
-	Gauge_enable(&statVar.AGLGauge);
-	Gauge_enable(&statVar.tempGauge);
-	Gauge_enable(&statVar.humidGauge);
-	Gauge_enable(&statVar.speedGauge);
-	Gauge_enable(&statVar.headingGauge);
-	Gauge_enable(&statVar.windDirGauge);
-	Gauge_enable(&statVar.windGauge);
-	Gauge_enable(&statVar.varioAvgGauge);
-	
-	Gauge_update(&statVar.varioGauge);
-	Gauge_update(&statVar.altitudeGauge);
-	Gauge_update(&statVar.AGLGauge);
-	Gauge_update(&statVar.tempGauge);
-	Gauge_update(&statVar.humidGauge);
-	
-	Gauge_update(&statVar.speedGauge);
-	Gauge_update(&statVar.headingGauge);
-	Gauge_update(&statVar.windGauge);
-	Gauge_update(&statVar.windDirGauge);
-	Gauge_update(&statVar.varioAvgGauge);
-	
-
-}
 
 
 void calibrateMagnetometer(){
@@ -1669,5 +1562,61 @@ void calibrateAccelerometer(){
 	statVar.ena_vector = enavectorold;
 	pinMode(BUZZER_PIN, OUTPUT);
 	statVar.BuzzerVolume = volume_old;
+	
+}
+
+void showFlightSummary(void){
+	
+	display.setFont(&FreeMonoBold9pt7b);
+	display.fillScreen(GxEPD_WHITE);
+	
+	display.setCursor(5,15);
+	display.print("takeoff: ");
+	display.print(var_takeoffalt*0.01f, 0);
+	display.print("m");
+	
+	display.setCursor(5,30);
+	display.print("lading:");
+	display.print(alt_filter*0.01f, 0);
+	display.print("m");
+	
+	display.setCursor(5,45);
+	display.print("max alt:");
+	display.print(maxalt*0.01f, 0);
+	display.print("m");
+	
+	display.setCursor(5,60);
+	display.print("min alt:");
+	display.print(minalt*0.01f, 0);
+	display.print("m");
+	
+	display.setCursor(5,75);
+	display.print("max rise:");
+	display.print(maxrise10s*0.01f);
+	display.print("m");
+	
+	display.setCursor(5,90);
+	display.print("max sink:");
+	display.print(minsink10s*0.01f);
+	display.print("m");
+	
+	display.setCursor(5,105);
+	display.print("flight time sec:");
+	display.print(rtc.getEpoch()-var_takeofftime);
+	display.print("m");
+	
+	
+	
+
+	display.display(true);
+
+	
+	while (!buttons.getFlag())
+	{	routine();
+		
+
+	}
+	display.setFont(&FreeMonoBold12pt7b);
+	buttons.getButtonPressed();
 	
 }

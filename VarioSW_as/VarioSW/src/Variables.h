@@ -33,6 +33,7 @@ typedef struct Gauge{
 	//uint8_t showPlusSign;
 	char name_shown[10];
 	char units[4];
+	uint16_t averaging;
 } Gauge;
 
 
@@ -79,6 +80,9 @@ typedef struct StaticVariables{
 	Gauge humidGauge;
 	Gauge windGauge;
 	Gauge windDirGauge;
+	Gauge glideRatioGauge;
+	Gauge flightTimeGauge;
+	Gauge altAboveTakeoffGauge;
 	
 	
 } StaticVariables;
@@ -99,6 +103,7 @@ extern int tracklog_stat;
 //extern struct tm*  var_localtime;
 extern struct tm  var_localtime;
 extern time_t  var_takeofftime;
+extern int var_takeoffalt;
 extern float g_meter;
 extern int ground_level;
 extern int PerformRoutineInWaitWhileBusy;
@@ -112,6 +117,11 @@ extern uint8_t present_devices;
 extern float battery_voltage, battery_SOC;
 
 extern int logger_ena;
+
+extern int maxalt ;
+extern int minalt ;
+extern int maxrise10s;
+extern int minsink10s ;
 
 
 

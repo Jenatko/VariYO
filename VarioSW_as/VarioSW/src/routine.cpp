@@ -24,6 +24,8 @@
 
 #include "MadgwickAHRS.h"
 
+#include "Gauge.h"
+
 
 NMEAGPS  gps;
 gps_fix  fix;
@@ -70,7 +72,10 @@ void routine(int OnlyReadGPS){
 		byte fn;
 		do {
 			fn = SPI.transfer( 0xFF );
-			//SerialUSB.write(fn);   //uncomment for sending GPS data over Serial (to work with u-center)
+	//		if(fn > 127 && fn != 0xff)
+
+	//		while(digitalRead(BUTTON_LEFT))
+	//		SerialUSB.println((int)fn);   //uncomment for sending GPS data over Serial (to work with u-center)
 		} while (gps.handle(fn) != NMEAGPS::DECODE_CHR_INVALID || fn != 0xff );
 		
 		digitalWrite(GPS_CS, 1);
@@ -88,6 +93,16 @@ void routine(int OnlyReadGPS){
 
 			//var_update_tracklog = 1;
 			//var_update_wind = 1;
+			
+				if(fix.valid.location)
+							updateGauge(&statVar.speedGauge, fix.speed_kph());
+				else  
+							updateGauge(&statVar.speedGauge, NAN);
+				
+				if(fix.valid.heading)	
+					updateGauge(&statVar.headingGauge, fix.heading());
+				else 
+					updateGauge(&statVar.headingGauge, NAN);
 			
 			
 			
@@ -135,6 +150,15 @@ void routine(int OnlyReadGPS){
 		}
 		
 		update_tracklog();
+		
+		if(statVar.ena_vector & ENA_TRACKLOG){
+			if(maxalt < alt_filter) maxalt = alt_filter;
+			if(minalt > alt_filter) minalt = alt_filter;
+			if(maxrise10s < vario_lowpassed) maxrise10s = vario_lowpassed;
+			if(minsink10s > vario_lowpassed) minsink10s = vario_lowpassed;
+			
+			
+		}
 
 
 		g_meter = pow(  ((float)ax*ax + (float)ay*ay + (float)az*az)/268.4e6 , 0.5) ;
@@ -446,163 +470,133 @@ void alt_agl(){
 	
 
 
-		
-		float fix_lat = fix.latitude();
-		float fix_lon = fix.longitude();
-		
-
-		
-		
-		
-		unsigned long time_a = micros();
-		unsigned long time_b;
-		
-		if(fix.valid.location && (present_devices & SD_PRESENT)){
-			int int_lat = (int)fix_lat;
-			int int_lon = (int)fix_lon;
-
-			
-			int x1y1, x2y1, x1y2, x2y2, x1, x2, y1, y2;
-			float fractx, fracty, x1inter, x2inter, interpolation;
-			
-			
-			x1 = floor(((float)fix_lon - int_lon)*1200.0f);
-			x2 = ceil(((float)fix_lon - int_lon)*1200.0f);
-			y1 = floor(1200.0f-((float)fix_lat - int_lat)*1200.0f);
-			y2 = ceil(1200.0f-((float)fix_lat - int_lat)*1200.0f);
-			
-
-			
-			/*
-			x1 = ((float)fix.longitude() - int_lon)*1200.0f;
-			x2 = x1+1;
-			y1 = 1201.0f-((float)fix.latitude() - int_lat)*1200.0f;
-			y2 = y1+1;
-			*/
-			
-			fractx = (((float)fix_lon - int_lon)*1200.0f) - x1;
-			fracty = (1200.0f-((float)fix_lat - int_lat)*1200.0f) - y1;
-			
-
-
-			
-			
-			float temp_lat  = round(1201.0f-((float)fix_lat - int_lat)*1200.0f);
-			float temp_lon = round(((float)fix_lon - int_lon)*1200.0f);
-			
-			
-			int row = (int)temp_lat;
-			int col = (int)temp_lon;
-			
-
-			
-			char cesta_char2[20];
-			
-
-
-			
-			//open corresponding HGT file if moved to different coordinates
-			if((int_lat != lat_last) || (int_lon != lon_last) || !HeightData.isOpen()){
-				SerialUSB.println("opening");
-				time_a = micros();
-
-
-				if(HeightData.isOpen())	HeightData.close();
-				if((int_lat != lat_last) || (int_lon != lon_last)) filenotpresent == 0;
-				if(filenotpresent == 0){
-					lat_last = int_lat;
-					lon_last = int_lon;
-					
-					
-					String cesta = ("/HGT/");
-					if(fix.latitude() < 0){
-						cesta.concat("S");
-						int_lat--;
-					}
-					else{
-						cesta.concat("N");
-					}
-					if(int_lat < 10 && int_lat > -10){
-						cesta.concat("0");
-					}
-					cesta.concat(String(abs(int_lat)));
-
-					if(fix.longitude() < 0){
-						cesta.concat("W");
-						int_lon--;
-					}
-					else{
-						cesta.concat("E");
-					}
-					if(int_lon < 10 && int_lon > -10){
-						cesta.concat("0");
-					}
-					if(int_lon < 100 && int_lon > -100){
-						cesta.concat("0");
-					}
-					cesta.concat(String(abs(int_lon)));
-					cesta.concat(".HGT");
-					cesta.toCharArray(cesta_char2, 20);
-					
-					HeightData.open(cesta_char2, O_READ);
-					time_b = micros();
-					if(!HeightData.isOpen()) filenotpresent = 1;
-				}
-				
-			}
-
-			
-			if(HeightData.isOpen()){
-				ground_level = getAGLfromFile(row, col);
-				x1y1 =  getAGLfromFile(y1, x1);
-				x2y1 =  getAGLfromFile(y1, x2);
-				x1y2 =  getAGLfromFile(y2, x1);
-				x2y2 =  getAGLfromFile(y2, x2);
-
-				x1inter = (1-fractx) * x1y1 + fractx*x2y1;
-				x2inter = (1-fractx) * x1y2 + fractx*x2y2;
-				interpolation = (1-fracty)* x1inter	+ fracty* x2inter;
-
-				ground_level_interpol = interpolation;
-				
-				
-
-			}
-			else{
-				ground_level = 0;
-				SerialUSB.println("not open");
-			}
-			/*
-			SerialUSB.print(x1);
-			SerialUSB.print(",");
-			SerialUSB.print(x2);
-			SerialUSB.print(",");
-			SerialUSB.print(y1);
-			SerialUSB.print(",");
-			SerialUSB.print(y2);
-			SerialUSB.print(",");
-			
-			SerialUSB.print(fractx, 3);
-			SerialUSB.print(",");
-			SerialUSB.print(fracty, 3);
-			SerialUSB.print(",");
-			SerialUSB.print(ground_level);
-			SerialUSB.print(",");
-			SerialUSB.print(x1y1);
-			SerialUSB.print(",");
-			SerialUSB.print(x2y1);
-			SerialUSB.print(",");
-			SerialUSB.print(x1y2);
-			SerialUSB.print(",");
-			SerialUSB.print(x2y2);
-			SerialUSB.print(",");
-			SerialUSB.print(interpolation);
-			SerialUSB.println(",");
-			*/
-		}
+	
+	float fix_lat = fix.latitude();
+	float fix_lon = fix.longitude();
+	
 
 	
-	//SerialUSB.println(time_b-time_a);
+	
+	
+	unsigned long time_a = micros();
+	unsigned long time_b;
+	
+	if(fix.valid.location && (present_devices & SD_PRESENT)){
+		int int_lat = (int)fix_lat;
+		int int_lon = (int)fix_lon;
+
+		
+		int x1y1, x2y1, x1y2, x2y2, x1, x2, y1, y2;
+		float fractx, fracty, x1inter, x2inter, interpolation;
+		
+		
+		x1 = floor(((float)fix_lon - int_lon)*1200.0f);
+		x2 = ceil(((float)fix_lon - int_lon)*1200.0f);
+		y1 = floor(1200.0f-((float)fix_lat - int_lat)*1200.0f);
+		y2 = ceil(1200.0f-((float)fix_lat - int_lat)*1200.0f);
+		
+
+		
+		/*
+		x1 = ((float)fix.longitude() - int_lon)*1200.0f;
+		x2 = x1+1;
+		y1 = 1201.0f-((float)fix.latitude() - int_lat)*1200.0f;
+		y2 = y1+1;
+		*/
+		
+		fractx = (((float)fix_lon - int_lon)*1200.0f) - x1;
+		fracty = (1200.0f-((float)fix_lat - int_lat)*1200.0f) - y1;
+		
+
+
+		
+		
+		float temp_lat  = round(1201.0f-((float)fix_lat - int_lat)*1200.0f);
+		float temp_lon = round(((float)fix_lon - int_lon)*1200.0f);
+		
+		
+		int row = (int)temp_lat;
+		int col = (int)temp_lon;
+		
+
+		
+		char cesta_char2[20];
+		
+
+
+		
+		//open corresponding HGT file if moved to different coordinates
+		if((int_lat != lat_last) || (int_lon != lon_last) || !HeightData.isOpen()){
+			time_a = micros();
+
+
+			if(HeightData.isOpen())	HeightData.close();
+			if((int_lat != lat_last) || (int_lon != lon_last)) filenotpresent == 0;
+			if(filenotpresent == 0){
+				lat_last = int_lat;
+				lon_last = int_lon;
+				
+				
+				String cesta = ("/HGT/");
+				if(fix.latitude() < 0){
+					cesta.concat("S");
+					int_lat--;
+				}
+				else{
+					cesta.concat("N");
+				}
+				if(int_lat < 10 && int_lat > -10){
+					cesta.concat("0");
+				}
+				cesta.concat(String(abs(int_lat)));
+
+				if(fix.longitude() < 0){
+					cesta.concat("W");
+					int_lon--;
+				}
+				else{
+					cesta.concat("E");
+				}
+				if(int_lon < 10 && int_lon > -10){
+					cesta.concat("0");
+				}
+				if(int_lon < 100 && int_lon > -100){
+					cesta.concat("0");
+				}
+				cesta.concat(String(abs(int_lon)));
+				cesta.concat(".HGT");
+				cesta.toCharArray(cesta_char2, 20);
+				
+				HeightData.open(cesta_char2, O_READ);
+				time_b = micros();
+				if(!HeightData.isOpen()) filenotpresent = 1;
+			}
+			
+		}
+
+		
+		if(HeightData.isOpen()){
+			ground_level = getAGLfromFile(row, col);
+			x1y1 =  getAGLfromFile(y1, x1);
+			x2y1 =  getAGLfromFile(y1, x2);
+			x1y2 =  getAGLfromFile(y2, x1);
+			x2y2 =  getAGLfromFile(y2, x2);
+
+			x1inter = (1-fractx) * x1y1 + fractx*x2y1;
+			x2inter = (1-fractx) * x1y2 + fractx*x2y2;
+			interpolation = (1-fracty)* x1inter	+ fracty* x2inter;
+
+			ground_level_interpol = interpolation;
+			
+			
+
+		}
+		else ground_level = 0xffff; //valid location but missing HGT file
+		
+
+	}
+	
+	else ground_level = 0xffff; //not valid location
 	
 }
 
