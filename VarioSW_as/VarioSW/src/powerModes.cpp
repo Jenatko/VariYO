@@ -160,7 +160,7 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	}
 	
 	
-	eepromWrite(0, statVar);
+
 	display.fillScreen(GxEPD_WHITE);
 	display.setCursor(20, 100);
 	display.print("Power Off");
@@ -169,6 +169,7 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 		display.print("Battery empty");
 	}
 	display.display();
+	eepromWrite(0, statVar);
 	USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
 	//USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_RUNSTDBY;
 	SCB->SCR |= 1 << 2;
@@ -192,12 +193,14 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 		REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;
 		REG_EIC_INTFLAG = EIC_INTFLAG_EXTINT9;
 	attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
+	//__DSB();
 	__WFI();
 	//SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	for(int i = 0; i < 100; i++){
 		if(digitalRead(BUTTON_CENTER)){   //go back to sleep if woken up by RTC timer (gps backup power turning off) or holding the button just for a while
 			
 			if(logger_ena){
+				SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 				logger_routine();
 			}
 			//attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
@@ -217,7 +220,7 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	USBDevice.attach();
 
 	reinitializePins();
-	counterInit();
+
 
 	
 	
@@ -232,7 +235,7 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	}
 	pinMode(SD_DETECT, INPUT);
 
-	
+
 	
 	display.init(0);
 
@@ -241,17 +244,21 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 
 	display.fillScreen(GxEPD_WHITE);
 
-	display.display();
+	//display.display();
 	display.setRotation(0);
 
 	display.display(true);
 	display.setTextWrap(0);
+			
 	if(present_devices | BMX160_PRESENT)
 	IMU_init();
+
 	if(present_devices | LPS33_PRESENT)
 	lps33_init();
 	if(present_devices | SI7021_PRESENT)
 	request_si7021();
+	
+		counterInit();
 	
 	if(statVar.ena_vector & (ENA_GPS)){
 		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
@@ -277,6 +284,9 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 
 
 void allLow() {
+	
+	//SPI.end();
+
 	digitalWrite(SD_RST, 0);
 	
 	digitalWrite(GPS_CS, 0);
@@ -323,19 +333,14 @@ void reinitializePins() {
 	digitalWrite(SRAM_CS, 1);
 	digitalWrite(SD_CS, 1);
 	digitalWrite(SD_RST, 0);
-
-	//pinMode(22, INPUT);
-	//pinMode(23, INPUT);
-	//pinMode(24, INPUT);
-	//pinMode(SD_CS, INPUT);
-	//digitalWrite(SD_RST, 1);
-	//delay(500);
+	
 	pinMode(SD_CS, OUTPUT);
 	digitalWrite(SD_CS, 1);
 
 	digitalWrite(SD_RST, 0);
 	digitalWrite(IMU_CS, 1);
 	digitalWrite(GPS_CS, 1);
+	digitalWrite(BARO_CS, 1);
 	digitalWrite(DISP_RST, 1);
 	digitalWrite(DISP_DC,1);
 	digitalWrite(DISP_CS, 1);
@@ -349,11 +354,10 @@ void reinitializePins() {
 	pinPeripheral(MOSI_PROG, PIO_SERCOM);
 	pinPeripheral(MISO_PROG, PIO_SERCOM);
 	pinPeripheral(SCK_PROG, PIO_SERCOM);
-	
-	//delay(500);
-	
+
 	SPI.begin();
-	
+
+
 
 }
 

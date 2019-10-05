@@ -1595,9 +1595,17 @@ void showFlightSummary(void){
 	display.print("m");
 	
 	display.setCursor(5,105);
-	display.print("flight time sec:");
-	display.print(rtc.getEpoch()-var_takeofftime);
-	display.print("m");
+	display.print("flight time:");
+		display.setCursor(5,120);
+	int hours = (rtc.getEpoch()-var_takeofftime) / 3600;
+		int minutes = ((rtc.getEpoch()-var_takeofftime)- 3600*hours) / 60;
+				int seconds = ((rtc.getEpoch()-var_takeofftime)- 3600*hours - 60*minutes);
+	display.print(hours);
+	display.print(":");
+		display.print(minutes);
+		display.print(":");
+			display.print(seconds);
+			display.print(":");
 	
 	
 	

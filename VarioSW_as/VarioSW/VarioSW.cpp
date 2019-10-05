@@ -258,7 +258,7 @@ void setup() {
 
 
 	SPI.begin();
-	
+
 
 	
 	delay(100);   //wait for EEPROM to power-up
