@@ -43,8 +43,8 @@
       </ToolNumber>
       <ToolName xmlns="">Custom Programming Tool</ToolName>
     </custom>
-    <CustomProgrammingToolCommand>python D:\Data\Bastelni\Vario\VarioSW_as\programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
-    <CustomProgrammingToolTimeout>10</CustomProgrammingToolTimeout>
+    <CustomProgrammingToolCommand>python D:\VariYO\programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
+    <CustomProgrammingToolTimeout>20</CustomProgrammingToolTimeout>
     <AsfFrameworkConfig>
       <framework-data xmlns="">
         <options />
@@ -572,6 +572,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lib\kalmanfilter3.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\logger.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\logger.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lib\MadgwickAHRS\MadgwickAHRS.cpp">
