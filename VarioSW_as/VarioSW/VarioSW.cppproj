@@ -31,17 +31,21 @@
     <ResetRule>0</ResetRule>
     <EraseKey />
     <avrtool>custom</avrtool>
-    <avrtoolserialnumber />
+    <avrtoolserialnumber>
+    </avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x10010305</avrdeviceexpectedsignature>
     <custom>
-      <ToolOptions xmlns="">
+      <ToolOptions>
         <InterfaceProperties>
+          <SwdClock>2000000</SwdClock>
         </InterfaceProperties>
+        <InterfaceName>
+        </InterfaceName>
       </ToolOptions>
-      <ToolType xmlns="">custom</ToolType>
-      <ToolNumber xmlns="">
+      <ToolType>custom</ToolType>
+      <ToolNumber>
       </ToolNumber>
-      <ToolName xmlns="">Custom Programming Tool</ToolName>
+      <ToolName>Custom Programming Tool</ToolName>
     </custom>
     <CustomProgrammingToolCommand>python D:\VariYO\programovani.py "$(OutputDirectory)\$(OutputFileName).bin"</CustomProgrammingToolCommand>
     <CustomProgrammingToolTimeout>20</CustomProgrammingToolTimeout>
@@ -57,6 +61,20 @@
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
+    <avrtoolinterface>
+    </avrtoolinterface>
+    <com_atmel_avrdbg_tool_jtagice3plus>
+      <ToolOptions>
+        <InterfaceProperties>
+          <SwdClock>2000000</SwdClock>
+        </InterfaceProperties>
+        <InterfaceName>SWD</InterfaceName>
+      </ToolOptions>
+      <ToolType>com.atmel.avrdbg.tool.jtagice3plus</ToolType>
+      <ToolNumber>J30200004391</ToolNumber>
+      <ToolName>JTAGICE3</ToolName>
+    </com_atmel_avrdbg_tool_jtagice3plus>
+    <avrtoolinterfaceclock>2000000</avrtoolinterfaceclock>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -158,6 +176,11 @@
             <Value>../src/lib/ellipsoid</Value>
             <Value>../src/lib/ellipsoid/eig</Value>
             <Value>../src/lib/Compass</Value>
+            <Value>../src/lib/SdFat</Value>
+            <Value>../src/lib/SdFat/FatLib</Value>
+            <Value>../src/lib/SdFat/SdCard</Value>
+            <Value>../src/lib/SdFat/SpiDriver</Value>
+            <Value>../src/lib/SdFat/SpiDriver/boards</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -329,6 +352,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\definitions.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Gauge.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Gauge.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\Interrupt_counter.cpp">
@@ -712,6 +741,192 @@
     <Compile Include="src\lib\RTCZero\RTCZero.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\lib\SdFat\BlockDriver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\ArduinoFiles.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\ArduinoStream.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\BaseBlockDriver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\bufstream.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatApiConstants.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatFile.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatFile.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatFileLFN.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatFilePrint.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatFileSFN.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatFileSystem.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatLib.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatLibConfig.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatStructs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatVolume.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FatVolume.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FmtNumber.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\FmtNumber.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\fstream.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\fstream.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\ios.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\iostream.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\istream.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\istream.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\ostream.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\ostream.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\StdioStream.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FatLib\StdioStream.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\FreeStack.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\MinimumSerial.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\MinimumSerial.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdCard\SdInfo.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdCard\SdioCard.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdCard\SdioCardEX.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdCard\SdioTeensy.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdCard\SdSpiCard.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdCard\SdSpiCard.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdCard\SdSpiCardEX.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdFat.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SdFatConfig.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\sdios.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\AvrDevelopersGpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\BobuinoGpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\GpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\LeonardoGpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\MegaGpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\SleepingBeautyGpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\Standard1284GpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\Teensy2GpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\Teensy2ppGpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\boards\UnoGpioPinMap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\DigitalPin.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SdSpiBaseDriver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SdSpiDriver.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SdSpiESP8266.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SdSpiParticle.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SdSpiSAM3X.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SdSpiSTM32.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SdSpiTeensy3.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SpiDriver\SoftSPI.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\SdFat\SysCall.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\Menu.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -890,7 +1105,12 @@
     <Folder Include="src\lib\GxEPD2" />
     <Folder Include="src\lib\ellipsoid" />
     <Folder Include="src\lib\Compass" />
+    <Folder Include="src\lib\SdFat" />
     <Folder Include="src\lib\RTCZero" />
+    <Folder Include="src\lib\SdFat\FatLib" />
+    <Folder Include="src\lib\SdFat\SpiDriver" />
+    <Folder Include="src\lib\SdFat\SdCard" />
+    <Folder Include="src\lib\SdFat\SpiDriver\boards" />
     <Folder Include="src\periph" />
     <Folder Include="src\periph\BMI160_bosch_driver" />
     <Folder Include="src\periph\BMM150_bosch_driver" />

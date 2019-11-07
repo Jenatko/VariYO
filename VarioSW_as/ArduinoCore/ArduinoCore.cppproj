@@ -750,45 +750,6 @@
     <Compile Include="src\core\WString.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\libraries\SD\File.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\SD.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\SD.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\FatStructs.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\Sd2Card.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\Sd2Card.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\Sd2PinMap.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\SdFat.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\SdFatmainpage.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\SdFatUtil.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\SdFile.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\SdInfo.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\libraries\SD\utility\SdVolume.cpp">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\libraries\spi\SPI.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -819,8 +780,6 @@
     <Folder Include="src\core\PreprocessingAssembly\" />
     <Folder Include="src\core\USB\" />
     <Folder Include="src\libraries\" />
-    <Folder Include="src\libraries\SD" />
-    <Folder Include="src\libraries\SD\utility" />
     <Folder Include="src\libraries\spi\" />
     <Folder Include="src\libraries\wire\" />
     <Folder Include="src\variants\" />

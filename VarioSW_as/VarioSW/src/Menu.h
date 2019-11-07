@@ -51,13 +51,14 @@ extern menu gauge_menu;
 extern menu gauges_menu;
 extern menu logger_menu;
 
-void Gauge_update(Gauge *gau);
-void Gauge_enable(Gauge *gau);
+void Gauge_print(Gauge *gau);
 void setGaugeMenu(Gauge *gaugePointer);
 void printGauges();
 
 void calibrateMagnetometer();
 void calibrateAccelerometer();
+
+void showFlightSummary(void);
 
 extern double myRealAltitude;
 

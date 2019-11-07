@@ -29,6 +29,13 @@ int ground_level;
 int PerformRoutineInWaitWhileBusy = 0;
 int position_updated = 0;
 
+
+int var_takeoffalt = 0;
+int maxalt = 0;
+int minalt = 0;
+int maxrise10s = 0;
+int minsink10s = 0;
+
 float battery_voltage, battery_SOC;
 
 

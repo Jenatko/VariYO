@@ -1,0 +1,21 @@
+Installation instruction:
+
+Get Arduino studio for drivers
+	- Go to Tools->Board->Board Manager and download SAMD package
+
+Get ATMEL Studio
+	- 32 bit, a je to arm (sam), ne AVR jetli jsi u toho zaškrkavatka při instalaci 🙂
+	- V Custom Programming Tool dat cestu k "programovani.py"
+	- Add logger.cpp and logger.h as existing source into the project from VarioSW_as\VarioSW\src\lib
+		- v solution exploreru najdi nějakou složku kam to patří, pravy, add -> existing item
+		
+Get python 2.7
+	- get pyserial and pywin32
+	
+Find out serial port
+	- Easiest in Arduino studio -- Remember which usb you've used! It's the front one on the right side.
+
+Change port in "programovani.py"
+	- line 48: port one less for communication
+	- line 56: the port
+	- line 63: the port  

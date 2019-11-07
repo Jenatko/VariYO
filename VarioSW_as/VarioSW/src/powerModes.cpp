@@ -9,33 +9,40 @@
 #include "wiring_private.h"
 #include "EEPROM.h"
 #include "Variables.h"
-#include "SD.h"
+#include "SdFat.h"
 #include "MEMS.h"
 #include "RTCZero.h"
 #include "MAX17055.h"
 
-extern File tracklog;
-extern File loggerFile;
+extern SdFile tracklog;
+extern SdFile loggerFile;
+
+extern SdFat SD;
 
 void logger_routine(void){
+	pinMode(PB22, OUTPUT);
+	digitalWrite(PB22, 1);
 	
 	reinitializePins();
-	display.fillScreen(GxEPD_WHITE);
-	display.setCursor(20, 20);
-	display.print("1");
-	display.display();
+	pinMode(PB22, OUTPUT);
+	digitalWrite(PB22, 1);
+	
+	//display.fillScreen(GxEPD_WHITE);
+	//display.setCursor(20, 20);
+	//display.print("1");
+	//display.display();
 	
 	pinMode(SD_DETECT, INPUT_PULLUP);
-	delay(100);
+	delay(10);
 
-	display.print("2");
-	display.display(true);
-	int ahoj = SD.begin(SD_CS);
-	display.print(ahoj);
-	display.display(true);
+	//display.print("2");
+	//display.display(true);
+	int ahoj = SD.begin(SD_CS, SD_SCK_MHZ(8));
+	//display.print(ahoj);
+	//display.display(true);
 	if(ahoj){
-		display.print("4");
-		display.display(true);
+		//display.print("4");
+		//display.display(true);
 		/*
 		if(digitalRead(SD_DETECT) == 0){
 		present_devices |= SD_PRESENT;
@@ -48,22 +55,22 @@ void logger_routine(void){
 		pinMode(SD_DETECT, INPUT);
 		float current = 0;
 		
-		display.print("5");
-		display.display(true);
+		//display.print("5");
+		//display.display(true);
 		request_si7021();
-		display.print("6");
-		display.display(true);
+		//display.print("6");
+		//display.display(true);
 		if(present_devices & MAX17055_PRESENT){
-			display.print("7");
-			display.display(true);
+			//display.print("7");
+			//display.display(true);
 			current = max17055.getAverageCurrent();
 			battery_SOC = max17055.getSOC();
 			battery_voltage = max17055.getAverageVoltage();
-			display.print("8");
-			display.display(true);
+			//display.print("8");
+			//display.display(true);
 			if(battery_voltage < 3){
-				display.print("9");
-				display.display(true);
+				//display.print("9");
+				//display.display(true);
 				rtc.detachInterrupt();
 				logger_ena = 0;
 				display.fillScreen(GxEPD_WHITE);
@@ -75,32 +82,32 @@ void logger_routine(void){
 				
 			}
 		}
-		display.setCursor(20, 50);
-		display.print("a");
-		display.display(true);
+		//display.setCursor(20, 50);
+		//display.print("a");
+		//display.display(true);
 		for(int timeout = 0; timeout < 10; timeout++){
 			if(read_si7021()) break;
 			else delay(10);
 			if(timeout == 9) request_si7021();
 		}
-		display.print("b");
-		display.display(true);
+		//display.print("b");
+		//display.display(true);
 		request_si7021();
-		delay(50);
+		//delay(50);
 		for(int timeout = 0; timeout < 10; timeout++){
 			if(read_si7021()) break;
 			else delay(10);
 			
 		}
-		display.print("c");
-		display.display(true);
+		//display.print("c");
+		//display.display(true);
 		
-		loggerFile = SD.open("logger.csv", FILE_WRITE);
-		display.print("d");
-		display.display(true);
-		if(loggerFile){
-			display.print("e");
-			display.display(true);
+		loggerFile.open("logger.csv", O_WRONLY | O_APPEND | O_CREAT);
+		//display.print("d");
+		//display.display(true);
+		if(loggerFile.isOpen()){
+			//display.print("e");
+			//display.display(true);
 			loggerFile.print(rtc.getDay());
 			loggerFile.print("/");
 			loggerFile.print(rtc.getMonth());
@@ -125,15 +132,16 @@ void logger_routine(void){
 			loggerFile.print(battery_SOC);
 			loggerFile.print(",");
 			loggerFile.println(ahoj);
+			loggerFile.sync();
 			loggerFile.close();
 		}
 	}
-	display.print("f");
-	display.display(true);
+	//display.print("f");
+	//display.display(true);
 	
-	rtc.setAlarmEpoch(rtc.getEpoch()+(3));
-	display.print("g");
-	display.display(true);
+	rtc.setAlarmEpoch(rtc.getEpoch()+(4));
+	//display.print("g");
+	//display.display(true);
 	allLow();
 	digitalWrite(GPS_BCKP, 0);
 
@@ -152,7 +160,7 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	}
 	
 	
-	eepromWrite(0, statVar);
+
 	display.fillScreen(GxEPD_WHITE);
 	display.setCursor(20, 100);
 	display.print("Power Off");
@@ -161,47 +169,58 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 		display.print("Battery empty");
 	}
 	display.display();
+	eepromWrite(0, statVar);
 	USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
 	//USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_RUNSTDBY;
 	SCB->SCR |= 1 << 2;
 	EIC->WAKEUP.reg = EIC_WAKEUP_WAKEUPEN9;
 	//display.powerDown();
 	REG_TC4_INTENCLR = TC_INTENCLR_MC1 | TC_INTENCLR_MC0 | TC_INTENCLR_OVF;
-	attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
+	
+
+
 	// pinMode(BUTTON_LEFT, OUTPUT);
 	// pinMode(BUTTON_RIGHT, OUTPUT);
 	// pinMode(BUTTON_UP, OUTPUT);
 	// pinMode(BUTTON_DOWN, OUTPUT);
 	// pinMode(BUTTON_CENTER, INPUT_PULLUP);
-	/*USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
-	USB->HOST.CTRLA.bit.ENABLE=0;
-	USB->DEVICE.CTRLA.bit.ENABLE=0;
-	I2S->CTRLA.bit.ENABLE=0;
-
-	ADC->CTRLA.bit.ENABLE=0;
-
-	DAC->CTRLA.bit.ENABLE=0;*/
+	
 	allLow();
 	if(GPS_BckpPwr) gpsBckpTimer();
 	else	digitalWrite(GPS_BCKP, 0);
+	SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 	
+		REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;
+		REG_EIC_INTFLAG = EIC_INTFLAG_EXTINT9;
+	attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
+	//__DSB();
 	__WFI();
+	//SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	for(int i = 0; i < 100; i++){
 		if(digitalRead(BUTTON_CENTER)){   //go back to sleep if woken up by RTC timer (gps backup power turning off) or holding the button just for a while
 			
 			if(logger_ena){
+				SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 				logger_routine();
 			}
+			//attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
+			SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+			attachInterrupt(BUTTON_CENTER, wakeUp, LOW);
 			__WFI();
+
 			i = 0;
 		}
 		delay(10);
 	}
 	logger_ena = 0;
 	rtc.detachInterrupt();
+	
+	//comment when i am super happy, slightly reduces consumption
+	USBDevice.init();
+	USBDevice.attach();
 
 	reinitializePins();
-	counterInit();
+
 
 	
 	
@@ -209,14 +228,14 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	delay(10);
 	if(digitalRead(SD_DETECT) == 0){
 		present_devices |= SD_PRESENT;
-		SD.begin(SD_CS);
+		SD.begin(SD_CS, SD_SCK_MHZ(8));
 	}
 	else{
 		present_devices &= ~SD_PRESENT;
 	}
 	pinMode(SD_DETECT, INPUT);
 
-	
+
 	
 	display.init(0);
 
@@ -225,17 +244,36 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 
 	display.fillScreen(GxEPD_WHITE);
 
-	display.display();
+	//display.display();
 	display.setRotation(0);
 
 	display.display(true);
 	display.setTextWrap(0);
+			
 	if(present_devices | BMX160_PRESENT)
 	IMU_init();
+
 	if(present_devices | LPS33_PRESENT)
 	lps33_init();
 	if(present_devices | SI7021_PRESENT)
 	request_si7021();
+	
+		counterInit();
+	
+	if(statVar.ena_vector & (ENA_GPS)){
+		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
+			GPS_low();
+			GPS_low();
+		}
+		else{
+			GPS_full();
+			GPS_full();
+		}
+	}
+	else{
+		GPS_off();
+				GPS_off();
+	}
 	
 	while (buttons.getFlag()){
 		buttons.getButtonPressed();
@@ -246,6 +284,9 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 
 
 void allLow() {
+	
+	//SPI.end();
+
 	digitalWrite(SD_RST, 0);
 	
 	digitalWrite(GPS_CS, 0);
@@ -272,6 +313,9 @@ void allLow() {
 	digitalWrite(SCK_IRQ, 0);
 	digitalWrite(POWER_ENA, 1);
 	digitalWrite(HEAT, 0);
+	
+	pinMode(BT_UART_TX, OUTPUT);  //BT uart tx
+	digitalWrite(BT_UART_TX, 0);
 
 	
 }
@@ -282,22 +326,21 @@ void reinitializePins() {
 	digitalWrite(GPS_BCKP, 1);
 	pinMode(POWER_ENA, INPUT_PULLDOWN);
 	//digitalWrite(POWER_ENA, 0);
-	delay(500);
+	delay(150);
 	pinMode(POWER_ENA, OUTPUT);
 	digitalWrite(POWER_ENA, 0);
 	digitalWrite(EEPROM_CS, 1);
 	digitalWrite(SRAM_CS, 1);
 	digitalWrite(SD_CS, 1);
 	digitalWrite(SD_RST, 0);
-	pinMode(22, INPUT);
-	pinMode(23, INPUT);
-	pinMode(24, INPUT);
-	pinMode(SD_CS, INPUT);
-	digitalWrite(SD_RST, 1);
-	delay(500);
+	
+	pinMode(SD_CS, OUTPUT);
+	digitalWrite(SD_CS, 1);
+
 	digitalWrite(SD_RST, 0);
 	digitalWrite(IMU_CS, 1);
 	digitalWrite(GPS_CS, 1);
+	digitalWrite(BARO_CS, 1);
 	digitalWrite(DISP_RST, 1);
 	digitalWrite(DISP_DC,1);
 	digitalWrite(DISP_CS, 1);
@@ -311,9 +354,10 @@ void reinitializePins() {
 	pinPeripheral(MOSI_PROG, PIO_SERCOM);
 	pinPeripheral(MISO_PROG, PIO_SERCOM);
 	pinPeripheral(SCK_PROG, PIO_SERCOM);
-	
+
 	SPI.begin();
-	
+
+
 
 }
 
@@ -321,7 +365,7 @@ void reinitializePins() {
 
 void wakeUp() {
 	
-
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 
 	detachInterrupt(BUTTON_CENTER);
 	REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;
@@ -358,7 +402,7 @@ void massStorageEna() {
 	digitalWrite(SD_CS, 1);
 
 
-	SD.begin(SD_CS);
+	SD.begin(SD_CS, SD_SCK_MHZ(8));
 
 	
 	display.init(0);

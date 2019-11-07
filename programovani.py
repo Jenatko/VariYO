@@ -40,11 +40,8 @@ print(ports)
 # #port_erase = "COM"+str(getComIndex(string))
 # print( port_erase)
 
-port = 9
-
-COM0 = "COM"+repr(port-1)
-COM1 = "COM"+repr(port)
-
+COM0 = ""
+COM1 = ""
 
 if(len(sys.argv) != 2):
   sys.exit(1)
@@ -63,6 +60,7 @@ for i in range(20):
         COM1 = "COM" + repr(i+1)
         break
 print("Done.")
+
   
 flag = False
 print("Connecting to port {:s}...".format(COM1), end='')
@@ -83,4 +81,3 @@ if flag:
  
 print('Loading file "{:s}": to port {:s}'.format(sys.argv[1], COM))
 subprocess.call(["D:\\VariYO\\bossac.exe", "--port="+COM, "-e", "-w", "-v", sys.argv[1], "-R"])
-

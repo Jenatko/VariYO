@@ -42,6 +42,8 @@
 
 #include "routine.h"
 
+#include "Gauge.h"
+
 
 // #include <GxEPD.h>
 // #include <GxGDEP015OC1/GxGDEP015OC1.h>    // 1.54" b/w
@@ -71,7 +73,9 @@ GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*D
 //GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
 
 
-#include <SD.h>
+#include "SdFat.h"
+
+SdFat SD;
 
 
 
@@ -89,22 +93,35 @@ void draw_floppy(int x_orig, int y_orig);
 
 
 
+
 void displayUpdate(void){
+
 
 
 	display.fillScreen(GxEPD_WHITE);
 
 
-	statVar.varioGauge.value = vario_filter/100;
-		statVar.varioAvgGauge.value = vario_lowpassed/100;
-	statVar.AGLGauge.value = (alt_filter/100) - ground_level;
-	statVar.altitudeGauge.value = (alt_filter/100);
-	statVar.tempGauge.value = enviromental_data.temperature/100;
-	statVar.humidGauge.value = enviromental_data.humidity/100;
-	statVar.speedGauge.value = fix.speed_kph();
-	statVar.headingGauge.value = fix.heading();
+	//statVar.varioGauge.value = vario_filter/100;
+	//statVar.varioAvgGauge.value = vario_lowpassed/100;
+	
+	if(ground_level != 0xffff)	statVar.AGLGauge.value = (alt_filter*0.01f) - ground_level;
+	else statVar.AGLGauge.value = NAN;
+	
+	
+	statVar.altitudeGauge.value = (alt_filter*0.01f);
+	statVar.tempGauge.value = enviromental_data.temperature*0.01f;
+	statVar.humidGauge.value = enviromental_data.humidity*0.01f;
+	
+	
 	statVar.windGauge.value = wind_speed_mps;
 	statVar.windDirGauge.value = wind_direction;
+	
+	if(statVar.ena_vector & ENA_TRACKLOG) statVar.flightTimeGauge.value = (rtc.getEpoch() - var_takeofftime)/60;
+	else statVar.flightTimeGauge.value = NAN;
+	//statVar.altAboveTakeoffGauge = ;
+	//statVar.glideRatioGauge = ;
+	if(statVar.ena_vector & ENA_TRACKLOG) statVar.altAboveTakeoffGauge.value = alt_filter*0.01f - var_takeoffalt*0.01f;
+	else statVar.altAboveTakeoffGauge.value = NAN;
 	
 	printGauges();
 	
@@ -160,7 +177,7 @@ void displayUpdate(void){
 
 	
 	display.setFont(&FreeMonoBold12pt7b);
-
+	if(redraw == 2) display.fillRect(80, 15, 6, 6, GxEPD_BLACK);
 	
 	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
 	
@@ -178,14 +195,17 @@ void setup() {
 
 
 	rtc.begin();
-	rtc.setTime(23, 59, 40);
-	rtc.setDate(1, 1, 2014);
+	rtc.setTime(0, 0, 0);
+	rtc.setDate(1, 1, 19);
 	
 	pinMode(HEAT, OUTPUT);
 	digitalWrite(HEAT, 0);
 	
 	pinMode(POWER_ENA, OUTPUT);
 	digitalWrite(POWER_ENA, 1);
+	
+	pinMode(PB22, OUTPUT);
+	digitalWrite(PB22, 1);
 	
 	delay(100);
 	digitalWrite(POWER_ENA, 0);
@@ -238,7 +258,7 @@ void setup() {
 
 
 	SPI.begin();
-	
+
 
 	
 	delay(100);   //wait for EEPROM to power-up
@@ -256,14 +276,17 @@ void setup() {
 	if(statVar.ena_vector & (ENA_GPS)){
 		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
 			GPS_low();
+			GPS_low();
 		}
 		else{
+			GPS_full();
 			GPS_full();
 		}
 	}
 	else{
 		GPS_off();
 	}
+	
 	
 	menu_init();
 	//while(!SerialUSB.available());
@@ -347,9 +370,10 @@ void setup() {
 	display.setCursor(10, 120);
 	int ahoj;
 	if(digitalRead(SD_DETECT) == 0){
-		display.print("SD present");
+		display.print("SD present ");
 		present_devices |= SD_PRESENT;
-		ahoj = SD.begin(SD_CS);
+		
+		ahoj = SD.begin(SD_CS, SD_SCK_MHZ(8));
 		display.print(ahoj);
 	}
 	else{
@@ -373,7 +397,7 @@ void setup() {
 	delay(1000);
 	
 	
-//setVariablesDefault();
+	//setVariablesDefault();
 
 
 	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
@@ -398,8 +422,7 @@ void setup() {
 
 void loop() {
 
-
-	if (buttons.getFlag()){
+	while (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){
 			case PRESS:
 			MenuEntry(&topmenu);
@@ -438,6 +461,8 @@ void loop() {
 
 
 	if(redraw){
+		counter500ms = 0;
+
 		//digitalWrite(SRAM_CS, 0);
 		/*
 		Wire.beginTransmission(SI7021_ADDRESS);
@@ -519,17 +544,19 @@ void loop() {
 		
 		
 	}
+	/*
 	else if(counter500ms>28 && counter500ms < 100){
-		uint64_t t_start_second = micros();
-		displayUpdate();
-		uint64_t t_stop_second = micros();
-		counter500ms = 1000;
-		//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
-		//	SerialUSB.print(",");
-		//	SerialUSB.println((uint32_t)((t_stop_second-t_start_second)/1000));
-		//routine();
-		
+	uint64_t t_start_second = micros();
+	displayUpdate();
+	uint64_t t_stop_second = micros();
+	counter500ms = 1000;
+	//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
+	//	SerialUSB.print(",");
+	//	SerialUSB.println((uint32_t)((t_stop_second-t_start_second)/1000));
+	//routine();
+	
 	}
+	*/
 	else{
 		//SerialUSB.println(counter500ms);
 		delay(10);

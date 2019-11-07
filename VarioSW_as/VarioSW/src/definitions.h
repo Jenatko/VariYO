@@ -57,8 +57,9 @@
 #define ENA_GPS_LOW_POWER 2
 #define ENA_TRACKLOG 4
 #define ENA_BUZZER 8
-#define ENA_HEATER 16
+#define ENA_BUZZ_WHEN_LOGGING 16
 #define ENA_HEATER_AUTO 32
+#define ENA_HEATER 64
 
 //---------------------------------
 //-----GPIOs----------------------
@@ -111,6 +112,8 @@
 
 #define HEAT PA03
 
+#define BT_UART_TX PB22
+
 
 
 
@@ -159,6 +162,7 @@
 #define GAUGE_FRAME 64
 #define GAUGE_SHOW_PLUS_SIGN 128
 #define GAUGE_VALIDS 256
+#define GAUGE_VALUE_VALID 512
 
 
 

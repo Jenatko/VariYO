@@ -9,6 +9,7 @@
 #include "kalmanfilter3.h"
 #include "Variables.h"
 #include "MEMS.h"
+#include "Gauge.h"
 
 
 #include <MahonyAHRS.h>
@@ -23,6 +24,13 @@ Madgwick Madgwick_filter;
 
 int zoufalepomocnapromenna = 0;
 int flag_sec;
+
+#include <NMEAGPS.h>
+#include <GPSport.h>
+#include <Streamers.h>
+
+extern NMEAGPS  gps;
+extern gps_fix  fix;
 
 
 
@@ -148,7 +156,8 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			//	digitalWrite(SRAM_CS, 1);
 			a_vertical_imu = Madgwick_filter.getVertical(ax_corr/IMU_BIT_PER_G, ay_corr/IMU_BIT_PER_G, az_corr/IMU_BIT_PER_G);
 			kalmanFilter3_update(alt_baro, (a_vertical_imu*1.0f-1.0f)*980, (float)1/100.0f, &alt_filter, &vario_filter);
-			vario_lowpassed = (vario_lowpassed * (statVar.vario_lowpass_coef-1)+ vario_filter)/statVar.vario_lowpass_coef;
+			 vario_lowpassed = (vario_lowpassed * (599)+ vario_filter)*(1.0f/600.0f);
+
 
 		}
 		/*
@@ -175,7 +184,13 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 	}
 	SPI_IRQ.endTransaction();
-
+	
+	updateGauge(&statVar.varioGauge, vario_filter*0.01f);
+	updateGauge(&statVar.varioAvgGauge, vario_filter*0.01f);
+	if (fix.speed_kph() != 0)
+	updateGauge(&statVar.glideRatioGauge, vario_filter/(fix.speed_kph() * (100.0f / 3.6f)));
+	else
+	updateGauge(&statVar.glideRatioGauge, NAN);
 
 	
 	/*
@@ -196,7 +211,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 
 	
 	//generate short beep bursts, long beep or be silent
-	if(statVar.ena_vector & ENA_BUZZER){
+	if(    ((statVar.ena_vector & ENA_BUZZER) &&  (statVar.ena_vector & ENA_BUZZ_WHEN_LOGGING)&& (statVar.ena_vector & ENA_TRACKLOG))    ||   ((statVar.ena_vector & ENA_BUZZER) &&  (!(statVar.ena_vector & ENA_BUZZ_WHEN_LOGGING)) )){
 		buzzerAltitudeDiff((int)vario_filter);
 		if (buzzer_counter < buzzer_on_preiod)
 		buzzerEna(1);
@@ -216,6 +231,10 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	
 	counter_incremented_every_ISR++;
 	counter500ms++;
+	if (counter500ms > 30){
+		 redraw = 2;
+	//counter500ms = 0;	
+	}
 
 	if(counter_incremented_every_ISR%20 == 0){
 		//Mag_print_angles();
