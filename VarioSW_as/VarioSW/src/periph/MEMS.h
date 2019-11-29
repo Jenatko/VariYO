@@ -16,7 +16,7 @@
 
 #include "bmm150.h"
 
-#include "bme280.h"
+
 #include "Wire.h"
 
 #define LPS_CTRL_REG1 0x10

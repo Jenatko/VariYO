@@ -75,9 +75,8 @@ void routine(int OnlyReadGPS){
 			//		if(fn > 127 && fn != 0xff)
 
 			//		while(digitalRead(BUTTON_LEFT))
-			//		SerialUSB.println((int)fn);   //uncomment for sending GPS data over Serial (to work with u-center)
+			//		SerialUSB.write(fn);   //uncomment for sending GPS data over Serial (to work with u-center)
 		} while (gps.handle(fn) != NMEAGPS::DECODE_CHR_INVALID || fn != 0xff );
-		
 		digitalWrite(GPS_CS, 1);
 		if(gps.available()){
 			fix = gps.read();
@@ -114,20 +113,20 @@ void routine(int OnlyReadGPS){
 			position_updated = 0;
 		}
 		//procedure for capturing commands sent to GPS
+/*
+		SerialUSB.println("-----------------");
+		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
+			SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+			digitalWrite(GPS_CS, 0);
+			fn = SerialUSB.read();
+			gps.handle(SPI.transfer(fn));
+			SerialUSB.print(fn);
+			digitalWrite(GPS_CS, 1);
 
-		// 		SerialUSB.println("-----------------");
-		// 		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
-		// 			SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-		// 			digitalWrite(GPS_CS, 0);
-		// 			fn = SerialUSB.read();
-		// 			gps.handle(SPI.transfer(fn));
-		// 			SerialUSB.print(fn);
-		// 			digitalWrite(GPS_CS, 1);
-		//
-		// 		}
-		// 		SerialUSB.println("-----------------");
-		// 		delay(50);
-
+		}
+		SerialUSB.println("-----------------");
+		delay(50);
+*/
 		
 	}
 	//update display if GPS is off
@@ -402,15 +401,19 @@ void update_tracklog(){
 					
 					tracklog.print(fix.dateTime.year);
 					tracklog.print("-");
+					if(fix.dateTime.month < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.month);
 					tracklog.print("-");
+					if(fix.dateTime.date < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.date);
 					tracklog.print("T");
-					
+					if(fix.dateTime.hours < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.hours);
 					tracklog.print(":");
+					if(fix.dateTime.minutes < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.minutes);
 					tracklog.print(":");
+					if(fix.dateTime.seconds < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.seconds);
 					
 					tracklog.println("Z</time>");

@@ -202,13 +202,13 @@ void setup() {
 	digitalWrite(HEAT, 0);
 	
 	pinMode(POWER_ENA, OUTPUT);
-	digitalWrite(POWER_ENA, 1);
+	digitalWrite(POWER_ENA, POWER_OFF);
 	
-	pinMode(PB22, OUTPUT);
-	digitalWrite(PB22, 1);
+	pinMode(BT_UART_TX, OUTPUT);
+	digitalWrite(BT_UART_TX, 0);
 	
 	delay(100);
-	digitalWrite(POWER_ENA, 0);
+	digitalWrite(POWER_ENA, POWER_ON);
 	delay(50);
 	
 	pinMode(BUTTON_LEFT, INPUT_PULLUP);
@@ -249,23 +249,15 @@ void setup() {
 	pinPeripheral(MOSI_IRQ, PIO_SERCOM);
 	pinPeripheral(MISO_IRQ, PIO_SERCOM);
 	pinPeripheral(SCK_IRQ, PIO_SERCOM);
-	
-	
-
-	//clk_test();
-	//buzzerEna(1);
-	//delay(10000);
-
 
 	SPI.begin();
 
-
-	
 	delay(100);   //wait for EEPROM to power-up
-	
-	
-	
 	eepromRead(0, statVar);
+
+
+	BT_off();
+
 	
 	present_devices = 0;
 	
@@ -276,10 +268,8 @@ void setup() {
 	if(statVar.ena_vector & (ENA_GPS)){
 		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
 			GPS_low();
-			GPS_low();
 		}
 		else{
-			GPS_full();
 			GPS_full();
 		}
 	}
@@ -287,6 +277,11 @@ void setup() {
 		GPS_off();
 	}
 	
+	
+	
+
+  
+  
 	
 	menu_init();
 	//while(!SerialUSB.available());
@@ -462,105 +457,17 @@ void loop() {
 
 	if(redraw){
 		counter500ms = 0;
-
-		//digitalWrite(SRAM_CS, 0);
-		/*
-		Wire.beginTransmission(SI7021_ADDRESS);
-		Wire.write(SI7021_MEASURE_RH);
-		Wire.endTransmission();
-		int byte = 0;
-		delay(15);
-		while(!byte){
-		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
-		}
-		int rh = 0;
-		rh = Wire.read()<<8;
-		rh += Wire.read();
-		SerialUSB.print((125.0*rh/65536.0)-6.0);
-		SerialUSB.print(',');
-		
-		
-		
-		Wire.beginTransmission(SI7021_ADDRESS);
-		Wire.write(SI7021_READ_TEMP_FROM_RH);
-		Wire.endTransmission();
-		byte = 0;
-		delay(15);
-		while(!byte){
-		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
-		}
-		rh = 0;
-		rh = Wire.read()<<8;
-		rh += Wire.read();
-		SerialUSB.println((175.72*rh/65536.0)-46.85);
-		
-		*/
-		
-		//	SerialUSB.println(rtc.getEpoch());
-		//   unsigned long fn = micros();
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;
 		var_localtime = *gmtime(&tempTime);
 		
-		//	unsigned long fn2 = micros();
-		//	SerialUSB.println(fn2-fn);		//time check, takes around 5ms
 		
-		//	SerialUSB.println(mktime(var_localtime));
 		t_start_first = micros();
 		displayUpdate();
 		t_stop_first = micros();
-		//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
-
-		
-		
-		/*
-		if(pocitadlo % 10 == 0){
-		SerialUSB.println(enviromental_data.temperature);
-		
-		SerialUSB.print("time;");
-		SerialUSB.print(pocitadlo);
-		SerialUSB.print(";Vavg;");
-		SerialUSB.print(max17055.getAverageVoltage(), 3); display.print(" V");
-		SerialUSB.print(";Iavg;");
-		SerialUSB.print(max17055.getAverageCurrent());  display.print(" mA");
-		SerialUSB.print(";SOC;");
-		SerialUSB.print(max17055.getSOC());  display.print(" %");
-		SerialUSB.print(";TTE;");
-		SerialUSB.print(max17055.getTimeToEmpty()); display.print(" hr");
-		SerialUSB.print(";TTF;");
-		SerialUSB.print(max17055.getTimeToFull()); display.print(" hr");
-		SerialUSB.print(";measCap;");
-		SerialUSB.print(max17055.getReportedCapacity()); display.print(" mAH");
-		SerialUSB.print(";remCap;");
-		SerialUSB.println(max17055.getRemainingCapacity()); display.print(" mAH");
-		
-		
-		}*/
-
-		
-		
-
-		//	pocitadlo ++;
-		
-		
-	}
-	/*
-	else if(counter500ms>28 && counter500ms < 100){
-	uint64_t t_start_second = micros();
-	displayUpdate();
-	uint64_t t_stop_second = micros();
-	counter500ms = 1000;
-	//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
-	//	SerialUSB.print(",");
-	//	SerialUSB.println((uint32_t)((t_stop_second-t_start_second)/1000));
-	//routine();
-	
-	}
-	*/
+		}
 	else{
-		//SerialUSB.println(counter500ms);
 		delay(10);
-
 	}
 	
 	

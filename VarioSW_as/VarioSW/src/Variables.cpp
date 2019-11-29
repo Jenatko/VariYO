@@ -41,7 +41,7 @@ float battery_voltage, battery_SOC;
 
 uint8_t present_devices;
 
-struct bme280_data enviromental_data;
+struct enviroData enviromental_data;
 
 float wind_speed_mps;
 float wind_direction;

@@ -6,7 +6,6 @@
 */
 #include <Arduino.h>
 #include <time.h>
-#include "bme280_defs.h"
 
 #include "data.h"
 #include "circle.h"
@@ -87,6 +86,14 @@ typedef struct StaticVariables{
 	
 } StaticVariables;
 
+struct enviroData {
+	/*! Compensated pressure */
+	uint32_t pressure;
+	/*! Compensated temperature */
+	int32_t temperature;
+	/*! Compensated humidity */
+	uint32_t humidity;
+};
 
 
 
@@ -135,7 +142,7 @@ extern Circle movement_circle_fit;
 
 
 //structure containng pressure, humidity and temperature
-extern struct bme280_data enviromental_data;
+extern struct enviroData enviromental_data;
 
 
 

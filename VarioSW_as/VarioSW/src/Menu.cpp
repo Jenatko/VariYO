@@ -100,9 +100,10 @@ int  menu2_id = MENUID_VARIO;
 #define MENUITEM_DEBUG_PRINT_EEPROM 4
 #define MENUITEM_DEBUG_32KHZ_TEST 5
 #define MENUITEM_DEBUG_PRINT_ACCEL 6
+#define MENUITEM_DEBUG_BT_PASSTHROUGH 7
 
 
-char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel"};
+char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel", "BT passthr"};
 char menu3_name[15] = "Debug";
 int  menu3_id = MENUID_DEBUG;
 
@@ -113,7 +114,7 @@ int  menu3_id = MENUID_DEBUG;
 #define MENUITEM_SETTINGS_VARIO 1
 #define MENUITEM_SETTINGS_GPS_POWER 2
 #define MENUITEM_SETTINGS_BUZZER 3
-#define MENUITEM_SETTINGS_TIME_ZONE 4
+#define MENUITEM_SETTINGS_DATETIME 4
 #define MENUITEM_SETTINGS_SAVE_EEPROM 5
 #define MENUITEM_SETTINGS_SET_DEFAULT 6
 #define MENUITEM_SETTINGS_HEATER 7
@@ -121,7 +122,7 @@ int  menu3_id = MENUID_DEBUG;
 #define MENUITEM_SETTINGS_CALIB_ACCEL 9
 #define MENUITEM_SETTINGS_CALIB_MAG 10
 
-char system_menu_list[][15] = {"Altimeter", "Vario", "GPS power", "buzzer","Time zone", "saveEEPROM", "set default", "heater off", "Gauges", "calib Accel", "calib mag"};
+char system_menu_list[][15] = {"Altimeter", "Vario", "GPS power", "buzzer","Time&Date", "saveEEPROM", "set default", "heater off", "Gauges", "calib Accel", "calib mag"};
 char system_menu_name[15] = "Settings";
 int  system_menu_id = MENUID_SETTINGS;
 
@@ -131,15 +132,15 @@ int  system_menu_id = MENUID_SETTINGS;
 #define MENUITEM_GAUGE_POSITION 1
 #define MENUITEM_GAUGE_SIZE 2
 #define MENUITEM_GAUGE_FRAME 3
-#define MENUITEM_GAUGE_DECIMALS 4
-#define MENUITEM_GAUGE_NAME 5
-#define MENUITEM_GAUGE_UNITS 6
-#define MENUITEM_GAUGE_FONT 7
-#define MENUITEM_GAUGE_PLUS_SIGN 8
-#define MENUITEM_GAUGE_FIXED_DECIMALS 9
+#define MENUITEM_GAUGE_DECIMALS 5
+#define MENUITEM_GAUGE_NAME 6
+#define MENUITEM_GAUGE_UNITS 7
+#define MENUITEM_GAUGE_FONT 8
+#define MENUITEM_GAUGE_PLUS_SIGN 9
+#define MENUITEM_GAUGE_FIXED_DECIMALS 4
 #define MENUITEM_GAUGE_AVERAGING 10
 
-char gauge_menu_list[][15] = {"enable", "position", "size", "frame", "decimals", "name", "units", "font", "Showing + sgn", "fixed decimal", "averaging"};
+char gauge_menu_list[][15] = {"Enabled", "Set position", "Set size", "frame", "fixed decimal", "decimals", "name", "units", "font", "Showing + sgn",  "averaging"};
 char gauge_menu_name[15] = "Gauge";
 int  gauge_menu_id = MENUID_GAUGE;
 
@@ -166,6 +167,23 @@ int  gauges_menu_id = MENUID_GAUGES;
 
 
 
+#define MENUID_DATETIME 0x0a
+#define MENUITEM_DATETIME_SETTIMEZONE 0
+#define MENUITEM_DATETIME_SETYEAR 1
+#define MENUITEM_DATETIME_SETMONTH 2
+#define MENUITEM_DATETIME_SETDAY 3
+#define MENUITEM_DATETIME_SETHOURS 4
+#define MENUITEM_DATETIME_SETMINUTES 5
+#define MENUITEM_DATETIME_SETSECONDS 6
+
+
+
+char datetime_menu_list[][15] = {"Timezone", "Set year", "Set month", "Set day", "Set Hours", "Set Minutes", "Set Seconds"};
+char datetime_menu_name[15] = "DateTime";
+int  datetime_menu_id = MENUID_DATETIME;
+
+
+
 
 int lastmenutype = 0;
 
@@ -179,6 +197,7 @@ menu settings_menu;
 menu gauge_menu;
 menu gauges_menu;
 menu logger_menu;
+menu datetime_menu;
 
 Gauge *gaugepointer = &statVar.varioGauge;
 
@@ -238,6 +257,9 @@ void menu_init() {
 	if(statVar.ena_vector&ENA_BUZZER && statVar.ena_vector&ENA_BUZZ_WHEN_LOGGING) strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzz in air", 15);
 	else if(statVar.ena_vector&ENA_BUZZER) strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer on", 15);
 	else strncpy(system_menu_list[MENUITEM_SETTINGS_BUZZER], "Buzzer off", 15);
+	
+	if(statVar.ena_vector&ENA_TRACKLOG) strncpy(listTopMenu[MENUITEM_TOPMENU_START_TRACKLOG], "Stop Tracklog", 15);
+	else strncpy(listTopMenu[MENUITEM_TOPMENU_START_TRACKLOG], "Start Trcklog", 15);
 
 	
 	
@@ -266,6 +288,11 @@ void menu_init() {
 	gauges_menu.no_items = sizeof(gauges_menu_list) / sizeof(gauges_menu_list[0]);
 	gauges_menu.menu_name = gauges_menu_name;
 	gauges_menu.menu_id = gauges_menu_id;
+	
+	datetime_menu.items_array = datetime_menu_list;
+	datetime_menu.no_items = sizeof(datetime_menu_list) / sizeof(datetime_menu_list[0]);
+	datetime_menu.menu_name = datetime_menu_name;
+	datetime_menu.menu_id = datetime_menu_id;
 
 }
 
@@ -515,6 +542,7 @@ void menuSelector(menu *menuPointer, int selected) {
 		//power off
 		else if (selected == MENUITEM_TOPMENU_POWEROFF) {
 			powerOff();
+			menu_init();
 
 
 		}
@@ -560,20 +588,18 @@ void menuSelector(menu *menuPointer, int selected) {
 			if(statVar.ena_vector&ENA_GPS){
 				//gps was low power
 				if(statVar.ena_vector&ENA_GPS_LOW_POWER){
-					SerialUSB.println("1");
 					strncpy(system_menu_list[MENUITEM_SETTINGS_GPS_POWER], "GPS full", 15);
 					GPS_full();
+					
 				}
 				//gps was full power
 				else {
-					SerialUSB.println("2");
 					strncpy(system_menu_list[MENUITEM_SETTINGS_GPS_POWER], "GPS off", 15);
 					GPS_off();
 					
 				}
 			}
 			else{
-				SerialUSB.println("3");
 				strncpy(system_menu_list[MENUITEM_SETTINGS_GPS_POWER], "GPS low", 15);
 				GPS_low();
 			}
@@ -597,8 +623,8 @@ void menuSelector(menu *menuPointer, int selected) {
 			}
 			
 		}
-		if (selected == MENUITEM_SETTINGS_TIME_ZONE){
-			statVar.TimeZone = numpad(statVar.TimeZone);
+		if (selected == MENUITEM_SETTINGS_DATETIME){
+			MenuEntry(&datetime_menu);
 		}
 		if (selected == MENUITEM_SETTINGS_SAVE_EEPROM){
 			eepromWrite(0, statVar);
@@ -718,8 +744,50 @@ void menuSelector(menu *menuPointer, int selected) {
 			printAccelerometerData();
 
 		}
+		else if (selected == MENUITEM_DEBUG_BT_PASSTHROUGH){
+			
+			while(!buttons.getFlag()){
+				if (SerialUSB.available()) {      // If anything comes in Serial (USB),
+					Serial.write(SerialUSB.read());   // read it and send it out Serial1 (pins 0 & 1)
+				}
+
+				if (Serial.available()) {     // If anything comes in Serial1 (pins 0 & 1)
+					SerialUSB.write(Serial.read());   // read it and send it out Serial (USB)
+				}
+			}
+			buttons.getButtonPressed();
+		}
 
 	}
+	//datetime menu
+	if (menuPointer->menu_id == MENUID_DATETIME) {
+		if (selected == MENUITEM_DATETIME_SETTIMEZONE){
+			statVar.TimeZone = numpad(statVar.TimeZone);
+		}
+		if (selected == MENUITEM_DATETIME_SETYEAR){
+			int year = numpad(rtc.getYear());
+			if(year > 2000) year -=2000;
+			rtc.setYear(year);
+		}
+		if (selected == MENUITEM_DATETIME_SETMONTH){
+			rtc.setMonth(numpad(rtc.getMonth()));
+		}
+		if (selected == MENUITEM_DATETIME_SETDAY){
+			rtc.setDay(numpad(rtc.getDay()));
+		}
+		if (selected == MENUITEM_DATETIME_SETHOURS){
+			rtc.setHours(numpad(rtc.getHours()));
+		}
+		if (selected == MENUITEM_DATETIME_SETMINUTES){
+			rtc.setMinutes(numpad(rtc.getMinutes()));
+		}
+		if (selected == MENUITEM_DATETIME_SETSECONDS){
+			rtc.setSeconds(numpad(rtc.getSeconds()));
+		}
+	}
+	
+	
+	
 	//gauges menu
 	if (menuPointer->menu_id == MENUID_GAUGES) {
 		//BMI160
@@ -801,7 +869,7 @@ void menuSelector(menu *menuPointer, int selected) {
 					{
 						case UP:
 						gaugepointer->offset_Y -=5;
-						if (gaugepointer->offset_Y <0)
+						if (gaugepointer->offset_Y >220)
 						{
 							gaugepointer->offset_Y =0;
 						}
@@ -818,7 +886,7 @@ void menuSelector(menu *menuPointer, int selected) {
 
 						case LEFT:
 						gaugepointer->offset_X -=5;
-						if (gaugepointer->offset_X <0)
+						if (gaugepointer->offset_X >220)
 						{
 							gaugepointer->offset_X =0;
 						}
@@ -972,7 +1040,7 @@ void menuSelector(menu *menuPointer, int selected) {
 				gaugepointer->settings &= ~GAUGE_SHOW_PLUS_SIGN;
 			}
 			else{
-				strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "showing + sign", 15);
+				strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "showing + sgn", 15);
 				gaugepointer->settings |= GAUGE_SHOW_PLUS_SIGN;
 			}
 
@@ -1007,28 +1075,28 @@ void menuSelector(menu *menuPointer, int selected) {
 }
 
 void setGaugeMenu(Gauge *gaugePointer){
-	if (gaugepointer->settings & GAUGE_ENA) strncpy(gauge_menu_list[0], "Enabled", 15);
-	else strncpy(gauge_menu_list[0], "Disabled", 15);
+	if (gaugepointer->settings & GAUGE_ENA) strncpy(gauge_menu_list[MENUITEM_GAUGE_ENABLE], "Enabled", 15);
+	else strncpy(gauge_menu_list[MENUITEM_GAUGE_ENABLE], "Disabled", 15);
 
-	if (gaugepointer->settings & GAUGE_FRAME) strncpy(gauge_menu_list[3], "Frame on", 15);
-	else strncpy(gauge_menu_list[3], "Frame off", 15);
+	if (gaugepointer->settings & GAUGE_FRAME) strncpy(gauge_menu_list[MENUITEM_GAUGE_FRAME], "Frame on", 15);
+	else strncpy(gauge_menu_list[MENUITEM_GAUGE_FRAME], "Frame off", 15);
 
-	if ((gaugepointer->settings & GAUGE_FONT_MASK) == 0) strncpy(gauge_menu_list[7], "font size 9", 15);
-	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 1) strncpy(gauge_menu_list[7], "font size 12", 15);
-	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 2) strncpy(gauge_menu_list[7], "font size 18", 15);
-	else strncpy(gauge_menu_list[7], "font size 24", 15);
+	if ((gaugepointer->settings & GAUGE_FONT_MASK) == 0) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 9", 15);
+	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 1) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 12", 15);
+	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 2) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 18", 15);
+	else strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 24", 15);
 	
 
-	if (gaugepointer->settings & GAUGE_SHOW_PLUS_SIGN)	strncpy(gauge_menu_list[8], "showing + sgn", 15);
-	else strncpy(gauge_menu_list[8], "not showing +", 15);
+	if (gaugepointer->settings & GAUGE_SHOW_PLUS_SIGN)	strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "showing + sgn", 15);
+	else strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "not showing +", 15);
 	
-	if(gaugepointer->settings & GAUGE_VALIDS){strncpy(
-		gauge_menu_list[9], "fixed digits", 15);
-		strncpy(gauge_menu_list[4], "no. digits", 15);
+	if(gaugepointer->settings & GAUGE_VALIDS){
+		strncpy(gauge_menu_list[MENUITEM_GAUGE_FIXED_DECIMALS], "fixed digits", 15);
+		strncpy(gauge_menu_list[MENUITEM_GAUGE_DECIMALS], "no. digits", 15);
 	}
 	else{
-		strncpy(gauge_menu_list[9], "fixed decimal", 15);
-		strncpy(gauge_menu_list[4], "no. decimals", 15);
+		strncpy(gauge_menu_list[MENUITEM_GAUGE_FIXED_DECIMALS], "fixed decimal", 15);
+		strncpy(gauge_menu_list[MENUITEM_GAUGE_DECIMALS], "no. decimals", 15);
 	}
 
 	
@@ -1317,7 +1385,6 @@ void debugMAX17055(void){
 		
 		
 		display.display(true);
-		SerialUSB.println(max17055.getVFSOC());
 
 
 	}
@@ -1362,6 +1429,9 @@ void debugGPS(void){
 		display.setCursor(5,90);
 		
 		display.print(fix.dateTime.hours); display.print(":");display.print(fix.dateTime.minutes);display.print(":"); display.print(fix.dateTime.seconds);	display.print(" ");display.print(fix.dateTime.date);display.print("/");display.print(fix.dateTime.month); display.print("/");display.print(fix.dateTime.year);
+		display.setCursor(5,105);
+		display.print("valid sat: ");
+		display.print(fix.satellites);
 
 		int satcount = 0;
 
@@ -1373,38 +1443,19 @@ void debugGPS(void){
 		}
 		
 		display.writeFastHLine(0, 185, 199, GxEPD_BLACK);
-		display.writeFastVLine(20, 95, 110, GxEPD_BLACK);
+		//	display.writeFastVLine(20, 95, 110, GxEPD_BLACK);
 
 		int satdrawn = 0;
 		display.setFont();
 		for(int i = 0; i < gps.sat_count; i++){
 			if(gps.satellites[i].tracked){
-				display.writeFillRect( 22+satdrawn*180/satcount, 185-gps.satellites[i].snr, 174/satcount-4, gps.satellites[i].snr, GxEPD_BLACK);
-				display.setCursor(22+satdrawn*180/satcount,190);
+				display.writeFillRect( 2+satdrawn*200/satcount, 185-gps.satellites[i].snr, 198/satcount-4, gps.satellites[i].snr, GxEPD_BLACK);
+				display.setCursor(2+satdrawn*200/satcount,190);
 				display.print(gps.satellites[i].id);
 				satdrawn++;
 			}
 		}
 		display.setFont(&FreeMonoBold9pt7b);
-		
-		
-		
-		
-		/*
-		SerialUSB.println(" ");
-		for(int i = 0; i < gps.sat_count; i++){
-		if(gps.satellites[i].tracked){
-		SerialUSB.print(gps.satellites[i].id);
-		SerialUSB.print(",");
-		SerialUSB.print(gps.satellites[i].snr);
-		SerialUSB.print(",");
-		}
-		}
-		SerialUSB.println(" ");
-		*/
-
-
-
 		display.display(true);
 
 
@@ -1596,16 +1647,16 @@ void showFlightSummary(void){
 	
 	display.setCursor(5,105);
 	display.print("flight time:");
-		display.setCursor(5,120);
+	display.setCursor(5,120);
 	int hours = (rtc.getEpoch()-var_takeofftime) / 3600;
-		int minutes = ((rtc.getEpoch()-var_takeofftime)- 3600*hours) / 60;
-				int seconds = ((rtc.getEpoch()-var_takeofftime)- 3600*hours - 60*minutes);
+	int minutes = ((rtc.getEpoch()-var_takeofftime)- 3600*hours) / 60;
+	int seconds = ((rtc.getEpoch()-var_takeofftime)- 3600*hours - 60*minutes);
 	display.print(hours);
 	display.print(":");
-		display.print(minutes);
-		display.print(":");
-			display.print(seconds);
-			display.print(":");
+	display.print(minutes);
+	display.print(":");
+	display.print(seconds);
+	display.print(":");
 	
 	
 	
@@ -1622,3 +1673,4 @@ void showFlightSummary(void){
 	buttons.getButtonPressed();
 	
 }
+
