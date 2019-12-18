@@ -5,8 +5,9 @@
 *  Author: Jena
 */
 
+#include <RTCZero.h>
+
 #include "definitions.h"
-#include "RTCZero.h"
 #include "powerModes.h"
 #include "Variables.h"
 #include "button_control.h"

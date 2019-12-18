@@ -5,7 +5,7 @@
 *  Author: Jena
 */
 
-#include <GxEPD2_BW.h>
+#include <GxEPD2/GxEPD2_BW.h>
 //#include <GxGDEP015OC1/GxGDEP015OC1.h>
 
 #include <Fonts/FreeMonoBold24pt7b.h>

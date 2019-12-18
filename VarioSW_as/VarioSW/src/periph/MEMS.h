@@ -13,10 +13,9 @@
 #include "SPI_IRQ.h"
 #include "bmi160_bosch.h"
 #include "Variables.h"
+#include "BMM150_bosch_driver/bmm150.h"
 
-#include "bmm150.h"
-
-#include "bme280.h"
+#include "BME280_bosch_driver/bme280.h"
 #include "Wire.h"
 
 #define LPS_CTRL_REG1 0x10

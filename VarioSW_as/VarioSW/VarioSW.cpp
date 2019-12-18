@@ -191,9 +191,10 @@ void displayUpdate(void){
 
 
 void setup() {
-
-
-
+	
+	while(!SerialUSB.available());
+	SerialUSB.println("Starting setup.");
+	
 	rtc.begin();
 	rtc.setTime(0, 0, 0);
 	rtc.setDate(1, 1, 19);
@@ -257,6 +258,8 @@ void setup() {
 	//delay(10000);
 
 
+
+
 	SPI.begin();
 
 
@@ -287,7 +290,7 @@ void setup() {
 		GPS_off();
 	}
 	
-	
+	SerialUSB.println("Setting up menu.");
 	menu_init();
 	//while(!SerialUSB.available());
 
@@ -295,9 +298,10 @@ void setup() {
 	analogWrite(DAC, statVar.BuzzerVolume);
 	Wire.begin();
 
+
+	SerialUSB.println("Setting up display.");
+
 	display.init(0);
-
-
 	display.setFont(&FreeMonoBold12pt7b);
 	display.setTextColor(GxEPD_BLACK);
 
@@ -313,9 +317,6 @@ void setup() {
 	display.setCursor(10, 20);
 	display.print("display ok");
 	display.display(true);
-
-	
-
 	
 	display.setCursor(10, 40);
 	if(max17055.checkFunct()){
@@ -329,8 +330,6 @@ void setup() {
 		display.print("max17055 NOK");
 	}
 	display.display(true);
-
-	
 
 	display.setCursor(10, 60);
 	if(IMU_init()==0){
@@ -414,6 +413,7 @@ void setup() {
 	// 		alt_agl_debug((float)i/100, 16.500f);
 	// 	}
 
+	SerialUSB.println("Setup done.");
 
 
 }
@@ -421,6 +421,9 @@ void setup() {
 
 
 void loop() {
+	
+	static int i_random_hash = 0;
+	SerialUSB.println(i_random_hash++);
 
 	while (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){

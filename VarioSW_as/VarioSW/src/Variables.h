@@ -6,10 +6,10 @@
 */
 #include <Arduino.h>
 #include <time.h>
-#include "bme280_defs.h"
+#include <bme280_defs.h>
 
-#include "data.h"
-#include "circle.h"
+#include "lib/CircleFit/circle.h"
+#include "lib/CircleFit/data.h"
 
 
 #ifndef VARIABLES_H_
