@@ -161,7 +161,7 @@ int  gauge_menu_id = MENUID_GAUGE;
 #define MENUITEM_GAUGES_ALT_ABOVE_TAKEOFF 12
 
 
-char gauges_menu_list[][15] = {"Vario", "Vario avg", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity", "Flight time", "Lift-to-drag", "Alt above TO"};
+char gauges_menu_list[][15] = {"Vario 1", "Vario 2", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity", "Flight time", "Lift-to-drag", "Alt above TO"};
 char gauges_menu_name[15] = "Gauges";
 int  gauges_menu_id = MENUID_GAUGES;
 

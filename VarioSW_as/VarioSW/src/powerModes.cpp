@@ -477,6 +477,7 @@ void GPS_stopped(void){
 
 
 void disableGPSBckp(){
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	digitalWrite(GPS_BCKP, 0);
 }
 
