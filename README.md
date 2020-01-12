@@ -19,23 +19,22 @@ Hardware platform is single PCB with:
 * E-paper driving circuitry
 * 5-way joystick button (as I hate some non-intuitive button interface and it can be used even in not superthick gloves)
 
-and externally connected:
-
+and connected:
 * Piezo buzzer
 * 200x200 1.54'' e-paper display (updated twice a second)
 * Li-po battery (I am using 1200mAh, giving around 24h battery life with GPS and roughly 40h without)
 
-###PCB
+### PCB
 As I have access to Altium designer at work, it's done in it so to modify with any free software would require some export. But gerber data for manufacturing are available as well, design is in compliance with JLCPCB design rules.
 Board is two layer, 50*70mm.
 
-###Components
+### Components
 Components were chosen to be as much hand-solderable as possible. However there are limited options for such devices, so some not so simple packages are there as well 
 
-* one 0.4mm pitch DFN package with exposed pad
-* multiple 0.5mm pitch QFN packages
+* One 0.4mm pitch DFN package with exposed pad
+* Multiple 0.5mm pitch QFN packages
 
-So hot air soldering is probably must.
+So hot air soldering is probably a must.
 
 ### Enclosure
 Enclosure is designed to be 3d-printable and consists of two parts. STL file in repo. There is silicon rubber cap for the 5-way button which might be harder to DIY, I casted it in a mould made on lathe, but 3d printing it might be possible. 
@@ -44,7 +43,6 @@ Enclosure is designed to be 3d-printable and consists of two parts. STL file in 
 ## Software
 
 Implemented vario-related fucntionality so far is:
-
 * Two varios with user definable averaging period (fusing batometer and accelerometer for instant response)
 * Altitude (user adujstable sea level pressure)
 * Altitude above ground level (90m mesh)
@@ -61,18 +59,18 @@ Implemented vario-related fucntionality so far is:
 * Piezo buzzer (adjustable volume, rise and sink trhreshold)
 * After-flight summary (take-off, landing, min and max altitude; max rise and sink (10s avg), flight time)
 
-Tthen obviously system stuff such as time, monitoring battery charge status
+Then obviously system stuff such as time, monitoring battery charge status
 
 And some not so standard fetures for paragliding vario:
 * Magnetic compass
-* Temperature and gumidity logger (every minute, hour or day)
+* Temperature and humidity logger (every minute, hour or day)
 * Chess for parawaiting and stuff (no UI tho, only PvP)
 * Since the .gpx tracklog contains many additional data originally for debugging, my [friend](https://github.com/jurajpalenik) did a python script to convert the tracklog into .srt format to use as a subtitles to actioncam footage (containing vario, alt, speed,...).
 
-###Programming
+### Programming
 Programming can be done via USB if SAM-BA bootloader is present in the microcontroller. To burn the bootloader, microcontroller programmer is however required (or getting somewhere preprogrammed chip, i know they are on Arduino Zero)
 
-
+User interface is almost fully adjustable, so whatever from the mentioned fucntionality can be turned on or off, places wherever on the screen, with three different font sizes, display units and so on.
 
 
 ## Acknowledgments
