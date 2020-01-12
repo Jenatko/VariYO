@@ -67,30 +67,32 @@ And some not so standard fetures for paragliding vario:
 * Chess for parawaiting and stuff (no UI tho, only PvP)
 * Since the .gpx tracklog contains many additional data originally for debugging, my [friend](https://github.com/jurajpalenik) did a python script to convert the tracklog into .srt format to use as a subtitles to actioncam footage (containing vario, alt, speed,...).
 
+User interface is almost fully adjustable, so whatever from the mentioned fucntionality can be turned on or off, places wherever on the screen, with three different font sizes, display units and so on.
+
+
 ### Programming
 Programming can be done via USB if SAM-BA bootloader is present in the microcontroller. To burn the bootloader, microcontroller programmer is however required (or getting somewhere preprogrammed chip, i know they are on Arduino Zero)
 
-User interface is almost fully adjustable, so whatever from the mentioned fucntionality can be turned on or off, places wherever on the screen, with three different font sizes, display units and so on.
 
 
 ## Acknowledgments
 
-###Arduino libraries
+### Arduino libraries
 Probably no need to write more, but for those who dont know: https://www.arduino.cc/
-###GxEPD2
+### GxEPD2
 Library for controlling the e-paper display. Developed by [ZinggJM](https://github.com/ZinggJM/GxEPD2), who can be found on arduino forum in a crazy long thread and his GitHub page is here.
-###Adafruit
+### Adafruit
 GxEPD2 library uses some features of [AdafruitGFX library](https://github.com/adafruit/Adafruit-GFX-Library).
-###NeoGPS
+### NeoGPS
 Minimalistic GPS library by [SlashDevin](https://github.com/SlashDevin/NeoGPS).
-###x-io technologies
+### x-io technologies
 From those guys, i used Madgwick AHRS library
-###Circle fit by Taubin
+### Circle fit by Taubin
 Algorythm to fit circle on bunch of points. However much I'm looking i can't find the webpage I downloaded it from and there is no header in the source code, so can't give you guys credit, sorry :-(
-###Ellipsoid fit
+### Ellipsoid fit
 C port of [this](https://www.mathworks.com/matlabcentral/fileexchange/24693-ellipsoid-fit) MATLAB library
-###Kalman filter
+### Kalman filter
 The core of it all. [This guy](https://github.com/har-in-air) did [kalman filter IMU/barometer vario](http://pataga.net/imukalmanvario.html), with source codes also on GitHub and some really good documentation on his webpage. So naturally i used his Kalman filter code.
-###MAX17055
+### MAX17055
 For the fuel gauge, there is a [library](https://github.com/AwotG/Arduino-MAX17055_Driver) from Awot Ghirmai and Ole Dreessen.
 
