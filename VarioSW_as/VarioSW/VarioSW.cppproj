@@ -179,6 +179,7 @@
       <Value>../src/lib/SdFat/SdCard</Value>
       <Value>../src/lib/SdFat/SpiDriver</Value>
       <Value>../src/lib/SdFat/SpiDriver/boards</Value>
+      <Value>../src/lib/GxEPD2/epd</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -578,6 +579,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lib\GxEPD2\GxEPD2_154.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD2\GxEPD2_154_D67.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD2\GxEPD2_154_D67.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lib\GxEPD2\GxEPD2_3C.h">
@@ -1073,6 +1080,7 @@
     <Folder Include="src\lib\Adafruit_GFX\" />
     <Folder Include="src\lib\Adafruit_GFX\Fonts\" />
     <Folder Include="src\lib\ellipsoid\eig" />
+    <Folder Include="src\lib\GxEPD2\epd" />
     <Folder Include="src\lib\NeoGPS\" />
     <Folder Include="src\lib\NeoGPS\extras\" />
     <Folder Include="src\lib\NeoGPS\extras\configs\" />

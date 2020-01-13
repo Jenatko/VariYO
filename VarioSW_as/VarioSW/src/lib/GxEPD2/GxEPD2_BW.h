@@ -14,8 +14,8 @@
 
 #include <Adafruit_GFX.h>
 #include "GxEPD2_EPD.h"
-#include "GxEPD2_154.h"
-
+#include "epd/GxEPD2_154.h"
+#include "epd/GxEPD2_154_D67.h"
 
 #ifndef ENABLE_GxEPD2_GFX
 // default is off
@@ -111,7 +111,7 @@ class GxEPD2_BW : public Adafruit_GFX
     }
 
     // init method with additional parameters:
-    // initial true for re-init after processor deep sleep wake up, if display power supply was kept
+    // initial false for re-init after processor deep sleep wake up, if display power supply was kept
     // this can be used to avoid the repeated initial full refresh on displays with fast partial update
     // NOTE: garbage will result on fast partial update displays, if initial full update is omitted after power loss
     // pulldown_rst_mode true for alternate RST handling to avoid feeding 5V through RST pin
@@ -141,6 +141,7 @@ class GxEPD2_BW : public Adafruit_GFX
       {
         epd2.writeImageAgain(_buffer, 0, 0, WIDTH, _page_height);
       }
+      if (!partial_update_mode) epd2.powerOff();
     }
 
     // display part of buffer content to screen, useful for full screen buffer
@@ -161,7 +162,7 @@ class GxEPD2_BW : public Adafruit_GFX
       epd2.refresh(x, y, w, h);
       if (epd2.hasFastPartialUpdate)
       {
-        epd2.writeImagePartAgain(_buffer, x, y, WIDTH, _page_height, x, y, w, h);
+        epd2.writeImagePartAgain(_buffer, x, y_part, WIDTH, _page_height, x, y, w, h);
       }
     }
 
@@ -223,8 +224,8 @@ class GxEPD2_BW : public Adafruit_GFX
           {
             epd2.writeImageAgain(_buffer, 0, 0, WIDTH, HEIGHT);
             //epd2.refresh(true); // not needed
-            epd2.powerOff();
           }
+          epd2.powerOff();
         }
         return false;
       }
@@ -452,7 +453,7 @@ class GxEPD2_BW : public Adafruit_GFX
       epd2.drawImage(bitmap, x, y, w, h, invert, mirror_y, pgm);
     }
     void drawImagePart(const uint8_t bitmap[], int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
-                        int16_t x, int16_t y, int16_t w, int16_t h, bool invert = false, bool mirror_y = false, bool pgm = false)
+                       int16_t x, int16_t y, int16_t w, int16_t h, bool invert = false, bool mirror_y = false, bool pgm = false)
     {
       epd2.drawImagePart(bitmap, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h, invert, mirror_y, pgm);
     }
@@ -465,12 +466,12 @@ class GxEPD2_BW : public Adafruit_GFX
       epd2.drawImage(black, color, x, y, w, h, false, false, false);
     }
     void drawImagePart(const uint8_t* black, const uint8_t* color, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
-                        int16_t x, int16_t y, int16_t w, int16_t h, bool invert, bool mirror_y, bool pgm)
+                       int16_t x, int16_t y, int16_t w, int16_t h, bool invert, bool mirror_y, bool pgm)
     {
       epd2.drawImagePart(black, color, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h, invert, mirror_y, pgm);
     }
     void drawImagePart(const uint8_t* black, const uint8_t* color, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
-                        int16_t x, int16_t y, int16_t w, int16_t h)
+                       int16_t x, int16_t y, int16_t w, int16_t h)
     {
       epd2.drawImagePart(black, color, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h, false, false, false);
     }
@@ -482,6 +483,7 @@ class GxEPD2_BW : public Adafruit_GFX
     void refresh(bool partial_update_mode = false) // screen refresh from controller memory to full screen
     {
       epd2.refresh(partial_update_mode);
+      if (!partial_update_mode) epd2.powerOff();
     }
     void refresh(int16_t x, int16_t y, int16_t w, int16_t h) // screen refresh from controller memory, partial screen
     {
@@ -542,7 +544,7 @@ class GxEPD2_BW : public Adafruit_GFX
     uint16_t _pw_x, _pw_y, _pw_w, _pw_h;
 };
 
-extern GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display;
+extern GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;
 
 #define GxEPD_HEIGHT 200
 #define GxEPD_WIDTH 200

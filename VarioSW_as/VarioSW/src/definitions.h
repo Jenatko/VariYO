@@ -1,5 +1,5 @@
 
-//#define VER14
+#define VER14
 
 #ifdef VER14
 #define POWER_ON 1

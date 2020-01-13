@@ -146,8 +146,8 @@ int  gauge_menu_id = MENUID_GAUGE;
 
 
 #define MENUID_GAUGES 0x08
-#define MENUITEM_GAUGES_VARIO 0
-#define MENUITEM_GAUGES_VARIO_AVG 1
+#define MENUITEM_GAUGES_VARIO_1 0
+#define MENUITEM_GAUGES_VARIO_2 1
 #define MENUITEM_GAUGES_ALTITUDE 2
 #define MENUITEM_GAUGES_AGL 3
 #define MENUITEM_GAUGES_SPEED 4
@@ -791,10 +791,10 @@ void menuSelector(menu *menuPointer, int selected) {
 	//gauges menu
 	if (menuPointer->menu_id == MENUID_GAUGES) {
 		//BMI160
-		if (selected == MENUITEM_GAUGES_VARIO){
+		if (selected == MENUITEM_GAUGES_VARIO_1){
 			gaugepointer = &statVar.varioGauge;
 		}
-		if (selected == MENUITEM_GAUGES_VARIO_AVG){
+		if (selected == MENUITEM_GAUGES_VARIO_2){
 			gaugepointer = &statVar.varioAvgGauge;
 		}
 		if (selected == MENUITEM_GAUGES_ALTITUDE){
