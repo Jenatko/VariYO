@@ -14,8 +14,8 @@
 
 #include <Adafruit_GFX.h>
 #include "GxEPD2_EPD.h"
-#include "epd/GxEPD2_154.h"
-#include "epd/GxEPD2_154_D67.h"
+#include "GxEPD2_154.h"
+#include "GxEPD2_154_D67.h"
 
 #ifndef ENABLE_GxEPD2_GFX
 // default is off

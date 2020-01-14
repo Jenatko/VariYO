@@ -12,6 +12,7 @@
 // Library: https://github.com/ZinggJM/GxEPD2
 
 #include "GxEPD2_154_D67.h"
+#include "definitions.h"
 
 GxEPD2_154_D67::GxEPD2_154_D67(int8_t cs, int8_t dc, int8_t rst, int8_t busy) :
   GxEPD2_EPD(cs, dc, rst, busy, HIGH, 10000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
@@ -77,6 +78,18 @@ void GxEPD2_154_D67::_writeImage(uint8_t command, const uint8_t bitmap[], int16_
   if (!_using_partial_mode) _Init_Part();
   _setPartialRamArea(x1, y1, w1, h1);
   _writeCommand(command);
+
+	uint8_t buffer2[5000];
+	for(int i = 0; i < 5000; i++){
+		buffer2[i] = bitmap[i];
+		
+	}
+	
+	digitalWrite(DISP_CS, 0);
+	sercom4.transferDataSPI(buffer2, 5000);
+	digitalWrite(DISP_CS, 1);
+
+/*
   for (int16_t i = 0; i < h1; i++)
   {
     for (int16_t j = 0; j < w1 / 8; j++)
@@ -100,6 +113,7 @@ void GxEPD2_154_D67::_writeImage(uint8_t command, const uint8_t bitmap[], int16_
       _writeData(data);
     }
   }
+*/
   delay(1); // yield() to avoid WDT on ESP8266 and ESP32
 }
 
@@ -373,9 +387,10 @@ void GxEPD2_154_D67::_Update_Full()
 }
 
 void GxEPD2_154_D67::_Update_Part()
-{
+{	digitalWrite(SRAM_CS, 0);
   _writeCommand(0x22);
   _writeData(0xfc);
   _writeCommand(0x20);
   _waitWhileBusy("_Update_Part", partial_refresh_time);
+	digitalWrite(SRAM_CS, 1);
 }

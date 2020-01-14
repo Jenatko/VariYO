@@ -174,7 +174,9 @@ void displayUpdate(void){
 	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
 	
 	//display.partiallyUpdateScreen();
+	digitalWrite(SRAM_CS, 1);
 	display.display(true);
+digitalWrite(SRAM_CS, 0);
 	
 
 	redraw = 0;
@@ -290,6 +292,7 @@ void setup() {
 
 	display.fillScreen(GxEPD_WHITE);
 	display.display();
+
 	
 	display.setRotation(0);
 
@@ -455,6 +458,7 @@ void loop() {
 		
 		
 		t_start_first = micros();
+		
 		displayUpdate();
 		t_stop_first = micros();
 		}
