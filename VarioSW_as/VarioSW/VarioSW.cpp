@@ -61,7 +61,12 @@
 
 #include "Interrupt_counter.h"
 
+#ifdef EPAPER_V2
 GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(GxEPD2_154_D67(/*CS=D8*/ PA13, /*DC=D3*/ PA14, /*RST=D4*/ PA15, /*BUSY=D2*/ PA10));
+#else
+GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*DC=D3*/ PA14, /*RST=D4*/ PA15, /*BUSY=D2*/ PA10));
+#endif
+
 
 
 

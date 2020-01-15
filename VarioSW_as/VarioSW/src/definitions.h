@@ -1,7 +1,8 @@
 
-#define VER14
+#define PCB_VER14_PLUS
+#define EPAPER_V2
 
-#ifdef VER14
+#ifdef PCB_VER14_PLUS
 #define POWER_ON 1
 #define POWER_OFF 0
 #else

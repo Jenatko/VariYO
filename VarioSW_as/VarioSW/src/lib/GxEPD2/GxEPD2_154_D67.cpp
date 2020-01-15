@@ -13,6 +13,7 @@
 
 #include "GxEPD2_154_D67.h"
 #include "definitions.h"
+#include "Variables.h"
 
 GxEPD2_154_D67::GxEPD2_154_D67(int8_t cs, int8_t dc, int8_t rst, int8_t busy) :
   GxEPD2_EPD(cs, dc, rst, busy, HIGH, 10000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
@@ -356,7 +357,7 @@ void GxEPD2_154_D67::_InitDisplay()
   _writeData(0x00); // C
   _writeData(0x00); // D
   _writeData(0xff); // E
-  _writeData(0x00); // F F[6]=0 : disable PingPong
+  _writeData(0x40); // F F[6]=0 : disable PingPong
   _writeData(0x00); // G
   _writeData(0x00); // H
   _writeData(0x00); // I
@@ -387,10 +388,10 @@ void GxEPD2_154_D67::_Update_Full()
 }
 
 void GxEPD2_154_D67::_Update_Part()
-{	digitalWrite(SRAM_CS, 0);
+{	
+
   _writeCommand(0x22);
   _writeData(0xfc);
   _writeCommand(0x20);
-  _waitWhileBusy("_Update_Part", partial_refresh_time);
-	digitalWrite(SRAM_CS, 1);
+
 }

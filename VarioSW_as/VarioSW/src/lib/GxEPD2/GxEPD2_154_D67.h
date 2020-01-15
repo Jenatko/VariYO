@@ -29,7 +29,7 @@ class GxEPD2_154_D67 : public GxEPD2_EPD
     static const uint16_t power_on_time = 100; // ms, e.g. 95583us
     static const uint16_t power_off_time = 150; // ms, e.g. 140621us
     static const uint16_t full_refresh_time = 2600; // ms, e.g. 2509602us
-    static const uint16_t partial_refresh_time = 50; // ms, e.g. 457282us
+    static const uint16_t partial_refresh_time = 500; // ms, e.g. 457282us
     // constructor
     GxEPD2_154_D67(int8_t cs, int8_t dc, int8_t rst, int8_t busy);
     // methods (virtual)

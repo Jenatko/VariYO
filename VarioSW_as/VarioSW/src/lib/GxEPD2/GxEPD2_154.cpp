@@ -396,7 +396,7 @@ void GxEPD2_154::_Update_Part()
 	_writeData(0x04);
 	_writeCommand(0x20);
 	//redrawRoutine();
-	routine();
-	_waitWhileBusy("_Update_Part", partial_refresh_time);
-	_writeCommand(0xff);
+	//routine();
+	//_waitWhileBusy("_Update_Part", partial_refresh_time);
+	//_writeCommand(0xff);
 }

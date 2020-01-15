@@ -131,15 +131,17 @@ class GxEPD2_BW : public Adafruit_GFX
         _buffer[x] = data;
       }
     }
-
+#include "definitions.h"
     // display buffer content to screen, useful for full screen buffer
     void display(bool partial_update_mode = false)
-    {
+    { 
+
+	 while(digitalRead(DISP_BUSY));
       epd2.writeImage(_buffer, 0, 0, WIDTH, _page_height);
       epd2.refresh(partial_update_mode);
       if (epd2.hasFastPartialUpdate)
       {
-        epd2.writeImageAgain(_buffer, 0, 0, WIDTH, _page_height);
+    //    epd2.writeImageAgain(_buffer, 0, 0, WIDTH, _page_height);
       }
       if (!partial_update_mode) epd2.powerOff();
     }
@@ -544,7 +546,12 @@ class GxEPD2_BW : public Adafruit_GFX
     uint16_t _pw_x, _pw_y, _pw_w, _pw_h;
 };
 
-extern GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;
+#ifdef EPAPER_V2
+	extern GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;
+#else
+	extern GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display;
+#endif
+
 
 #define GxEPD_HEIGHT 200
 #define GxEPD_WIDTH 200
