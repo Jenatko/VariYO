@@ -63,8 +63,9 @@ class GxEPD2_154_D67 : public GxEPD2_EPD
     void refresh(int16_t x, int16_t y, int16_t w, int16_t h); // screen refresh from controller memory, partial screen
     void powerOff(); // turns off generation of panel driving voltages, avoids screen fading over time
     void hibernate(); // turns powerOff() and sets controller to deep sleep for minimum power use, ONLY if wakeable by RST (rst >= 0)
-	    void _Init_Full();
-	    void _Init_Part();
+	 //   void _Init_Full();
+	 //   void _Init_Part();
+		void setmode(bool partial_update_mode);
   private:
     void _writeScreenBuffer(uint8_t command, uint8_t value);
     void _writeImage(uint8_t command, const uint8_t bitmap[], int16_t x, int16_t y, int16_t w, int16_t h, bool invert = false, bool mirror_y = false, bool pgm = false);
@@ -74,8 +75,8 @@ class GxEPD2_154_D67 : public GxEPD2_EPD
     void _PowerOn();
     void _PowerOff();
     void _InitDisplay(bool full = true);
-  //  void _Init_Full();
-   // void _Init_Part();
+    void _Init_Full();
+    void _Init_Part();
     void _Update_Full();
     void _Update_Part();
 };

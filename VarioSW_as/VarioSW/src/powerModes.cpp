@@ -117,7 +117,6 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 		display.setCursor(10, 120);
 		display.print("Battery empty");
 	}
-	display.set_full();
 	display.display();
 	while(digitalRead(DISP_BUSY));
 	eepromWrite(0, statVar);
@@ -333,7 +332,7 @@ void massStorageEna() {
 	display.print("USB mass storage");
 	display.setCursor(20, 120);
 	display.print("push to end");
-	display.set_full();
+
 	display.display();
 	display.powerOff();
 	
@@ -362,7 +361,6 @@ void massStorageEna() {
 	display.init(0);
 		display.fillScreen(GxEPD_WHITE);
 		display.display(true);
-	display.set_part();
 	
 }
 

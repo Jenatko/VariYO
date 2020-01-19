@@ -12,7 +12,6 @@
 
 #include "GxEPD2_154.h"
 #include "definitions.h"
-#include "routine.h"
 
 GxEPD2_154::GxEPD2_154(int8_t cs, int8_t dc, int8_t rst, int8_t busy) :
 GxEPD2_EPD(cs, dc, rst, busy, HIGH, 10000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
@@ -385,7 +384,6 @@ void GxEPD2_154::_Update_Full()
 	_writeData(0xc4);
 	_writeCommand(0x20);
 	//redrawRoutine();
-	routine();
 	_waitWhileBusy("_Update_Full", full_refresh_time);
 	_writeCommand(0xff);
 }

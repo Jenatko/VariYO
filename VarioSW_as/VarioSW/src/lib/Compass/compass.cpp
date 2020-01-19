@@ -6,6 +6,7 @@
  */ 
 #include "button_control.h"
 #include "Variables.h"
+#include "routine.h"
 #include <GxEPD2_BW.h>
 //#include <GxGDEP015OC1/GxGDEP015OC1.h>
 #include <Fonts/FreeMonoBold24pt7b.h>
@@ -31,6 +32,7 @@ void compass(){
 	
 	
 	while(buttons.getFlag() == 0){
+		routine();
 		display.fillScreen(GxEPD_WHITE);
 		display.setCursor(80, 18);
 		display.print(yaw, 0);

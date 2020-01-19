@@ -439,10 +439,9 @@ void loop() {
 			display.fillScreen(GxEPD_WHITE);
 			//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 			//display.display(true);
-			display.set_full();
+
 			displayUpdate(true);
 			display.display();
-			display.set_part();
 			break;
 			
 			case DOWN:

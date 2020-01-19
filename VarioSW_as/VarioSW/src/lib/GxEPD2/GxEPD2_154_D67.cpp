@@ -382,6 +382,15 @@ void GxEPD2_154_D67::_Init_Part()
 	_using_partial_mode = true;
 }
 
+void GxEPD2_154_D67::setmode(bool partial_update_mode){
+	if(_using_partial_mode == false){
+		if(partial_update_mode)	_Init_Part();
+	}
+	else{
+		if(!partial_update_mode) _Init_Full();
+	}	
+}
+
 void GxEPD2_154_D67::_Update_Full()
 {
 	_writeCommand(0x22);
