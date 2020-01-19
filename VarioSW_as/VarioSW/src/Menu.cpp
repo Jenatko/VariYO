@@ -537,12 +537,13 @@ void menuSelector(menu *menuPointer, int selected) {
 		//mass storage
 		else if (selected == MENUITEM_TOPMENU_MASS_STORAGE){
 			massStorageEna();
+			//menu_init();
 
 		}
 		//power off
 		else if (selected == MENUITEM_TOPMENU_POWEROFF) {
 			powerOff();
-			menu_init();
+		//	menu_init();
 
 
 		}

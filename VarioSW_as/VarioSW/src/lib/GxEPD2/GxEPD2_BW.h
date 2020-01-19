@@ -16,6 +16,7 @@
 #include "GxEPD2_EPD.h"
 #include "GxEPD2_154.h"
 #include "GxEPD2_154_D67.h"
+#include "definitions.h"
 
 #ifndef ENABLE_GxEPD2_GFX
 // default is off
@@ -101,6 +102,8 @@ class GxEPD2_BW : public Adafruit_GFX
       else
         _buffer[i] = (_buffer[i] & (0xFF ^ (1 << (7 - x % 8))));
     }
+	
+	
 
     void init(uint32_t serial_diag_bitrate = 0) // = 0 : disabled
     {
@@ -131,7 +134,15 @@ class GxEPD2_BW : public Adafruit_GFX
         _buffer[x] = data;
       }
     }
-#include "definitions.h"
+	
+	void set_full(){
+		epd2._Init_Full();
+	}
+	
+		void set_part(){
+			epd2._Init_Part();
+		}
+
     // display buffer content to screen, useful for full screen buffer
     void display(bool partial_update_mode = false)
     { 

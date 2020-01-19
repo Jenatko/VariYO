@@ -91,23 +91,20 @@ void draw_floppy(int x_orig, int y_orig);
 
 
 
-void displayUpdate(void){
+void displayUpdate(bool drawall = false){
+
+//digitalWrite(SRAM_CS, 0);
 
 
 
-	display.fillScreen(GxEPD_WHITE);
 
-
-	//statVar.varioGauge.value = vario_filter/100;
-	//statVar.varioAvgGauge.value = vario_lowpassed/100;
-	
 	if(ground_level != 0xffff)	statVar.AGLGauge.value = (alt_filter*0.01f) - ground_level;
 	else statVar.AGLGauge.value = NAN;
 	
 	
 	statVar.altitudeGauge.value = (alt_filter*0.01f);
 	statVar.tempGauge.value = enviromental_data.temperature*0.01f;
-	statVar.humidGauge.value = enviromental_data.humidity*0.01f;
+	statVar.humidGauge.value = enviromental_data.humidity;
 	
 	
 	statVar.windGauge.value = wind_speed_mps;
@@ -119,54 +116,22 @@ void displayUpdate(void){
 	//statVar.glideRatioGauge = ;
 	if(statVar.ena_vector & ENA_TRACKLOG) statVar.altAboveTakeoffGauge.value = alt_filter*0.01f - var_takeoffalt*0.01f;
 	else statVar.altAboveTakeoffGauge.value = NAN;
+
+	digitalWrite(SRAM_CS, 0);
 	
-	printGauges();
+	if(drawall)
+		printGauges();
+	else
+		printGauges_values();
 	
+	
+	digitalWrite(SRAM_CS, 1);
+	
+
 	
 
 
-	display.setFont(&FreeMonoBold9pt7b);
-	display.setCursor(5,12);
-	if(var_localtime.tm_hour < 10) display.print("0");
-	display.print(var_localtime.tm_hour);
-	display.print(":");
-	if(var_localtime.tm_min < 10) display.print("0");
-	display.print(var_localtime.tm_min);
-	display.print(":");
-	if(var_localtime.tm_sec < 10) display.print("0");
-	display.print(var_localtime.tm_sec);
 
-	
-	display.setFont();
-	
-	draw_antenna(100, 0);
-	display.setCursor(113,5);
-	//	display.setFont();
-	if(statVar.ena_vector & ENA_GPS){
-		if(fix.valid.location)
-		display.print("3D");
-		else if(fix.valid.time)
-		display.print("time");
-		else
-		display.print("No");
-	}
-	else		display.print("OFF");
-	
-	if(statVar.ena_vector & ENA_TRACKLOG)	draw_floppy(150, 0);
-	
-	
-	
-	
-	display.setCursor(176,3);
-
-	display.print(battery_SOC, 0);
-	display.print("%");
-	display.drawLine(170, 0, 198, 0, GxEPD_BLACK);
-	display.drawLine(170, 12, 198, 12, GxEPD_BLACK);
-	display.drawLine(170, 0, 170, 12, GxEPD_BLACK);
-	display.drawLine(198, 0, 198, 12, GxEPD_BLACK);
-	display.drawLine(169, 3, 169, 9, GxEPD_BLACK);
-	display.drawLine(168, 3, 168, 9, GxEPD_BLACK);
 	
 	display.setCursor(10,110);
 	display.setFont(&FreeMonoBold12pt7b);
@@ -179,10 +144,60 @@ void displayUpdate(void){
 	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
 	
 	//display.partiallyUpdateScreen();
-	digitalWrite(SRAM_CS, 1);
+
 	display.display(true);
-digitalWrite(SRAM_CS, 0);
+
 	
+	display.fillScreen(GxEPD_WHITE);
+		display.setFont(&FreeMonoBold9pt7b);
+		display.setCursor(5,12);
+		if(var_localtime.tm_hour < 10) display.print("0");
+		display.print(var_localtime.tm_hour);
+		display.print(":");
+		if(var_localtime.tm_min < 10) display.print("0");
+		display.print(var_localtime.tm_min);
+		display.print(":");
+		if(var_localtime.tm_sec < 10) display.print("0");
+		display.print(var_localtime.tm_sec);
+
+		
+		display.setFont();
+		
+		draw_antenna(100, 0);
+		display.setCursor(113,5);
+		//	display.setFont();
+		if(statVar.ena_vector & ENA_GPS){
+			if(fix.valid.location)
+			display.print("3D");
+			else if(fix.valid.time)
+			display.print("time");
+			else
+			display.print("No");
+		}
+		else		display.print("OFF");
+		
+		if(statVar.ena_vector & ENA_TRACKLOG)	draw_floppy(150, 0);
+		
+		
+		
+		
+		display.setCursor(176,3);
+
+		display.print(battery_SOC, 0);
+		display.print("%");
+		display.drawLine(170, 0, 198, 0, GxEPD_BLACK);
+		display.drawLine(170, 12, 198, 12, GxEPD_BLACK);
+		display.drawLine(170, 0, 170, 12, GxEPD_BLACK);
+		display.drawLine(198, 0, 198, 12, GxEPD_BLACK);
+		display.drawLine(169, 3, 169, 9, GxEPD_BLACK);
+		display.drawLine(168, 3, 168, 9, GxEPD_BLACK);
+		
+		
+		printGauges_frames();
+		
+		
+			display.setFont(&FreeMonoBold12pt7b);
+
 
 	redraw = 0;
 	
@@ -255,7 +270,7 @@ void setup() {
 	eepromRead(0, statVar);
 
 
-	BT_off();
+	//BT_off();
 
 	
 	present_devices = 0;
@@ -424,7 +439,10 @@ void loop() {
 			display.fillScreen(GxEPD_WHITE);
 			//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 			//display.display(true);
+			display.set_full();
+			displayUpdate(true);
 			display.display();
+			display.set_part();
 			break;
 			
 			case DOWN:
@@ -454,8 +472,8 @@ void loop() {
 	//	SerialUSB.println((uint32_t)((t_stop-t_start)/1000));
 
 
-
-	if(redraw){
+	if(digitalRead(DISP_BUSY) == 0){
+	//if(redraw){
 		counter500ms = 0;
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;

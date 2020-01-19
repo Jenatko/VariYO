@@ -38,7 +38,6 @@
 
 #other shit
 *.zip
-*.pdf
 *.rar
 
 VarioSW_as/ArduinoCore/Release
