@@ -60,6 +60,8 @@ int logger_ena;
 void setVariablesDefault(){
 	memset(&statVar, sizeof(statVar), 0);
 	statVar = {
+		
+		.valid = 1,
 		.th_rise = 30,
 		.th_sink = -150,
 		.ena_vector= 0,
@@ -69,9 +71,6 @@ void setVariablesDefault(){
 		//MS5611 baro
 		.Psea = 101325,
 		
-		//MAX17055 fuel gauge
-		.resistSensor = 0.039,
-		.designCap = 1200,
 		
 		//Accelerometer
 		.gainErrorAccelX  = (double)16384/16315,
@@ -90,7 +89,6 @@ void setVariablesDefault(){
 		.gainErrorMagZ = 4444,
 		.offsetMagZ = 21860756,
 		
-		.vario_lowpass_coef = 10,
 		
 		.zvariance = 40 ,
 		.accelvariance = 10

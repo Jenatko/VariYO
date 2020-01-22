@@ -14,6 +14,8 @@
 #include "RTCZero.h"
 #include "MAX17055.h"
 
+#include "FlashStorage.h"
+
 extern SdFile tracklog;
 extern SdFile loggerFile;
 
@@ -119,7 +121,8 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	}
 	display.display();
 	while(digitalRead(DISP_BUSY));
-	eepromWrite(0, statVar);
+	//eepromWrite(0, statVar);
+	statVarFlash.write(statVar);
 	USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
 	//USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_RUNSTDBY;
 	SCB->SCR |= 1 << 2;

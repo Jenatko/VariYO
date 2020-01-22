@@ -66,6 +66,8 @@ void setSeaPressureFromAltitude(int altitude, unsigned int pressure);
 //calculate altitude from pressure stored in StatVar.enviromental_data
 float getAltitude();
 
+float getPressureAltitude();
+
 int IMU_FifoBytesToRead();
 
 int IMU_ReadFrameFromFifo();

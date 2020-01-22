@@ -148,10 +148,12 @@ class GxEPD2_BW : public Adafruit_GFX
 		#endif
 		epd2.writeImage(_buffer, 0, 0, WIDTH, _page_height);
 		epd2.refresh(partial_update_mode);
+		#ifndef EPAPER_V2
 		if (epd2.hasFastPartialUpdate)
-		{
-			//    epd2.writeImageAgain(_buffer, 0, 0, WIDTH, _page_height);
+		{//while(digitalRead(DISP_BUSY));
+			 //   epd2.writeImageAgain(_buffer, 0, 0, WIDTH, _page_height);
 		}
+		#endif
 		if (!partial_update_mode) epd2.powerOff();
 		routine();
 	}

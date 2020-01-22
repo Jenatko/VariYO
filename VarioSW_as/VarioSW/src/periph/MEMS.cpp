@@ -432,3 +432,24 @@ float getAltitude(){
 	
 	
 }
+
+float getPressureAltitude(){
+
+	
+	
+	float diff = 10132500.0f/(enviromental_data.pressure) - 1.3f;
+	float diff2 = diff * diff;
+	
+	//some crazy taylor series magic, bcs aint nobody has time for pow()
+	float power = (1.05099483835522f
+	+ 0.153261726531934f * diff
+	+ -0.0477720927877293f * diff2
+	+ 0.0221763811870283f * diff2 * diff
+	+ -0.0119855962404455f * diff2 * diff2);
+
+	
+	return ((power -1.0f)* (enviromental_data.temperature/100.0f + 273.15f) / 0.0065f);
+	
+	
+	
+}

@@ -74,6 +74,10 @@ GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*D
 
 SdFat SD;
 
+#include "FlashStorage.h"
+
+FlashStorage(statVarFlash, StaticVariables);
+
 
 
 
@@ -93,7 +97,7 @@ void draw_floppy(int x_orig, int y_orig);
 
 void displayUpdate(bool drawall = false){
 
-//digitalWrite(SRAM_CS, 0);
+	//digitalWrite(SRAM_CS, 0);
 
 
 
@@ -110,6 +114,9 @@ void displayUpdate(bool drawall = false){
 	statVar.windGauge.value = wind_speed_mps;
 	statVar.windDirGauge.value = wind_direction;
 	
+	statVar.PressureAltGauge.value = getPressureAltitude();
+		statVar.MagHdgGauge.value = yaw;
+	
 	if(statVar.ena_vector & ENA_TRACKLOG) statVar.flightTimeGauge.value = (rtc.getEpoch() - var_takeofftime)/60;
 	else statVar.flightTimeGauge.value = NAN;
 	//statVar.altAboveTakeoffGauge = ;
@@ -120,9 +127,9 @@ void displayUpdate(bool drawall = false){
 	digitalWrite(SRAM_CS, 0);
 	
 	if(drawall)
-		printGauges();
+	printGauges();
 	else
-		printGauges_values();
+	printGauges_values();
 	
 	
 	digitalWrite(SRAM_CS, 1);
@@ -149,54 +156,54 @@ void displayUpdate(bool drawall = false){
 
 	
 	display.fillScreen(GxEPD_WHITE);
-		display.setFont(&FreeMonoBold9pt7b);
-		display.setCursor(5,12);
-		if(var_localtime.tm_hour < 10) display.print("0");
-		display.print(var_localtime.tm_hour);
-		display.print(":");
-		if(var_localtime.tm_min < 10) display.print("0");
-		display.print(var_localtime.tm_min);
-		display.print(":");
-		if(var_localtime.tm_sec < 10) display.print("0");
-		display.print(var_localtime.tm_sec);
+	display.setFont(&FreeMonoBold9pt7b);
+	display.setCursor(5,12);
+	if(var_localtime.tm_hour < 10) display.print("0");
+	display.print(var_localtime.tm_hour);
+	display.print(":");
+	if(var_localtime.tm_min < 10) display.print("0");
+	display.print(var_localtime.tm_min);
+	display.print(":");
+	if(var_localtime.tm_sec < 10) display.print("0");
+	display.print(var_localtime.tm_sec);
 
-		
-		display.setFont();
-		
-		draw_antenna(100, 0);
-		display.setCursor(113,5);
-		//	display.setFont();
-		if(statVar.ena_vector & ENA_GPS){
-			if(fix.valid.location)
-			display.print("3D");
-			else if(fix.valid.time)
-			display.print("time");
-			else
-			display.print("No");
-		}
-		else		display.print("OFF");
-		
-		if(statVar.ena_vector & ENA_TRACKLOG)	draw_floppy(150, 0);
-		
-		
-		
-		
-		display.setCursor(176,3);
+	
+	display.setFont();
+	
+	draw_antenna(100, 0);
+	display.setCursor(113,5);
+	//	display.setFont();
+	if(statVar.ena_vector & ENA_GPS){
+		if(fix.valid.location)
+		display.print("3D");
+		else if(fix.valid.time)
+		display.print("time");
+		else
+		display.print("No");
+	}
+	else		display.print("OFF");
+	
+	if(statVar.ena_vector & ENA_TRACKLOG)	draw_floppy(150, 0);
+	
+	
+	
+	
+	display.setCursor(176,3);
 
-		display.print(battery_SOC, 0);
-		display.print("%");
-		display.drawLine(170, 0, 198, 0, GxEPD_BLACK);
-		display.drawLine(170, 12, 198, 12, GxEPD_BLACK);
-		display.drawLine(170, 0, 170, 12, GxEPD_BLACK);
-		display.drawLine(198, 0, 198, 12, GxEPD_BLACK);
-		display.drawLine(169, 3, 169, 9, GxEPD_BLACK);
-		display.drawLine(168, 3, 168, 9, GxEPD_BLACK);
-		
-		
-		printGauges_frames();
-		
-		
-			display.setFont(&FreeMonoBold12pt7b);
+	display.print(battery_SOC, 0);
+	display.print("%");
+	display.drawLine(170, 0, 198, 0, GxEPD_BLACK);
+	display.drawLine(170, 12, 198, 12, GxEPD_BLACK);
+	display.drawLine(170, 0, 170, 12, GxEPD_BLACK);
+	display.drawLine(198, 0, 198, 12, GxEPD_BLACK);
+	display.drawLine(169, 3, 169, 9, GxEPD_BLACK);
+	display.drawLine(168, 3, 168, 9, GxEPD_BLACK);
+	
+	
+	printGauges_frames();
+	
+	
+	display.setFont(&FreeMonoBold12pt7b);
 
 
 	redraw = 0;
@@ -267,7 +274,10 @@ void setup() {
 	SPI.begin();
 
 	delay(100);   //wait for EEPROM to power-up
-	eepromRead(0, statVar);
+	//eepromRead(0, statVar);
+	
+	statVar = statVarFlash.read();
+	if(statVar.valid == 0) setVariablesDefault();
 
 
 	//BT_off();
@@ -294,8 +304,8 @@ void setup() {
 	
 	
 
-  
-  
+	
+	
 	
 	menu_init();
 	//while(!SerialUSB.available());
@@ -392,6 +402,16 @@ void setup() {
 	pinMode(SD_DETECT, INPUT);
 	display.display(true);
 	
+	display.setCursor(10, 150);
+	
+	display.print("eeprom used:");
+	display.setCursor(10, 170);
+	display.print(sizeof(statVar));
+	display.print("/");
+		display.print(4096/8/sizeof(char));
+	display.display(true);
+	
+	
 
 
 	delay(1000);
@@ -472,7 +492,7 @@ void loop() {
 
 
 	if(digitalRead(DISP_BUSY) == 0){
-	//if(redraw){
+		//if(redraw){
 		counter500ms = 0;
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;
@@ -483,7 +503,7 @@ void loop() {
 		
 		displayUpdate();
 		t_stop_first = micros();
-		}
+	}
 	else{
 		delay(10);
 	}

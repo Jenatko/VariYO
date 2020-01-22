@@ -286,6 +286,9 @@ void printGauges(){
 	Gauge_print(&statVar.flightTimeGauge);
 	Gauge_print(&statVar.altAboveTakeoffGauge);
 	
+		Gauge_print(&statVar.PressureAltGauge);
+		Gauge_print(&statVar.MagHdgGauge);
+	
 
 }
 
@@ -307,6 +310,9 @@ void printGauges_values(){
 	Gauge_print_value(&statVar.flightTimeGauge);
 	Gauge_print_value(&statVar.altAboveTakeoffGauge);
 	
+	Gauge_print_value(&statVar.PressureAltGauge);
+	Gauge_print_value(&statVar.MagHdgGauge);
+	
 
 }
 
@@ -327,6 +333,9 @@ void printGauges_frames(){
 	Gauge_print_frame(&statVar.glideRatioGauge, 1);
 	Gauge_print_frame(&statVar.flightTimeGauge);
 	Gauge_print_frame(&statVar.altAboveTakeoffGauge);
+	
+	Gauge_print_frame(&statVar.PressureAltGauge);
+		Gauge_print_frame(&statVar.MagHdgGauge);
 	
 
 }
