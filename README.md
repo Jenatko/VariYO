@@ -11,15 +11,14 @@ Hardware platform is single PCB with:
 * Temperature and humidity sensor
 * GNSS reviever (GPS/GLONASS/Galileo/Beidou)
 * Bluetooth
-* EEPROM (not needed anymore, using uC flash)
 * SD card
 * Card reader chip for connecting with PC
-* SRAM (not needed yet, still enough in uC)
 * ARM M0+ microcontroller
-* Battery charging IC
+* Battery charging IC (via USB)
 * E-paper driving circuitry
 * 5-way joystick button (as I hate some non-intuitive button interface and it can be used even in not superthick gloves)
-* Battery charging controller from PC
+* EEPROM (not needed anymore, using uC flash)
+* SRAM (not needed yet, still enough in uC) 
 
 and connected:
 * Piezo buzzer
