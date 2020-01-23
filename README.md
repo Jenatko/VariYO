@@ -2,6 +2,7 @@
 
 VariYo is an open source project (both hardware and software) of a compact vario for paragliding (or other forms of freeflight). With hardware being more or less frozen, software is still being updated to include more and more features and hopefully this page will be updated as well.
 
+![Alt text](pict/frontside.jpg?raw=true "Title")
 ## Hardware
 Hardware platform is single PCB with:
 
@@ -10,14 +11,15 @@ Hardware platform is single PCB with:
 * Temperature and humidity sensor
 * GNSS reviever (GPS/GLONASS/Galileo/Beidou)
 * Bluetooth
-* EEPROM
+* EEPROM (not needed anymore, using uC flash)
 * SD card
 * Card reader chip for connecting with PC
-* EEPROM
+* SRAM (not needed yet, still enough in uC)
 * ARM M0+ microcontroller
 * Battery charging IC
 * E-paper driving circuitry
 * 5-way joystick button (as I hate some non-intuitive button interface and it can be used even in not superthick gloves)
+* Battery charging controller from PC
 
 and connected:
 * Piezo buzzer
@@ -36,6 +38,10 @@ Components were chosen to be as much hand-solderable as possible. However there 
 
 So hot air soldering is probably a must.
 
+
+![Alt text](pict/front2.jpg?raw=true "Title")
+![Alt text](pict/back1.jpg?raw=true "Title")
+
 ### Enclosure
 Enclosure is designed to be 3d-printable and consists of two parts. STL file in repo. There is silicon rubber cap for the 5-way button which might be harder to DIY, I casted it in a mould made on lathe, but 3d printing it might be possible. 
 
@@ -45,10 +51,12 @@ Enclosure is designed to be 3d-printable and consists of two parts. STL file in 
 Implemented vario-related fucntionality so far is:
 * Two varios with user definable averaging period (fusing batometer and accelerometer for instant response)
 * Altitude (user adujstable sea level pressure)
+* Pressure altitude (using std pressure)
 * Altitude above ground level (90m mesh)
 * Altitude above take-off
 * Ground speed
-* Heading
+* Heading (movement direction)
+* Magnetic heading
 * Temperature
 * Humidity
 * Flight time
@@ -69,6 +77,7 @@ And some not so standard fetures for paragliding vario:
 
 User interface is almost fully adjustable, so whatever from the mentioned fucntionality can be turned on or off, places wherever on the screen, with three different font sizes, display units and so on.
 
+![Alt text](pict/frontside.jpg?raw=true "Title")
 
 ### Programming
 Programming can be done via USB if SAM-BA bootloader is present in the microcontroller. To burn the bootloader, microcontroller programmer is however required (or getting somewhere preprogrammed chip, i know they are on Arduino Zero)
