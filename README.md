@@ -38,9 +38,9 @@ Components were chosen to be as much hand-solderable as possible. However there 
 
 So hot air soldering is probably a must.
 
-
-![Alt text](pict/front2.jpg?raw=true "Title")
-![Alt text](pict/back1.jpg?raw=true "Title")
+| col 1      | col 2      |
+|------------|-------------|
+| ![Alt text](pict/front2.jpg?raw=true "Title") | ![Alt text](pict/back1.jpg?raw=true "Title") |
 
 ### Enclosure
 Enclosure is designed to be 3d-printable and consists of two parts. STL file in repo. There is silicon rubber cap for the 5-way button which might be harder to DIY, I casted it in a mould made on lathe, but 3d printing it might be possible. 
@@ -77,7 +77,7 @@ And some not so standard fetures for paragliding vario:
 
 User interface is almost fully adjustable, so whatever from the mentioned fucntionality can be turned on or off, places wherever on the screen, with three different font sizes, display units and so on.
 
-![Alt text](pict/frontside.jpg?raw=true "Title")
+![Alt text](pict/frontassambled.jpg?raw=true "Title")
 
 ### Programming
 Programming can be done via USB if SAM-BA bootloader is present in the microcontroller. To burn the bootloader, microcontroller programmer is however required (or getting somewhere preprogrammed chip, i know they are on Arduino Zero)
