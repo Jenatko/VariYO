@@ -38,6 +38,8 @@ Components were chosen to be as much hand-solderable as possible. However there 
 
 So hot air soldering is probably a must.
 
+| frontside      | backside      |
+|------------|-------------|
 | ![Alt text](pict/front2.jpg?raw=true "Title") | ![Alt text](pict/back1.jpg?raw=true "Title") |
 
 ### Enclosure
