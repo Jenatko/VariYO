@@ -83,8 +83,8 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 		//float v[3];
 		float w[3];
 				
-		//u[0] = 1 - 2 * (q2*q2 + q3*q3);
-		//u[1] =     2 * (q1*q2 + q3*q0);
+		u[0] = 1 - 2 * (q2*q2 + q3*q3);
+		u[1] =     2 * (q1*q2 + q3*q0);
 		u[2] =     2 * (q1*q3 - q2*q0);
 				
 		//v[0] =     2 * (q1*q2 - q3*q0);
@@ -96,11 +96,11 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 		//w[2] = 1 - 2 * (q1*q1 + q2*q2);
 			
 		float res = 0;
-				
+						
 		if(abs(u[2]) > 0.7f) { // upright
 			res = -atan2(-w[1], -w[0]);
 		} else {
-			res = atan2(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3);
+			res = -atan2(-u[1], -u[0]);
 		}
 		res *= RAD2DEG;
 		if (res < 0) res += 360;
