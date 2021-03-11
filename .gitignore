@@ -48,3 +48,5 @@ VarioSW_as/ArduinoCore/Debug/
 VarioSW_as/VarioSW/Debug/
 
 .vs/
+
+__pycache__
