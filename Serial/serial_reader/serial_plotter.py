@@ -44,6 +44,8 @@ class SerialPlotter(QtWidgets.QWidget):
             else:
                 print('Vario not connected.')
                 return False
+        else:
+            return True
 
     def read(self):
 
