@@ -8,6 +8,7 @@
 #include <time.h>
 #include <bme280_defs.h>
 
+
 #include "lib/CircleFit/circle.h"
 #include "lib/CircleFit/data.h"
 
@@ -39,6 +40,7 @@ typedef struct Gauge{
 
 
 typedef struct StaticVariables{
+	int8_t valid;
 	int16_t th_rise;
 	int16_t th_sink;
 	int8_t ena_vector;
@@ -48,17 +50,14 @@ typedef struct StaticVariables{
 	//MS5611 baro
 	float Psea;
 	
-	//MAX17055 fuel gauge
-	float resistSensor;
-	int designCap;
 	
 	//IMU
 	float gainErrorAccelX;
-	int offsetAccelX;
+	int16_t offsetAccelX;
 	float gainErrorAccelY;
-	int offsetAccelY;
+	int16_t offsetAccelY;
 	float gainErrorAccelZ;
-	int offsetAccelZ;
+	int16_t offsetAccelZ;
 	
 	int gainErrorMagX;
 	int offsetMagX;
@@ -67,7 +66,7 @@ typedef struct StaticVariables{
 	int gainErrorMagZ;
 	int offsetMagZ;
 	
-	int vario_lowpass_coef;
+
 	
 	float zvariance, accelvariance;
 	Gauge varioGauge;
@@ -83,10 +82,20 @@ typedef struct StaticVariables{
 	Gauge glideRatioGauge;
 	Gauge flightTimeGauge;
 	Gauge altAboveTakeoffGauge;
+	Gauge PressureAltGauge;
+	Gauge MagHdgGauge;
 	
 	
 } StaticVariables;
 
+struct enviroData {
+	/*! Compensated pressure */
+	uint32_t pressure;
+	/*! Compensated temperature */
+	int32_t temperature;
+	/*! Compensated humidity */
+	uint32_t humidity;
+};
 
 
 
@@ -135,7 +144,7 @@ extern Circle movement_circle_fit;
 
 
 //structure containng pressure, humidity and temperature
-extern struct bme280_data enviromental_data;
+extern struct enviroData enviromental_data;
 
 
 

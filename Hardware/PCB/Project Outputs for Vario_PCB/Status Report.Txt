@@ -1,0 +1,12 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : PCB Document [Vario_pcb_2l.PcbDoc]
+   Generated File[Vario_pcb_2l.TXT]
+   Generated File[Vario_pcb_2l.LDP]
+   Generated File[Vario_pcb_2l.DRR]
+
+
+Files Generated   : 3
+Documents Printed : 0
+
+Finished Output Generation At 13:12:22 On 19/01/2020

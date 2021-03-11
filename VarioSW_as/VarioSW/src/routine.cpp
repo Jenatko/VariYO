@@ -75,9 +75,8 @@ void routine(int OnlyReadGPS){
 			//		if(fn > 127 && fn != 0xff)
 
 			//		while(digitalRead(BUTTON_LEFT))
-			//		SerialUSB.println((int)fn);   //uncomment for sending GPS data over Serial (to work with u-center)
+			//		SerialUSB.write(fn);   //uncomment for sending GPS data over Serial (to work with u-center)
 		} while (gps.handle(fn) != NMEAGPS::DECODE_CHR_INVALID || fn != 0xff );
-		
 		digitalWrite(GPS_CS, 1);
 		if(gps.available()){
 			fix = gps.read();
@@ -114,20 +113,20 @@ void routine(int OnlyReadGPS){
 			position_updated = 0;
 		}
 		//procedure for capturing commands sent to GPS
+/*
+		SerialUSB.println("-----------------");
+		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
+			SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+			digitalWrite(GPS_CS, 0);
+			fn = SerialUSB.read();
+			gps.handle(SPI.transfer(fn));
+			SerialUSB.print(fn);
+			digitalWrite(GPS_CS, 1);
 
-		// 		SerialUSB.println("-----------------");
-		// 		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
-		// 			SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-		// 			digitalWrite(GPS_CS, 0);
-		// 			fn = SerialUSB.read();
-		// 			gps.handle(SPI.transfer(fn));
-		// 			SerialUSB.print(fn);
-		// 			digitalWrite(GPS_CS, 1);
-		//
-		// 		}
-		// 		SerialUSB.println("-----------------");
-		// 		delay(50);
-
+		}
+		SerialUSB.println("-----------------");
+		delay(50);
+*/
 		
 	}
 	//update display if GPS is off
@@ -287,7 +286,7 @@ void update_tracklog(){
 					tracklog.println("</ele>");
 					
 					tracklog.print("        <note>,");
-					tracklog.print(enviromental_data.temperature, 1);
+					tracklog.print(enviromental_data.temperature*0.01f, 1);
 					tracklog.print(",");
 					tracklog.print(enviromental_data.humidity, 1);
 					tracklog.print(",");
@@ -318,44 +317,6 @@ void update_tracklog(){
 					tracklog.print(movement_circle_fit.r);
 					tracklog.print(",");
 					
-					tracklog.print(ax);
-					tracklog.print(",");
-					tracklog.print(ay);
-					tracklog.print(",");
-					tracklog.print(az);
-					tracklog.print(",");
-					tracklog.print(gx);
-					tracklog.print(",");
-					tracklog.print(gy);
-					tracklog.print(",");
-					tracklog.print(gz);
-					tracklog.print(",");
-					tracklog.print(mx);
-					tracklog.print(",");
-					tracklog.print(my);
-					tracklog.print(",");
-					tracklog.print(mz);
-					tracklog.print(",");
-					tracklog.print(mx_cor);
-					tracklog.print(",");
-					tracklog.print(my_cor);
-					tracklog.print(",");
-					tracklog.print(mz_cor);
-					tracklog.print(",");
-					
-					tracklog.print(ax_avg);
-					tracklog.print(",");
-					tracklog.print(ay_avg);
-					tracklog.print(",");
-					tracklog.print(az_avg);
-					tracklog.print(",");
-					tracklog.print(gx_avg);
-					tracklog.print(",");
-					tracklog.print(gy_avg);
-					tracklog.print(",");
-					tracklog.print(gz_avg);
-					tracklog.print(",");
-					
 					tracklog.print(yaw);
 					tracklog.print(",");
 					tracklog.print(pitch);
@@ -370,10 +331,6 @@ void update_tracklog(){
 					tracklog.print(",");
 					tracklog.print(fix.valid.time);
 					tracklog.print(",");
-					
-					
-					
-					
 					
 					tracklog.println("</note>");
 					
@@ -402,15 +359,19 @@ void update_tracklog(){
 					
 					tracklog.print(fix.dateTime.year);
 					tracklog.print("-");
+					if(fix.dateTime.month < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.month);
 					tracklog.print("-");
+					if(fix.dateTime.date < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.date);
 					tracklog.print("T");
-					
+					if(fix.dateTime.hours < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.hours);
 					tracklog.print(":");
+					if(fix.dateTime.minutes < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.minutes);
 					tracklog.print(":");
+					if(fix.dateTime.seconds < 10) tracklog.print("0");
 					tracklog.print(fix.dateTime.seconds);
 					
 					tracklog.println("Z</time>");
@@ -600,10 +561,6 @@ void alt_agl(){
 	
 }
 
-
-
-
-
 float calcDistanceFromCoordinates(double latHome, double lonHome, double latDest, double lonDest) {
 	double pi = 3.141592653589793;
 	int R = 6371; //Radius of the Earth
@@ -620,7 +577,6 @@ float calcDistanceFromCoordinates(double latHome, double lonHome, double latDest
 
 	return distance;
 }
-
 float calcHeadingFromCoordinates(double latHome, double lonHome, double latDest, double lonDest) {
 
 	double pi = 3.141592653589793;

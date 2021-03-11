@@ -12,11 +12,11 @@
 #include "Gauge.h"
 
 
-#include <MahonyAHRS/MahonyAHRS.h>
-#include <MadgwickAHRS/MadgwickAHRS.h>
+
+#include <MadgwickAHRS.h>
 
 
-Mahony Mahony_filter;
+
 Madgwick Madgwick_filter;
 
 

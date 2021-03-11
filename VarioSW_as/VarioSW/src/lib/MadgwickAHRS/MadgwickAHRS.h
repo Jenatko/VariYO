@@ -17,7 +17,7 @@
 #define betaDef		0.1f		// 2 * proportional gain
 
 #include <math.h>
-
+#include "definitions.h"
 
 class Madgwick {
 private:
@@ -63,7 +63,7 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 		return yaw;
 	}
 	
-	float getVertical(float ax, float ay, float az){
+	float getVertical(float ax, float ay, float az) {
 	
 			float A = q0*q1 + q2*q3;
 			float B = 0.5f - q1*q1 - q2*q2;
@@ -73,8 +73,39 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 
 			float a_vertical = az* B * odmocninka*cos_pitch - ax * sin_pitch + ay * A * odmocninka *cos_pitch;
 			return a_vertical;
+	}
+	
+	/**
+	 * Returns the azimuth in degrees
+	 */
+	float getAzimuth() { 
+		float u[3];
+		//float v[3];
+		float w[3];
+				
+		u[0] = 1 - 2 * (q2*q2 + q3*q3);
+		u[1] =     2 * (q1*q2 + q3*q0);
+		u[2] =     2 * (q1*q3 - q2*q0);
+				
+		//v[0] =     2 * (q1*q2 - q3*q0);
+		//v[1] = 1 - 2 * (q1*q1 + q3*q3);
+		//v[2] =     2 * (q2*q3 + q1*q0);
+				
+		w[0] =     2 * (q1*q3 + q2*q0);
+		w[1] =     2 * (q2*q3 - q1*q0);
+		//w[2] = 1 - 2 * (q1*q1 + q2*q2);
 			
+		float res = 0;
+						
+		if(abs(u[2]) > 0.7f) { // upright
+			res = -atan2(-w[1], -w[0]);
+		} else {
+			res = -atan2(-u[1], -u[0]);
+		}
+		res *= RAD2DEG;
+		if (res < 0) res += 360;
 		
+		return res;
 	}
 };
 

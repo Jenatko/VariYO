@@ -21,5 +21,7 @@ void GPS_stopped(void);
 
 void gpsBckpTimer(void);
 
+void BT_off(void);
+
 
 #endif /* POWERMODES_H_ */

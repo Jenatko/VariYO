@@ -45,17 +45,12 @@
 #include "Gauge.h"
 
 
-// #include <GxEPD.h>
-// #include <GxGDEP015OC1/GxGDEP015OC1.h>    // 1.54" b/w
-// #include <GxIO/GxIO_SPI/GxIO_SPI.h>
-// #include <GxIO/GxIO.h>
-
 #define ENABLE_GxEPD2_GFX 0
 
 
 #include <GxEPD2_BW.h>
 #define MAX_DISPAY_BUFFER_SIZE 15000ul // ~15k is a good compromise
-#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPAY_BUFFER_SIZE / (EPD::WIDTH / 8))
+#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8))
 
 
 
@@ -66,16 +61,22 @@
 
 #include "Interrupt_counter.h"
 
+#ifdef EPAPER_V2
+GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(GxEPD2_154_D67(/*CS=D8*/ PA13, /*DC=D3*/ PA14, /*RST=D4*/ PA15, /*BUSY=D2*/ PA10));
+#else
 GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*DC=D3*/ PA14, /*RST=D4*/ PA15, /*BUSY=D2*/ PA10));
+#endif
 
 
-//GxIO_Class io(SPI, /*CS=*/ DISP_CS, /*DC=*/ DISP_DC, /*RST=*/ DISP_RST);
-//GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
 
 
 #include "SdFat.h"
 
 SdFat SD;
+
+#include "FlashStorage.h"
+
+FlashStorage(statVarFlash, StaticVariables);
 
 
 
@@ -94,27 +95,27 @@ void draw_floppy(int x_orig, int y_orig);
 
 
 
-void displayUpdate(void){
+void displayUpdate(bool drawall = false){
+
+	//digitalWrite(SRAM_CS, 0);
 
 
 
-	display.fillScreen(GxEPD_WHITE);
 
-
-	//statVar.varioGauge.value = vario_filter/100;
-	//statVar.varioAvgGauge.value = vario_lowpassed/100;
-	
 	if(ground_level != 0xffff)	statVar.AGLGauge.value = (alt_filter*0.01f) - ground_level;
 	else statVar.AGLGauge.value = NAN;
 	
 	
 	statVar.altitudeGauge.value = (alt_filter*0.01f);
 	statVar.tempGauge.value = enviromental_data.temperature*0.01f;
-	statVar.humidGauge.value = enviromental_data.humidity*0.01f;
+	statVar.humidGauge.value = enviromental_data.humidity;
 	
 	
 	statVar.windGauge.value = wind_speed_mps;
 	statVar.windDirGauge.value = wind_direction;
+	
+	statVar.PressureAltGauge.value = getPressureAltitude();
+		statVar.MagHdgGauge.value = yaw;
 	
 	if(statVar.ena_vector & ENA_TRACKLOG) statVar.flightTimeGauge.value = (rtc.getEpoch() - var_takeofftime)/60;
 	else statVar.flightTimeGauge.value = NAN;
@@ -122,12 +123,39 @@ void displayUpdate(void){
 	//statVar.glideRatioGauge = ;
 	if(statVar.ena_vector & ENA_TRACKLOG) statVar.altAboveTakeoffGauge.value = alt_filter*0.01f - var_takeoffalt*0.01f;
 	else statVar.altAboveTakeoffGauge.value = NAN;
+
+	digitalWrite(SRAM_CS, 0);
 	
+	if(drawall)
 	printGauges();
+	else
+	printGauges_values();
 	
+	
+	digitalWrite(SRAM_CS, 1);
+	
+
 	
 
 
+
+	
+	display.setCursor(10,110);
+	display.setFont(&FreeMonoBold12pt7b);
+	
+
+	
+	display.setFont(&FreeMonoBold12pt7b);
+	if(redraw == 2) display.fillRect(80, 15, 6, 6, GxEPD_BLACK);
+	
+	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	
+	//display.partiallyUpdateScreen();
+
+	display.display(true);
+
+	
+	display.fillScreen(GxEPD_WHITE);
 	display.setFont(&FreeMonoBold9pt7b);
 	display.setCursor(5,12);
 	if(var_localtime.tm_hour < 10) display.print("0");
@@ -171,19 +199,12 @@ void displayUpdate(void){
 	display.drawLine(169, 3, 169, 9, GxEPD_BLACK);
 	display.drawLine(168, 3, 168, 9, GxEPD_BLACK);
 	
-	display.setCursor(10,110);
-	display.setFont(&FreeMonoBold12pt7b);
 	
+	printGauges_frames();
+	
+	
+	display.setFont(&FreeMonoBold12pt7b);
 
-	
-	display.setFont(&FreeMonoBold12pt7b);
-	if(redraw == 2) display.fillRect(80, 15, 6, 6, GxEPD_BLACK);
-	
-	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
-	
-	//display.partiallyUpdateScreen();
-	display.display(true);
-	
 
 	redraw = 0;
 	
@@ -192,7 +213,7 @@ void displayUpdate(void){
 
 void setup() {
 	
-	while(!SerialUSB.available());
+	//while(!SerialUSB.available());
 	SerialUSB.println("Starting setup.");
 	
 	rtc.begin();
@@ -203,13 +224,13 @@ void setup() {
 	digitalWrite(HEAT, 0);
 	
 	pinMode(POWER_ENA, OUTPUT);
-	digitalWrite(POWER_ENA, 1);
+	digitalWrite(POWER_ENA, POWER_OFF);
 	
-	pinMode(PB22, OUTPUT);
-	digitalWrite(PB22, 1);
+	pinMode(BT_UART_TX, OUTPUT);
+	digitalWrite(BT_UART_TX, 0);
 	
 	delay(100);
-	digitalWrite(POWER_ENA, 0);
+	digitalWrite(POWER_ENA, POWER_ON);
 	delay(50);
 	
 	pinMode(BUTTON_LEFT, INPUT_PULLUP);
@@ -250,25 +271,20 @@ void setup() {
 	pinPeripheral(MOSI_IRQ, PIO_SERCOM);
 	pinPeripheral(MISO_IRQ, PIO_SERCOM);
 	pinPeripheral(SCK_IRQ, PIO_SERCOM);
-	
-	
-
-	//clk_test();
-	//buzzerEna(1);
-	//delay(10000);
-
 
 
 
 	SPI.begin();
 
-
-	
 	delay(100);   //wait for EEPROM to power-up
+	//eepromRead(0, statVar);
 	
-	
-	
-	eepromRead(0, statVar);
+	statVar = statVarFlash.read();
+	if(statVar.valid == 0) setVariablesDefault();
+
+
+	//BT_off();
+
 	
 	present_devices = 0;
 	
@@ -279,10 +295,8 @@ void setup() {
 	if(statVar.ena_vector & (ENA_GPS)){
 		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
 			GPS_low();
-			GPS_low();
 		}
 		else{
-			GPS_full();
 			GPS_full();
 		}
 	}
@@ -290,7 +304,7 @@ void setup() {
 		GPS_off();
 	}
 	
-	SerialUSB.println("Setting up menu.");
+
 	menu_init();
 	//while(!SerialUSB.available());
 
@@ -307,6 +321,7 @@ void setup() {
 
 	display.fillScreen(GxEPD_WHITE);
 	display.display();
+
 	
 	display.setRotation(0);
 
@@ -381,6 +396,16 @@ void setup() {
 	pinMode(SD_DETECT, INPUT);
 	display.display(true);
 	
+	display.setCursor(10, 150);
+	
+	display.print("eeprom used:");
+	display.setCursor(10, 170);
+	display.print(sizeof(statVar));
+	display.print("/");
+		display.print(4096/8/sizeof(char));
+	display.display(true);
+	
+	
 
 
 	delay(1000);
@@ -432,6 +457,8 @@ void loop() {
 			display.fillScreen(GxEPD_WHITE);
 			//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 			//display.display(true);
+
+			displayUpdate(true);
 			display.display();
 			break;
 			
@@ -462,108 +489,21 @@ void loop() {
 	//	SerialUSB.println((uint32_t)((t_stop-t_start)/1000));
 
 
-
-	if(redraw){
+	if(digitalRead(DISP_BUSY) == 0){
+		//if(redraw){
 		counter500ms = 0;
-
-		//digitalWrite(SRAM_CS, 0);
-		/*
-		Wire.beginTransmission(SI7021_ADDRESS);
-		Wire.write(SI7021_MEASURE_RH);
-		Wire.endTransmission();
-		int byte = 0;
-		delay(15);
-		while(!byte){
-		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
-		}
-		int rh = 0;
-		rh = Wire.read()<<8;
-		rh += Wire.read();
-		SerialUSB.print((125.0*rh/65536.0)-6.0);
-		SerialUSB.print(',');
-		
-		
-		
-		Wire.beginTransmission(SI7021_ADDRESS);
-		Wire.write(SI7021_READ_TEMP_FROM_RH);
-		Wire.endTransmission();
-		byte = 0;
-		delay(15);
-		while(!byte){
-		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
-		}
-		rh = 0;
-		rh = Wire.read()<<8;
-		rh += Wire.read();
-		SerialUSB.println((175.72*rh/65536.0)-46.85);
-		
-		*/
-		
-		//	SerialUSB.println(rtc.getEpoch());
-		//   unsigned long fn = micros();
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;
 		var_localtime = *gmtime(&tempTime);
 		
-		//	unsigned long fn2 = micros();
-		//	SerialUSB.println(fn2-fn);		//time check, takes around 5ms
 		
-		//	SerialUSB.println(mktime(var_localtime));
 		t_start_first = micros();
+		
 		displayUpdate();
 		t_stop_first = micros();
-		//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
-
-		
-		
-		/*
-		if(pocitadlo % 10 == 0){
-		SerialUSB.println(enviromental_data.temperature);
-		
-		SerialUSB.print("time;");
-		SerialUSB.print(pocitadlo);
-		SerialUSB.print(";Vavg;");
-		SerialUSB.print(max17055.getAverageVoltage(), 3); display.print(" V");
-		SerialUSB.print(";Iavg;");
-		SerialUSB.print(max17055.getAverageCurrent());  display.print(" mA");
-		SerialUSB.print(";SOC;");
-		SerialUSB.print(max17055.getSOC());  display.print(" %");
-		SerialUSB.print(";TTE;");
-		SerialUSB.print(max17055.getTimeToEmpty()); display.print(" hr");
-		SerialUSB.print(";TTF;");
-		SerialUSB.print(max17055.getTimeToFull()); display.print(" hr");
-		SerialUSB.print(";measCap;");
-		SerialUSB.print(max17055.getReportedCapacity()); display.print(" mAH");
-		SerialUSB.print(";remCap;");
-		SerialUSB.println(max17055.getRemainingCapacity()); display.print(" mAH");
-		
-		
-		}*/
-
-		
-		
-
-		//	pocitadlo ++;
-		
-		
 	}
-	/*
-	else if(counter500ms>28 && counter500ms < 100){
-	uint64_t t_start_second = micros();
-	displayUpdate();
-	uint64_t t_stop_second = micros();
-	counter500ms = 1000;
-	//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
-	//	SerialUSB.print(",");
-	//	SerialUSB.println((uint32_t)((t_stop_second-t_start_second)/1000));
-	//routine();
-	
-	}
-	*/
 	else{
-		//SerialUSB.println(counter500ms);
 		delay(10);
-
 	}
 	
 	

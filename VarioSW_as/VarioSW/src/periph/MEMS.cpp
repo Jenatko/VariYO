@@ -20,7 +20,6 @@ struct bmi160_fifo_frame fifo_frame;
 struct bmm150_dev bmm150;
 
 
-struct bme280_dev bme;
 
 
 
@@ -297,134 +296,6 @@ int IMU_ReadFrameFromFifo(){
 
 
 
-int8_t BME_init_1ms(){
-
-	int8_t rslt = BME280_OK;
-
-	/* Sensor_0 interface over SPI with native chip select line */
-	bme.dev_id = BARO_CS;
-	bme.intf = BME280_SPI_INTF;
-	bme.read = read_sensor;
-	bme.write = write_sensor;
-	bme.delay_ms = delayWrapper;
-
-	rslt = bme280_init(&bme);
-	
-	
-	bme.settings.osr_h = BME280_OVERSAMPLING_1X;
-	bme.settings.osr_p = BME280_OVERSAMPLING_2X;
-	bme.settings.osr_t = BME280_OVERSAMPLING_1X;
-	bme.settings.filter = BME280_FILTER_COEFF_2;
-	bme.settings.standby_time = BME280_STANDBY_TIME_1_MS;
-	
-	uint8_t settings_sel;
-	
-	settings_sel = BME280_OSR_PRESS_SEL;
-	settings_sel |= BME280_OSR_TEMP_SEL;
-	settings_sel |= BME280_OSR_HUM_SEL;
-	settings_sel |= BME280_STANDBY_SEL;
-	settings_sel |= BME280_FILTER_SEL;
-	
-	rslt |= bme280_set_sensor_settings(settings_sel, &bme);
-	rslt |= bme280_set_sensor_mode(BME280_NORMAL_MODE, &bme);
-	
-	return rslt;
-}
-
-int8_t BME_init_1s(){
-
-	int8_t rslt = BME280_OK;
-
-	/* Sensor_0 interface over SPI with native chip select line */
-	bme.dev_id = BARO_CS;
-	bme.intf = BME280_SPI_INTF;
-	bme.read = read_sensor;
-	bme.write = write_sensor;
-	bme.delay_ms = delayWrapper;
-
-	rslt = bme280_init(&bme);
-	
-	
-	bme.settings.osr_h = BME280_OVERSAMPLING_1X;
-	bme.settings.osr_p = BME280_OVERSAMPLING_2X;
-	bme.settings.osr_t = BME280_OVERSAMPLING_1X;
-	bme.settings.filter = BME280_FILTER_COEFF_2;
-	bme.settings.standby_time = BME280_STANDBY_TIME_1000_MS ;
-	
-	uint8_t settings_sel;
-	
-	settings_sel = BME280_OSR_PRESS_SEL;
-	settings_sel |= BME280_OSR_TEMP_SEL;
-	settings_sel |= BME280_OSR_HUM_SEL;
-	settings_sel |= BME280_STANDBY_SEL;
-	settings_sel |= BME280_FILTER_SEL;
-	
-	rslt |= bme280_set_sensor_settings(settings_sel, &bme);
-	rslt |= bme280_set_sensor_mode(BME280_NORMAL_MODE, &bme);
-	
-	return rslt;
-}
-
-
-int8_t BME_init_forced(){
-
-	int8_t rslt = BME280_OK;
-
-	/* Sensor_0 interface over SPI with native chip select line */
-	bme.dev_id = BARO_CS;
-	bme.intf = BME280_SPI_INTF;
-	bme.read = read_sensor;
-	bme.write = write_sensor;
-	bme.delay_ms = delayWrapper;
-
-	rslt = bme280_init(&bme);
-	
-	
-	bme.settings.osr_h = BME280_OVERSAMPLING_1X;
-	bme.settings.osr_p = BME280_OVERSAMPLING_1X;
-	bme.settings.osr_t = BME280_OVERSAMPLING_1X;
-	bme.settings.filter = BME280_FILTER_COEFF_2;
-	bme.settings.standby_time = BME280_STANDBY_TIME_1000_MS ;
-	
-	uint8_t settings_sel;
-	
-	//settings_sel = BME280_OSR_PRESS_SEL;
-	settings_sel |= BME280_OSR_TEMP_SEL;
-	//settings_sel |= BME280_OSR_HUM_SEL;
-	settings_sel |= BME280_STANDBY_SEL;
-	//settings_sel |= BME280_FILTER_SEL;
-	
-	rslt |= bme280_set_sensor_settings(settings_sel, &bme);
-	rslt |= bme280_set_sensor_mode(BME280_FORCED_MODE, &bme);
-	
-	return rslt;
-}
-
-void BME_read(){
-	
-
-	int8_t rslt;
-	uint8_t settings_sel;
-	struct bme280_data comp_data;
-	
-	rslt = bme280_get_sensor_data(BME280_ALL, &enviromental_data, &bme);
-	
-	
-	/*
-	SerialUSB.print(enviromental_data.humidity);
-	SerialUSB.print(",");
-	SerialUSB.print(enviromental_data.temperature);
-	SerialUSB.print(",");
-	SerialUSB.println(enviromental_data.pressure);
-	
-
-	*/
-
-	
-	
-}
-
-
 int read_si7021(){
 	
 	// Wire.beginTransmission(SI7021_ADDRESS);
@@ -440,8 +311,10 @@ int read_si7021(){
 		int rh = 0;
 		rh = Wire.read()<<8;
 		rh += Wire.read();
-		float humidity = (125.0*rh/65536.0)-6.0;
-		enviromental_data.humidity = humidity*100;
+		float humidity = (125.0f*rh/65536.0f)-6.0f;
+		if(humidity <= 0) humidity = 0;
+		else if(humidity >= 100) humidity = 100;
+		enviromental_data.humidity = humidity;
 		//  SerialUSB.print((125.0*rh/65536.0)-6.0);
 		//  SerialUSB.print(',');
 		
@@ -456,7 +329,7 @@ int read_si7021(){
 			rh = 0;
 			rh = Wire.read()<<8;
 			rh += Wire.read();
-			float temperature = (175.72*rh/65536.0)-46.85;
+			float temperature = (175.72f*rh/65536.0f)-46.85f;
 			enviromental_data.temperature = temperature*100;
 			return 1;
 			
@@ -544,6 +417,27 @@ float getAltitude(){
 	
 	
 	float diff = statVar.Psea*100.0f/(enviromental_data.pressure) - 1.3f;
+	float diff2 = diff * diff;
+	
+	//some crazy taylor series magic, bcs aint nobody has time for pow()
+	float power = (1.05099483835522f
+	+ 0.153261726531934f * diff
+	+ -0.0477720927877293f * diff2
+	+ 0.0221763811870283f * diff2 * diff
+	+ -0.0119855962404455f * diff2 * diff2);
+
+	
+	return ((power -1.0f)* (enviromental_data.temperature/100.0f + 273.15f) / 0.0065f);
+	
+	
+	
+}
+
+float getPressureAltitude(){
+
+	
+	
+	float diff = 10132500.0f/(enviromental_data.pressure) - 1.3f;
 	float diff2 = diff * diff;
 	
 	//some crazy taylor series magic, bcs aint nobody has time for pow()
