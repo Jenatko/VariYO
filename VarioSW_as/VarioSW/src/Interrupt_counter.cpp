@@ -11,12 +11,12 @@
 #include "MEMS.h"
 #include "Gauge.h"
 
-
-#include <MahonyAHRS/MahonyAHRS.h>
+//#include <MahonyAHRS/MahonyAHRS.h>
+//#include <MahonyAHRS.h>
 #include <MadgwickAHRS/MadgwickAHRS.h>
 
 
-Mahony Mahony_filter;
+
 Madgwick Madgwick_filter;
 
 
@@ -110,7 +110,8 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 		alt_baro = getAltitude()*100;
 
-		
+		SerialUSB.println(alt_baro);
+
 		//SerialUSB.println(alt_baro);
 
 	}

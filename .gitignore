@@ -43,10 +43,12 @@
 
 VarioSW_as/ArduinoCore/Release
 VarioSW_as/VarioSW/Release
+<<<<<<< Updated upstream
 
 VarioSW_as/ArduinoCore/Debug/
 VarioSW_as/VarioSW/Debug/
 
-.vs/
+.vs
 
 __pycache__
+

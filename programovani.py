@@ -2,15 +2,16 @@
 Python dependencies:
 pyserial
 pywin32
-
 """
 
 
+from __future__ import print_function
 import serial
 import subprocess
 import time
 import sys
 import win32com.client
+
 
 ports = []
 string = ""
@@ -43,28 +44,33 @@ print(ports)
 COM0 = ""
 COM1 = ""
 
-if(len(sys.argv) != 2):
+if(len(sys.argv) != 3):
   sys.exit(1)
 
+flag_found = False
 print("Looking for ports.")
-for i in range(20):
+for i in range(2, 20):
     COM0 = "COM"+repr(i)
-    print("Connecting to port {:s}...".format(COM0), end='')
+    print("\tConnecting to port {:s}...".format(COM0), end='')
     try:
       ser = serial.Serial(COM0, 1200)
       ser.close()
     except Exception as ex:
       print("Not this one.")
     else:
+        flag_found = True
         print("Found open port: ", COM0)
         COM1 = "COM" + repr(i+1)
         break
 print("Done.")
 
-  
+if not flag_found:
+    print('No open port found. Aborting.')
+    exit(-1)
+
 flag = False
 print("Connecting to port {:s}...".format(COM1), end='')
-for k in range(100):
+for k in range(2, 100):
   try:
     ser = serial.Serial(COM1, 1200)
     ser.close()
@@ -78,6 +84,9 @@ for k in range(100):
 COM = COM0
 if flag:
     COM = COM1
+    
+    
  
 print('Loading file "{:s}": to port {:s}'.format(sys.argv[1], COM))
-subprocess.call(["D:\\VariYO\\bossac.exe", "--port="+COM, "-e", "-w", "-v", sys.argv[1], "-R"])
+print(sys.argv[2]+'\\bossac.exe')
+subprocess.call([sys.argv[2]+"\\bossac.exe", "--port="+COM, "-e", "-w", "-v", sys.argv[1], "-R"])

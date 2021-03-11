@@ -1,4 +1,15 @@
 
+//#define VER14
+
+#ifdef VER14
+#define POWER_ON 1
+#define POWER_OFF 0
+#else
+#define POWER_ON 0
+#define POWER_OFF 1
+#endif
+
+
 #define PA11 0
 #define PA10 1
 #define PA14 2
@@ -162,7 +173,6 @@
 #define GAUGE_FRAME 64
 #define GAUGE_SHOW_PLUS_SIGN 128
 #define GAUGE_VALIDS 256
-#define GAUGE_VALUE_VALID 512
 
 
 

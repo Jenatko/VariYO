@@ -192,7 +192,7 @@ void displayUpdate(void){
 
 void setup() {
 	
-	while(!SerialUSB.available());
+	//while(!SerialUSB.available());
 	SerialUSB.println("Starting setup.");
 	
 	rtc.begin();
@@ -203,13 +203,13 @@ void setup() {
 	digitalWrite(HEAT, 0);
 	
 	pinMode(POWER_ENA, OUTPUT);
-	digitalWrite(POWER_ENA, 1);
+	digitalWrite(POWER_ENA, POWER_OFF);
 	
-	pinMode(PB22, OUTPUT);
-	digitalWrite(PB22, 1);
+	pinMode(BT_UART_TX, OUTPUT);
+	digitalWrite(BT_UART_TX, 0);
 	
 	delay(100);
-	digitalWrite(POWER_ENA, 0);
+	digitalWrite(POWER_ENA, POWER_ON);
 	delay(50);
 	
 	pinMode(BUTTON_LEFT, INPUT_PULLUP);
@@ -250,25 +250,17 @@ void setup() {
 	pinPeripheral(MOSI_IRQ, PIO_SERCOM);
 	pinPeripheral(MISO_IRQ, PIO_SERCOM);
 	pinPeripheral(SCK_IRQ, PIO_SERCOM);
-	
-	
-
-	//clk_test();
-	//buzzerEna(1);
-	//delay(10000);
-
 
 
 
 	SPI.begin();
 
-
-	
 	delay(100);   //wait for EEPROM to power-up
-	
-	
-	
 	eepromRead(0, statVar);
+
+
+	BT_off();
+
 	
 	present_devices = 0;
 	
@@ -279,10 +271,8 @@ void setup() {
 	if(statVar.ena_vector & (ENA_GPS)){
 		if(statVar.ena_vector & (ENA_GPS_LOW_POWER)){
 			GPS_low();
-			GPS_low();
 		}
 		else{
-			GPS_full();
 			GPS_full();
 		}
 	}
@@ -291,6 +281,7 @@ void setup() {
 	}
 	
 	SerialUSB.println("Setting up menu.");
+
 	menu_init();
 	//while(!SerialUSB.available());
 
@@ -299,46 +290,66 @@ void setup() {
 	Wire.begin();
 
 
-	SerialUSB.println("Setting up display.");
+	SerialUSB.println("Setting up display:");
 
 	display.init(0);
+	SerialUSB.println("  init");
+
 	display.setFont(&FreeMonoBold12pt7b);
+	SerialUSB.println("  Font");
+
 	display.setTextColor(GxEPD_BLACK);
+	SerialUSB.println("  Text Color");
 
 	display.fillScreen(GxEPD_WHITE);
+	SerialUSB.println("  Fill");
 	display.display();
+	SerialUSB.println("  display()");
 	
 	display.setRotation(0);
+	SerialUSB.println("  rotation");
 
 	display.display(true);
+	SerialUSB.println("  display(true)");
 
 	display.setTextWrap(0);
-	
+	SerialUSB.println("  text warp");
+
 	display.setCursor(10, 20);
 	display.print("display ok");
 	display.display(true);
-	
+	SerialUSB.println("  display ok");
+
 	display.setCursor(10, 40);
+	SerialUSB.println("  Check max17055:");
+
 	if(max17055.checkFunct()){
 		max17055.setResistSensor(0.039);
 		max17055.setCapacity(1200);
 		display.print("max17055 ok");
+		SerialUSB.println("    max17055 ok");
 		present_devices |= MAX17055_PRESENT;
 		
 	}
 	else{
 		display.print("max17055 NOK");
+		SerialUSB.println("    max17055 NOK");
+
 	}
 	display.display(true);
+	SerialUSB.println("  End check max17055k");
+
 
 	display.setCursor(10, 60);
 	if(IMU_init()==0){
 		display.print("BMX160 ok");
 		present_devices |= BMX160_PRESENT;
-		//SerialUSB.println( MAG_init());
+		SerialUSB.println( MAG_init());
 	}
 	else{
 		display.print("BMX160 NOK");
+		SerialUSB.println("  BMX160 NOK");
+
 	}
 	//present_devices += BMX160_PRESENT;
 	display.display(true);
@@ -352,31 +363,40 @@ void setup() {
 	}
 	else{
 		display.print("lps33 NOK");
+		SerialUSB.println("lps33 NOK");
 	}
 	display.display(true);
 	
 	
 	display.setCursor(10, 100);
 	if(request_si7021() == 0){
-		display.print("si7021 ok");
+		display.print("  si7021 ok");
 		present_devices |= SI7021_PRESENT;
 	}
 	else{
 		display.print("si7021 NOK");
+		SerialUSB.println("  si7021 NOK");
 	}
 	display.display(true);
+	
+	SerialUSB.println("  SD check:");
+
 	
 	display.setCursor(10, 120);
 	int ahoj;
 	if(digitalRead(SD_DETECT) == 0){
 		display.print("SD present ");
+		SerialUSB.println("    SD present ");
 		present_devices |= SD_PRESENT;
 		
 		ahoj = SD.begin(SD_CS, SD_SCK_MHZ(8));
 		display.print(ahoj);
+		SerialUSB.println(ahoj);
 	}
 	else{
 		display.print("no SD card");
+		SerialUSB.println("    no SD card");
+
 	}
 	pinMode(SD_DETECT, INPUT);
 	display.display(true);
@@ -386,7 +406,8 @@ void setup() {
 	delay(1000);
 	
 	
-	
+	SerialUSB.println("  Buzzer");
+
 	buzzerInit();
 
 
@@ -398,6 +419,7 @@ void setup() {
 	
 	//setVariablesDefault();
 
+	SerialUSB.println("  kalman filter");
 
 	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
 	
@@ -423,7 +445,7 @@ void setup() {
 void loop() {
 	
 	static int i_random_hash = 0;
-	SerialUSB.println(i_random_hash++);
+	//SerialUSB.println(i_random_hash++);
 
 	while (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){
@@ -465,105 +487,17 @@ void loop() {
 
 	if(redraw){
 		counter500ms = 0;
-
-		//digitalWrite(SRAM_CS, 0);
-		/*
-		Wire.beginTransmission(SI7021_ADDRESS);
-		Wire.write(SI7021_MEASURE_RH);
-		Wire.endTransmission();
-		int byte = 0;
-		delay(15);
-		while(!byte){
-		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
-		}
-		int rh = 0;
-		rh = Wire.read()<<8;
-		rh += Wire.read();
-		SerialUSB.print((125.0*rh/65536.0)-6.0);
-		SerialUSB.print(',');
-		
-		
-		
-		Wire.beginTransmission(SI7021_ADDRESS);
-		Wire.write(SI7021_READ_TEMP_FROM_RH);
-		Wire.endTransmission();
-		byte = 0;
-		delay(15);
-		while(!byte){
-		byte = Wire.requestFrom(SI7021_ADDRESS, 2);
-		}
-		rh = 0;
-		rh = Wire.read()<<8;
-		rh += Wire.read();
-		SerialUSB.println((175.72*rh/65536.0)-46.85);
-		
-		*/
-		
-		//	SerialUSB.println(rtc.getEpoch());
-		//   unsigned long fn = micros();
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;
 		var_localtime = *gmtime(&tempTime);
 		
-		//	unsigned long fn2 = micros();
-		//	SerialUSB.println(fn2-fn);		//time check, takes around 5ms
 		
-		//	SerialUSB.println(mktime(var_localtime));
 		t_start_first = micros();
 		displayUpdate();
 		t_stop_first = micros();
-		//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
-
-		
-		
-		/*
-		if(pocitadlo % 10 == 0){
-		SerialUSB.println(enviromental_data.temperature);
-		
-		SerialUSB.print("time;");
-		SerialUSB.print(pocitadlo);
-		SerialUSB.print(";Vavg;");
-		SerialUSB.print(max17055.getAverageVoltage(), 3); display.print(" V");
-		SerialUSB.print(";Iavg;");
-		SerialUSB.print(max17055.getAverageCurrent());  display.print(" mA");
-		SerialUSB.print(";SOC;");
-		SerialUSB.print(max17055.getSOC());  display.print(" %");
-		SerialUSB.print(";TTE;");
-		SerialUSB.print(max17055.getTimeToEmpty()); display.print(" hr");
-		SerialUSB.print(";TTF;");
-		SerialUSB.print(max17055.getTimeToFull()); display.print(" hr");
-		SerialUSB.print(";measCap;");
-		SerialUSB.print(max17055.getReportedCapacity()); display.print(" mAH");
-		SerialUSB.print(";remCap;");
-		SerialUSB.println(max17055.getRemainingCapacity()); display.print(" mAH");
-		
-		
-		}*/
-
-		
-		
-
-		//	pocitadlo ++;
-		
-		
-	}
-	/*
-	else if(counter500ms>28 && counter500ms < 100){
-	uint64_t t_start_second = micros();
-	displayUpdate();
-	uint64_t t_stop_second = micros();
-	counter500ms = 1000;
-	//SerialUSB.print((uint32_t)((t_stop_first-t_start_first)/1000));
-	//	SerialUSB.print(",");
-	//	SerialUSB.println((uint32_t)((t_stop_second-t_start_second)/1000));
-	//routine();
-	
-	}
-	*/
+		}
 	else{
-		//SerialUSB.println(counter500ms);
 		delay(10);
-
 	}
 	
 	

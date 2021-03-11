@@ -15,7 +15,8 @@
 #include "Variables.h"
 #include "BMM150_bosch_driver/bmm150.h"
 
-#include "BME280_bosch_driver/bme280.h"
+//#include "BME280_bosch_driver/bme280.h" // Honzo toto zmazal
+
 #include "Wire.h"
 
 #define LPS_CTRL_REG1 0x10
