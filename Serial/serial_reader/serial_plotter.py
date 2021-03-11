@@ -76,7 +76,7 @@ class SerialPlotter(QtWidgets.QWidget):
             else:
                 print('Reading data failed.')
 
-    def scan_connections(self, freq=1200):
+    def scan_connections(self):
 
         flag_found = False
         print("Looking for ports.")
@@ -84,7 +84,7 @@ class SerialPlotter(QtWidgets.QWidget):
             COM0 = "COM" + repr(i)
             print("\tConnecting to port {:s}...".format(COM0), end='')
             try:
-                ser = serial.Serial(COM0, freq)
+                ser = serial.Serial(COM0, self.FREQ)
                 ser.close()
             except Exception as ex:
                 print("Not this one.")
