@@ -20,6 +20,7 @@ class SerialPlotter(QtWidgets.QWidget):
         self.grid = []
 
         self.mpl = MplWidget(dpi=100)
+        self.mpl.toolbar.show()
         self.layout().addWidget(self.mpl, 0, 0)
 
         self.iterationsLabel = QLineEdit()
@@ -32,25 +33,27 @@ class SerialPlotter(QtWidgets.QWidget):
         self.layout().addWidget(button, 2, 0)
 
         self.port = port
-        # port, flag = self.scan_connections()
-        # if flag:
-        #     self.port = port
 
-    def read(self):
+    def check_connection(self):
 
         if self.port is None:
-
             port, flag = self.scan_connections()
             if flag:
                 self.port = port
+                return True
             else:
                 print('Vario not connected.')
-                return
+                return False
+
+    def read(self):
+
+        if not self.check_connection():
+            return
 
         iterations = int(self.iterationsLabel.text())
 
         with serial.Serial(self.port, self.FREQ, timeout=5) as ser:
-
+            print('Vario connected at port:', self.port)
             cache = []
             try:
                 for i in range(iterations):
@@ -88,9 +91,12 @@ class SerialPlotter(QtWidgets.QWidget):
             else:
                 flag_found = True
                 print("Found open port: ", COM0)
-                COM1 = "COM" + repr(i + 1)
                 break
-        print("Done.")
+        print("Done.\n")
+        if flag_found:
+            print("Found open port: ", COM0)
+        else:
+            print('No port available.')
         return COM0, flag_found
 
 
