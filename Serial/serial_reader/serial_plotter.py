@@ -12,7 +12,7 @@ class SerialPlotter(QtWidgets.QWidget):
 
     FREQ = 4800
 
-    def __init__(self):
+    def __init__(self, port=None):
         super(SerialPlotter, self).__init__()
 
         self.setLayout(QGridLayout(self))
@@ -31,10 +31,10 @@ class SerialPlotter(QtWidgets.QWidget):
         button.clicked.connect(self.read)
         self.layout().addWidget(button, 2, 0)
 
-        self.port = None
-        port, flag = self.scan_connections()
-        if flag:
-            self.port = port
+        self.port = port
+        # port, flag = self.scan_connections()
+        # if flag:
+        #     self.port = port
 
     def read(self):
 
@@ -73,7 +73,6 @@ class SerialPlotter(QtWidgets.QWidget):
             else:
                 print('Reading data failed.')
 
-
     def scan_connections(self, freq=1200):
 
         flag_found = False
@@ -94,12 +93,18 @@ class SerialPlotter(QtWidgets.QWidget):
         print("Done.")
         return COM0, flag_found
 
+
 if __name__ == "__main__":
 
     import sys
-    app = QApplication(sys.argv)
 
-    window = SerialPlotter()
+    port = None
+    if len(sys.argv) > 1:
+        port = sys.argv[1]
+
+    app = QApplication([])
+
+    window = SerialPlotter(port)
     window.show()
     sys.exit(app.exec_())
 
