@@ -7,7 +7,7 @@
 
 #include "Gauge.h"
 #include "definitions.h"
-#include <GxEPD2_BW.h>
+#include <GxEPD2/GxEPD2_BW.h>
 
 #include <Fonts/FreeMonoBold24pt7b.h>
 #include <Fonts/FreeMonoBold18pt7b.h>

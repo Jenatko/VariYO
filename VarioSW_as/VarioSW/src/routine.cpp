@@ -20,9 +20,9 @@
 
 #include "Variables.h"
 
-#include "CircleFitByTaubin.h"
+#include "CircleFit/CircleFitByTaubin.h"
 
-#include "MadgwickAHRS.h"
+#include <MadgwickAHRS/MadgwickAHRS.h>
 
 #include "Gauge.h"
 

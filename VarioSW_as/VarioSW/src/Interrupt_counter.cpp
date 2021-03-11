@@ -6,7 +6,7 @@
 #include "buzzer.h"
 #include "roundbuff.h"
 #include <BMI160Gen.h>
-#include "kalmanfilter3.h"
+#include "lib/kalmanfilter3.h"
 #include "Variables.h"
 #include "MEMS.h"
 #include "Gauge.h"
