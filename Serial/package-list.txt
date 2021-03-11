@@ -2,7 +2,7 @@
 
 pyserial
 matplotlib
-pyqt
+pyqt5
 numpy
  
 
