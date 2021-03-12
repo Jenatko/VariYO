@@ -1,6 +1,6 @@
 
 #define PCB_VER14_PLUS
-#define EPAPER_V2
+//#define EPAPER_V2
 
 #ifdef PCB_VER14_PLUS
 #define POWER_ON 1
