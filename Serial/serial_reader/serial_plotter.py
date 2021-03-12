@@ -1,14 +1,13 @@
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QGridLayout, QApplication, QPushButton, QLineEdit
-from qtpy import QtWidgets
+from PyQt5.QtWidgets import QGridLayout, QApplication, QPushButton, QLineEdit, QWidget
 
-from matplot_vidgets import MplWidget
+from serial_reader.matplot_vidgets import MplWidget
 import serial
 
 import numpy as np
 
 
-class SerialPlotter(QtWidgets.QWidget):
+class SerialPlotter(QWidget):
 
     FREQ = 4800
 
@@ -82,7 +81,7 @@ class SerialPlotter(QtWidgets.QWidget):
 
         flag_found = False
         print("Looking for ports.")
-        for i in range(2, 20):
+        for i in range(2, 30):
             COM0 = "COM" + repr(i)
             print("\tConnecting to port {:s}...".format(COM0), end='')
             try:
@@ -102,8 +101,7 @@ class SerialPlotter(QtWidgets.QWidget):
         return COM0, flag_found
 
 
-if __name__ == "__main__":
-
+def run():
     import sys
 
     port = None
@@ -116,3 +114,6 @@ if __name__ == "__main__":
     window.show()
     sys.exit(app.exec_())
 
+
+if __name__ == "__main__":
+    run()

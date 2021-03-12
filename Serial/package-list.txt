@@ -1,8 +1,0 @@
-# Following packages are required:
-
-pyserial
-matplotlib
-pyqt5
-numpy
- 
-

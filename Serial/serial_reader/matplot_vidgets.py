@@ -3,7 +3,7 @@ import matplotlib
 from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QPalette
 
-from my_base_widget import MyBaseWidget
+from serial_reader.my_base_widget import MyBaseWidget
 
 matplotlib.use('Qt5Agg')
 
