@@ -61,7 +61,6 @@ dt = seconds;
 }
 */
 
-//void routine(int pollGPS = 1, int performOtherTasks = 1)
 void routine(int OnlyReadGPS){
 
 
@@ -113,20 +112,20 @@ void routine(int OnlyReadGPS){
 			position_updated = 0;
 		}
 		//procedure for capturing commands sent to GPS
-/*
-		SerialUSB.println("-----------------");
-		while(SerialUSB.available()) {      // If anything comes in Serial (USB),
-			SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-			digitalWrite(GPS_CS, 0);
-			fn = SerialUSB.read();
-			gps.handle(SPI.transfer(fn));
-			SerialUSB.print(fn);
-			digitalWrite(GPS_CS, 1);
 
-		}
-		SerialUSB.println("-----------------");
-		delay(50);
-*/
+		//SerialUSB.println("-----------------");
+		//while(SerialUSB.available()) {      // If anything comes in Serial (USB),
+			//SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+			//digitalWrite(GPS_CS, 0);
+			//fn = SerialUSB.read();
+			//gps.handle(SPI.transfer(fn));
+			//SerialUSB.print(fn);
+			//digitalWrite(GPS_CS, 1);
+//
+		//}
+		//SerialUSB.println("-----------------");
+		//delay(50);
+
 		
 	}
 	//update display if GPS is off
@@ -263,8 +262,10 @@ void update_tracklog(){
 					tracklog.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n");
 					
 					tracklog.println("<gpx version=\"1.1\" creator=\"mojehustevario\">");
+					tracklog.println("        <note>, temperature, humidity, pressure, alt_pres, vario, g_meter, valid_speed, valid_heading, speed, heading, wind speed, wind direction, circle fit a, circle fit b, circle fit r, yaw, pitch, roll, ground level, ground level interpol, valid date, valid time, </note>");
 					tracklog.println("  <trk>");
 					tracklog.println("    <trkseg>");
+
 					tracklog_stat = TRACKLOG_FILE_OPEN;
 					
 					

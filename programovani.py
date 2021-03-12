@@ -44,28 +44,33 @@ print(ports)
 COM0 = ""
 COM1 = ""
 
-port_start = 5
+port_start = 2
 
 if(len(sys.argv) != 3):
   print ('Not enough input arguments.')
   sys.exit(1)
 
+flag_found = False
 print("Looking for ports.")
 for i in range(port_start, 20):
     COM0 = "COM"+repr(i)
-    print("Connecting to port {:s}...".format(COM0), end='')
+    print("\tConnecting to port {:s}...".format(COM0), end='')
     try:
       ser = serial.Serial(COM0, 1200)
       ser.close()
     except Exception as ex:
       print("Not this one.")
     else:
+        flag_found = True
         print("Found open port: ", COM0)
         COM1 = "COM" + repr(i+1)
         break
 print("Done.")
 
-  
+if not flag_found:
+    print('No open port found. Aborting.')
+    exit(-1)
+
 flag = False
 print("Connecting to port {:s}...".format(COM1), end='')
 for k in range(2, 100):

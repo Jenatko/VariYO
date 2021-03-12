@@ -42,3 +42,7 @@
 
 VarioSW_as/ArduinoCore/Release
 VarioSW_as/VarioSW/Release
+
+.vs
+Hardware/PCB/__Previews
+Hardware/PCB/Vario_pcb_2l.PcbDoc.htm

@@ -4,6 +4,7 @@
 //#include "config.h"
 #include <math.h>
 #include "kalmanfilter3.h"
+#include "variables.h"
 
 // State being tracked
 static float z_;  // position
@@ -121,11 +122,28 @@ void kalmanFilter3_update(float z, float a, float dt, float* pZ, float* pV) {
 	// Error
 	float innov = z - z_; 
 	float sInv = 1.0f / (Pzz_ + zMeasVariance_);  
+	if(isinf(sInv)){
+		debugflag |= 0x1;
+		
+	}
 
     // Kalman gains
 	float kz = Pzz_ * sInv;  
 	float kv = Pvz_ * sInv;
 	float ka = Paz_ * sInv;
+	
+		if(isnan(kz)){
+			debugflag |= 0x8;
+			
+		}
+			if(isnan(kv)){
+				debugflag |= 0x10;
+				
+			}
+				if(isnan(ka)){
+					debugflag |= 0x20;
+					
+				}
 
 	// Update state 
 	z_ += kz * innov;
