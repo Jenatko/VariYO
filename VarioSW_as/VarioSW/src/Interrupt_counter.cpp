@@ -11,9 +11,9 @@
 #include "MEMS.h"
 #include "Gauge.h"
 
-//#include <MahonyAHRS/MahonyAHRS.h>
-//#include <MahonyAHRS.h>
+
 #include <MadgwickAHRS/MadgwickAHRS.h>
+
 
 
 

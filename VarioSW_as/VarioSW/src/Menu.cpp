@@ -31,6 +31,8 @@
 
 #include "logger.h"
 
+#include "FlashStorage/FlashStorage.h"
+
 
 #define MENUID_TOPMENU 0x01
 #define MENUITEM_TOPMENU_SETINGS 0
@@ -146,22 +148,25 @@ int  gauge_menu_id = MENUID_GAUGE;
 
 
 #define MENUID_GAUGES 0x08
-#define MENUITEM_GAUGES_VARIO 0
-#define MENUITEM_GAUGES_VARIO_AVG 1
+#define MENUITEM_GAUGES_VARIO_1 0
+#define MENUITEM_GAUGES_VARIO_2 1
 #define MENUITEM_GAUGES_ALTITUDE 2
 #define MENUITEM_GAUGES_AGL 3
-#define MENUITEM_GAUGES_SPEED 4
-#define MENUITEM_GAUGES_HEADING 5
-#define MENUITEM_GAUGES_WIND_SPEED 6
-#define MENUITEM_GAUGES_WIND_DIR 7
-#define MENUITEM_GAUGES_TEMPERATURE 8
-#define MENUITEM_GAUGES_HUMIDITY 9
-#define MENUITEM_GAUGES_FLIGHT_TIME 10
-#define MENUITEM_GAUGES_LIFT_TO_DRAG 11
-#define MENUITEM_GAUGES_ALT_ABOVE_TAKEOFF 12
+#define MENUITEM_GAUGES_PRESSURE_ALT 4
+#define MENUITEM_GAUGES_ALT_ABOVE_TAKEOFF 5
+#define MENUITEM_GAUGES_SPEED 6
+#define MENUITEM_GAUGES_HEADING 7
+#define MENUITEM_GAUGES_WIND_SPEED 8
+#define MENUITEM_GAUGES_WIND_DIR 9
+#define MENUITEM_GAUGES_TEMPERATURE 10
+#define MENUITEM_GAUGES_HUMIDITY 11
+#define MENUITEM_GAUGES_FLIGHT_TIME 12
+#define MENUITEM_GAUGES_LIFT_TO_DRAG 13
+#define MENUITEM_GAUGES_MAG_HDG 14
 
 
-char gauges_menu_list[][15] = {"Vario", "Vario avg", "Altitude", "AGL", "Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity", "Flight time", "Lift-to-drag", "Alt above TO"};
+
+char gauges_menu_list[][15] = {"Vario 1", "Vario 2", "Altitude", "AGL", "Pressure Alt", "Alt above TO" ,"Speed", "Heading", "Wind speed", "Wind dir", "Temperature", "Humidity", "Flight time", "Lift-to-drag", "Mag Heading"};
 char gauges_menu_name[15] = "Gauges";
 int  gauges_menu_id = MENUID_GAUGES;
 
@@ -243,8 +248,7 @@ void menu_init() {
 	tmpstring =  String((float)statVar.accelvariance);
 	tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_ACCVAR], 15);
 	
-	tmpstring =  String((float)statVar.vario_lowpass_coef);
-	tmpstring.toCharArray(vario_menu.items_array[MENUITEM_VARIO_DATA_AVERAGING], 15);
+
 	
 	if(statVar.ena_vector&ENA_GPS){
 		if(statVar.ena_vector&ENA_GPS_LOW_POWER)
@@ -537,12 +541,13 @@ void menuSelector(menu *menuPointer, int selected) {
 		//mass storage
 		else if (selected == MENUITEM_TOPMENU_MASS_STORAGE){
 			massStorageEna();
+			//menu_init();
 
 		}
 		//power off
 		else if (selected == MENUITEM_TOPMENU_POWEROFF) {
 			powerOff();
-			menu_init();
+		//	menu_init();
 
 
 		}
@@ -627,7 +632,8 @@ void menuSelector(menu *menuPointer, int selected) {
 			MenuEntry(&datetime_menu);
 		}
 		if (selected == MENUITEM_SETTINGS_SAVE_EEPROM){
-			eepromWrite(0, statVar);
+			statVarFlash.write(statVar);
+			//eepromWrite(0, statVar);
 		}
 		else if (selected == MENUITEM_SETTINGS_SET_DEFAULT){
 			setVariablesDefault();
@@ -791,44 +797,50 @@ void menuSelector(menu *menuPointer, int selected) {
 	//gauges menu
 	if (menuPointer->menu_id == MENUID_GAUGES) {
 		//BMI160
-		if (selected == MENUITEM_GAUGES_VARIO){
+		if (selected == MENUITEM_GAUGES_VARIO_1){
 			gaugepointer = &statVar.varioGauge;
 		}
-		if (selected == MENUITEM_GAUGES_VARIO_AVG){
+		else if (selected == MENUITEM_GAUGES_VARIO_2){
 			gaugepointer = &statVar.varioAvgGauge;
 		}
-		if (selected == MENUITEM_GAUGES_ALTITUDE){
+		else if (selected == MENUITEM_GAUGES_ALTITUDE){
 			gaugepointer = &statVar.altitudeGauge;
 		}
-		if (selected == MENUITEM_GAUGES_AGL){
+		else if (selected == MENUITEM_GAUGES_AGL){
 			gaugepointer = &statVar.AGLGauge;
 		}
-		if (selected == MENUITEM_GAUGES_SPEED){
+		else if (selected == MENUITEM_GAUGES_SPEED){
 			gaugepointer = &statVar.speedGauge;
 		}
-		if (selected == MENUITEM_GAUGES_HEADING){
+		else if (selected == MENUITEM_GAUGES_HEADING){
 			gaugepointer = &statVar.headingGauge;
 		}
-		if (selected == MENUITEM_GAUGES_WIND_SPEED){
+		else if (selected == MENUITEM_GAUGES_WIND_SPEED){
 			gaugepointer = &statVar.windGauge;
 		}
-		if (selected == MENUITEM_GAUGES_WIND_DIR){
+		else if (selected == MENUITEM_GAUGES_WIND_DIR){
 			gaugepointer = &statVar.windDirGauge;
 		}
-		if (selected == MENUITEM_GAUGES_TEMPERATURE){
+		else if (selected == MENUITEM_GAUGES_TEMPERATURE){
 			gaugepointer = &statVar.tempGauge;
 		}
-		if (selected == MENUITEM_GAUGES_HUMIDITY){
+		else if (selected == MENUITEM_GAUGES_HUMIDITY){
 			gaugepointer = &statVar.humidGauge;
 		}
-		if (selected == MENUITEM_GAUGES_FLIGHT_TIME){
+		else if (selected == MENUITEM_GAUGES_FLIGHT_TIME){
 			gaugepointer = &statVar.flightTimeGauge;
 		}
-		if (selected == MENUITEM_GAUGES_LIFT_TO_DRAG){
+		else if (selected == MENUITEM_GAUGES_LIFT_TO_DRAG){
 			gaugepointer = &statVar.glideRatioGauge;
 		}
-		if (selected == MENUITEM_GAUGES_ALT_ABOVE_TAKEOFF){
+		else if (selected == MENUITEM_GAUGES_ALT_ABOVE_TAKEOFF){
 			gaugepointer = &statVar.altAboveTakeoffGauge;
+		}
+		else if (selected == MENUITEM_GAUGES_PRESSURE_ALT){
+			gaugepointer = &statVar.PressureAltGauge;
+		}
+		else if (selected == MENUITEM_GAUGES_MAG_HDG){
+			gaugepointer = &statVar.MagHdgGauge;
 		}
 		
 		

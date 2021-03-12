@@ -286,7 +286,7 @@ void update_tracklog(){
 					tracklog.println("</ele>");
 					
 					tracklog.print("        <note>,");
-					tracklog.print(enviromental_data.temperature, 1);
+					tracklog.print(enviromental_data.temperature*0.01f, 1);
 					tracklog.print(",");
 					tracklog.print(enviromental_data.humidity, 1);
 					tracklog.print(",");
@@ -317,44 +317,6 @@ void update_tracklog(){
 					tracklog.print(movement_circle_fit.r);
 					tracklog.print(",");
 					
-					tracklog.print(ax);
-					tracklog.print(",");
-					tracklog.print(ay);
-					tracklog.print(",");
-					tracklog.print(az);
-					tracklog.print(",");
-					tracklog.print(gx);
-					tracklog.print(",");
-					tracklog.print(gy);
-					tracklog.print(",");
-					tracklog.print(gz);
-					tracklog.print(",");
-					tracklog.print(mx);
-					tracklog.print(",");
-					tracklog.print(my);
-					tracklog.print(",");
-					tracklog.print(mz);
-					tracklog.print(",");
-					tracklog.print(mx_cor);
-					tracklog.print(",");
-					tracklog.print(my_cor);
-					tracklog.print(",");
-					tracklog.print(mz_cor);
-					tracklog.print(",");
-					
-					tracklog.print(ax_avg);
-					tracklog.print(",");
-					tracklog.print(ay_avg);
-					tracklog.print(",");
-					tracklog.print(az_avg);
-					tracklog.print(",");
-					tracklog.print(gx_avg);
-					tracklog.print(",");
-					tracklog.print(gy_avg);
-					tracklog.print(",");
-					tracklog.print(gz_avg);
-					tracklog.print(",");
-					
 					tracklog.print(yaw);
 					tracklog.print(",");
 					tracklog.print(pitch);
@@ -369,10 +331,6 @@ void update_tracklog(){
 					tracklog.print(",");
 					tracklog.print(fix.valid.time);
 					tracklog.print(",");
-					
-					
-					
-					
 					
 					tracklog.println("</note>");
 					
@@ -603,10 +561,6 @@ void alt_agl(){
 	
 }
 
-
-
-
-
 float calcDistanceFromCoordinates(double latHome, double lonHome, double latDest, double lonDest) {
 	double pi = 3.141592653589793;
 	int R = 6371; //Radius of the Earth
@@ -623,7 +577,6 @@ float calcDistanceFromCoordinates(double latHome, double lonHome, double latDest
 
 	return distance;
 }
-
 float calcHeadingFromCoordinates(double latHome, double lonHome, double latDest, double lonDest) {
 
 	double pi = 3.141592653589793;

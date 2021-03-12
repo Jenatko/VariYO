@@ -1,0 +1,107 @@
+Protel Design System Design Rule Check
+PCB File : C:\Data\PCB\vario14\PCB\Vario_pcb_2l.PcbDoc
+Date     : 19/01/2020
+Time     : 13:12:48
+
+Processing Rule : Clearance Constraint (Gap=0.127mm) (All),(All)
+Rule Violations :0
+
+Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)
+Rule Violations :0
+
+Processing Rule : Un-Routed Net Constraint ( (All) )
+Rule Violations :0
+
+Processing Rule : Modified Polygon (Allow modified: No), (Allow shelved: No)
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=0.127mm) (Max=2.54mm) (Preferred=0.152mm) (All)
+Rule Violations :0
+
+Processing Rule : Power Plane Connect Rule(Relief Connect )(Expansion=0.508mm) (Conductor Width=0.254mm) (Air Gap=0.254mm) (Entries=4) (All)
+Rule Violations :0
+
+Processing Rule : Minimum Annular Ring (Minimum=0.076mm) (All)
+Rule Violations :0
+
+Processing Rule : Acute Angle Constraint (Minimum=80.000) (All)
+   Violation between Acute Angle Constraint: (75.135 < 80.000) Between Via (63mm,69mm) from Top Layer to Bottom Layer And Pad Free-3(65mm,68mm) on Multi-Layer (Angle = 75.135)
+   Violation between Acute Angle Constraint: (77.535 < 80.000) Between Via (63mm,69mm) from Top Layer to Bottom Layer And Polygon Region (52 hole(s)) Top Layer (Angle = 77.535)
+   Violation between Acute Angle Constraint: (75.135 < 80.000) Between Via (63mm,69mm) from Top Layer to Bottom Layer And Pad Free-3(65mm,68mm) on Multi-Layer (Angle = 75.135)
+   Violation between Acute Angle Constraint: (77.535 < 80.000) Between Via (63mm,69mm) from Top Layer to Bottom Layer And Polygon Region (45 hole(s)) Bottom Layer (Angle = 77.535)
+   Violation between Acute Angle Constraint: (77.645 < 80.000) Between Track (94.705mm,24.895mm)(95.5mm,24.1mm) on Bottom Layer And Polygon Region (0 hole(s)) Bottom Layer (Angle = 77.645)
+   Violation between Acute Angle Constraint: (77.418 < 80.000) Between Track (94.705mm,24.895mm)(94.705mm,27.605mm) on Bottom Layer And Polygon Region (45 hole(s)) Bottom Layer (Angle = 77.418)
+   Violation between Acute Angle Constraint: (76.718 < 80.000) Between Pad C8-2(75.05mm,55.45mm) on Bottom Layer And Track (75.05mm,55.45mm)(75.85mm,55.45mm) on Bottom Layer (Angle = 76.718)
+Rule Violations :7
+
+Processing Rule : Hole Size Constraint (Min=0.2mm) (Max=2.54mm) (All)
+Rule Violations :0
+
+Processing Rule : Hole To Hole Clearance (Gap=0.254mm) (All),(All)
+Rule Violations :0
+
+Processing Rule : Net Antennae (Tolerance=0mm) (All)
+   Violation between Net Antennae: Via (103.9mm,41.5mm) from Top Layer to Bottom Layer 
+Rule Violations :1
+
+Processing Rule : Board Clearance Constraint (Gap=0mm) (All)
+   Violation between Board Outline Clearance(Cutout Edge): (0.076mm < 0.21mm) Between Arc (87.8mm,63.9mm) on Bottom Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (Collision < 0.21mm) Between Arc (86.5mm,63.8mm) on Bottom Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Outline Edge): (0mm < 0.21mm) Between Pad USB_SD-6(84.3mm,22mm) on Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0mm < 0.21mm) Between Pad USB_SD-6(91.3mm,22mm) on Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Cutout Edge): (0.161mm < 0.21mm) Between Pad U18-1(87mm,64.8mm) on Bottom Layer And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (0.183mm < 0.21mm) Between Pad U18-3(87mm,66.8mm) on Bottom Layer And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (0.175mm < 0.21mm) Between Pad U18-4(90mm,66.8mm) on Bottom Layer And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (0.156mm < 0.21mm) Between Pad U18-6(90mm,64.8mm) on Bottom Layer And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Outline Edge): (0.175mm < 0.21mm) Between Via (107.4mm,53.3mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Cutout Edge): (0.196mm < 0.21mm) Between Via (92mm,64mm) from Top Layer to Bottom Layer And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Outline Edge): (0.2mm < 0.21mm) Between Via (102mm,24mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.203mm < 0.21mm) Between Via (103mm,58mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.2mm < 0.21mm) Between Via (115mm,42mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.2mm < 0.21mm) Between Via (115mm,46mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.2mm < 0.21mm) Between Via (115mm,50mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.195mm < 0.21mm) Between Via (114mm,52mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.2mm < 0.21mm) Between Via (116mm,40mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.2mm < 0.21mm) Between Via (118mm,40mm) from Top Layer to Bottom Layer And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.142mm < 0.21mm) Between Track (70.393mm,69.758mm)(77.893mm,69.758mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.142mm < 0.21mm) Between Track (77.893mm,65.208mm)(77.893mm,69.758mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.142mm < 0.21mm) Between Track (70.393mm,65.208mm)(70.393mm,69.758mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Cutout Edge): (Collision < 0.21mm) Between Track (102.929mm,45mm)(104.697mm,45mm) on Top Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (Collision < 0.21mm) Between Track (102.929mm,45mm)(103.459mm,45.53mm) on Top Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (Collision < 0.21mm) Between Track (102.929mm,45mm)(103.459mm,45.53mm) on Top Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (Collision < 0.21mm) Between Track (102.929mm,45mm)(103.459mm,44.47mm) on Top Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (116.541mm,45.53mm)(117.071mm,45mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (116.541mm,44.47mm)(117.071mm,45mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (116.541mm,44.47mm)(117.071mm,45mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (115.303mm,45mm)(117.071mm,45mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.069mm < 0.21mm) Between Track (102.311mm,64.089mm)(102.711mm,63.689mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (84.05mm,19.75mm)(84.05mm,24.3mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (91.55mm,19.75mm)(91.55mm,24.3mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (84.05mm,19.75mm)(91.55mm,19.75mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (100.357mm,67.85mm)(103.307mm,67.85mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (100.357mm,64.5mm)(103.307mm,64.5mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.05mm < 0.21mm) Between Track (101.6mm,20.7mm)(104.85mm,20.7mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.05mm < 0.21mm) Between Track (101.6mm,24.95mm)(104.85mm,24.95mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.05mm < 0.21mm) Between Track (101.6mm,20.7mm)(101.6mm,24.95mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (103.307mm,64.5mm)(103.307mm,67.85mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (107.2mm,49.63mm)(118.7mm,49.63mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (118.7mm,40.63mm)(118.7mm,49.63mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Track (107.2mm,40.63mm)(118.7mm,40.63mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Cutout Edge): (Collision < 0.21mm) Between Text "SCL
+ SDA" (105.1mm,33.2mm) on Top Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Outline Edge): (0.148mm < 0.21mm) Between Text "U19" (95.2mm,24.7mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.148mm < 0.21mm) Between Text "C20" (79mm,20.3mm) on Top Overlay And Board Edge 
+   Violation between Board Outline Clearance(Cutout Edge): (Collision < 0.21mm) Between Text " SCL
+SDA" (105.6mm,41.5mm) on Bottom Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Cutout Edge): (0.166mm < 0.21mm) Between Text "U18" (84.1mm,66.2mm) on Bottom Overlay And Board Cutout (Multi-Layer)Region (0 hole(s)) Multi-Layer 
+   Violation between Board Outline Clearance(Outline Edge): (Collision < 0.21mm) Between Text "C32" (95.4mm,25.5mm) on Bottom Overlay And Board Edge 
+   Violation between Board Outline Clearance(Outline Edge): (0.143mm < 0.21mm) Between Text "C38" (95.5mm,22.8mm) on Bottom Overlay And Board Edge 
+Rule Violations :49
+
+Processing Rule : Height Constraint (Min=0mm) (Max=25.4mm) (Prefered=12.7mm) (All)
+Rule Violations :0
+
+
+Violations Detected : 57
+Waived Violations : 0
+Time Elapsed        : 00:00:05

@@ -38,7 +38,6 @@
 
 #other shit
 *.zip
-*.pdf
 *.rar
 
 VarioSW_as/ArduinoCore/Release
@@ -52,3 +51,8 @@ VarioSW_as/VarioSW/Debug/
 
 __pycache__
 
+<<<<<<< HEAD
+=======
+__pycache__
+
+>>>>>>> 6130049638ae05aeb5c99c8e491e38cb012a2ef9

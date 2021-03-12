@@ -44,12 +44,15 @@ print(ports)
 COM0 = ""
 COM1 = ""
 
+port_start = 2
+
 if(len(sys.argv) != 3):
+  print ('Not enough input arguments.')
   sys.exit(1)
 
 flag_found = False
 print("Looking for ports.")
-for i in range(2, 20):
+for i in range(port_start, 20):
     COM0 = "COM"+repr(i)
     print("\tConnecting to port {:s}...".format(COM0), end='')
     try:
@@ -88,5 +91,10 @@ if flag:
     
  
 print('Loading file "{:s}": to port {:s}'.format(sys.argv[1], COM))
-print(sys.argv[2]+'\\bossac.exe')
-subprocess.call([sys.argv[2]+"\\bossac.exe", "--port="+COM, "-e", "-w", "-v", sys.argv[1], "-R"])
+print(sys.argv[2]+"\\bossac.exe")
+ret = subprocess.call([sys.argv[2]+"\\bossac.exe", "--port="+COM, "-e", "-w", "-v", sys.argv[1], "-R"])
+if ret == 0:
+	print('Success.')
+else:
+	print('bossac.exe finished with exit code: ', ret)
+sys.exit(ret)

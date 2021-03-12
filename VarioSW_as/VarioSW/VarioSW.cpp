@@ -45,17 +45,12 @@
 #include "Gauge.h"
 
 
-// #include <GxEPD.h>
-// #include <GxGDEP015OC1/GxGDEP015OC1.h>    // 1.54" b/w
-// #include <GxIO/GxIO_SPI/GxIO_SPI.h>
-// #include <GxIO/GxIO.h>
-
 #define ENABLE_GxEPD2_GFX 0
 
 
 #include <GxEPD2_BW.h>
 #define MAX_DISPAY_BUFFER_SIZE 15000ul // ~15k is a good compromise
-#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPAY_BUFFER_SIZE / (EPD::WIDTH / 8))
+#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8))
 
 
 
@@ -66,16 +61,22 @@
 
 #include "Interrupt_counter.h"
 
+#ifdef EPAPER_V2
+GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(GxEPD2_154_D67(/*CS=D8*/ PA13, /*DC=D3*/ PA14, /*RST=D4*/ PA15, /*BUSY=D2*/ PA10));
+#else
 GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(GxEPD2_154(/*CS=D8*/ PA13, /*DC=D3*/ PA14, /*RST=D4*/ PA15, /*BUSY=D2*/ PA10));
+#endif
 
 
-//GxIO_Class io(SPI, /*CS=*/ DISP_CS, /*DC=*/ DISP_DC, /*RST=*/ DISP_RST);
-//GxEPD_Class display(io, /*RST=*/ DISP_RST, /*BUSY=*/ DISP_BUSY);
 
 
 #include "SdFat.h"
 
 SdFat SD;
+
+#include "FlashStorage/FlashStorage.h"
+
+FlashStorage(statVarFlash, StaticVariables);
 
 
 
@@ -94,27 +95,27 @@ void draw_floppy(int x_orig, int y_orig);
 
 
 
-void displayUpdate(void){
+void displayUpdate(bool drawall = false){
+
+	//digitalWrite(SRAM_CS, 0);
 
 
 
-	display.fillScreen(GxEPD_WHITE);
 
-
-	//statVar.varioGauge.value = vario_filter/100;
-	//statVar.varioAvgGauge.value = vario_lowpassed/100;
-	
 	if(ground_level != 0xffff)	statVar.AGLGauge.value = (alt_filter*0.01f) - ground_level;
 	else statVar.AGLGauge.value = NAN;
 	
 	
 	statVar.altitudeGauge.value = (alt_filter*0.01f);
 	statVar.tempGauge.value = enviromental_data.temperature*0.01f;
-	statVar.humidGauge.value = enviromental_data.humidity*0.01f;
+	statVar.humidGauge.value = enviromental_data.humidity;
 	
 	
 	statVar.windGauge.value = wind_speed_mps;
 	statVar.windDirGauge.value = wind_direction;
+	
+	statVar.PressureAltGauge.value = getPressureAltitude();
+		statVar.MagHdgGauge.value = yaw;
 	
 	if(statVar.ena_vector & ENA_TRACKLOG) statVar.flightTimeGauge.value = (rtc.getEpoch() - var_takeofftime)/60;
 	else statVar.flightTimeGauge.value = NAN;
@@ -122,12 +123,39 @@ void displayUpdate(void){
 	//statVar.glideRatioGauge = ;
 	if(statVar.ena_vector & ENA_TRACKLOG) statVar.altAboveTakeoffGauge.value = alt_filter*0.01f - var_takeoffalt*0.01f;
 	else statVar.altAboveTakeoffGauge.value = NAN;
+
+	digitalWrite(SRAM_CS, 0);
 	
+	if(drawall)
 	printGauges();
+	else
+	printGauges_values();
 	
+	
+	digitalWrite(SRAM_CS, 1);
+	
+
 	
 
 
+
+	
+	display.setCursor(10,110);
+	display.setFont(&FreeMonoBold12pt7b);
+	
+
+	
+	display.setFont(&FreeMonoBold12pt7b);
+	if(redraw == 2) display.fillRect(80, 15, 6, 6, GxEPD_BLACK);
+	
+	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
+	
+	//display.partiallyUpdateScreen();
+
+	display.display(true);
+
+	
+	display.fillScreen(GxEPD_WHITE);
 	display.setFont(&FreeMonoBold9pt7b);
 	display.setCursor(5,12);
 	if(var_localtime.tm_hour < 10) display.print("0");
@@ -171,19 +199,12 @@ void displayUpdate(void){
 	display.drawLine(169, 3, 169, 9, GxEPD_BLACK);
 	display.drawLine(168, 3, 168, 9, GxEPD_BLACK);
 	
-	display.setCursor(10,110);
-	display.setFont(&FreeMonoBold12pt7b);
 	
+	printGauges_frames();
+	
+	
+	display.setFont(&FreeMonoBold12pt7b);
 
-	
-	display.setFont(&FreeMonoBold12pt7b);
-	if(redraw == 2) display.fillRect(80, 15, 6, 6, GxEPD_BLACK);
-	
-	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
-	
-	//display.partiallyUpdateScreen();
-	display.display(true);
-	
 
 	redraw = 0;
 	
@@ -256,10 +277,15 @@ void setup() {
 	SPI.begin();
 
 	delay(100);   //wait for EEPROM to power-up
-	eepromRead(0, statVar);
+	
+	// Check this
+	//eepromRead(0, statVar);
+	
+	statVar = statVarFlash.read();
+	if(statVar.valid == 0) setVariablesDefault();
 
 
-	BT_off();
+	//BT_off();
 
 	
 	present_devices = 0;
@@ -280,7 +306,6 @@ void setup() {
 		GPS_off();
 	}
 	
-	SerialUSB.println("Setting up menu.");
 
 	menu_init();
 	//while(!SerialUSB.available());
@@ -304,7 +329,7 @@ void setup() {
 	display.fillScreen(GxEPD_WHITE);
 	SerialUSB.println("  Fill");
 	display.display();
-	SerialUSB.println("  display()");
+
 	
 	display.setRotation(0);
 	SerialUSB.println("  rotation");
@@ -401,6 +426,16 @@ void setup() {
 	pinMode(SD_DETECT, INPUT);
 	display.display(true);
 	
+	display.setCursor(10, 150);
+	
+	display.print("eeprom used:");
+	display.setCursor(10, 170);
+	display.print(sizeof(statVar));
+	display.print("/");
+		display.print(4096/8/sizeof(char));
+	display.display(true);
+	
+	
 
 
 	delay(1000);
@@ -454,6 +489,8 @@ void loop() {
 			display.fillScreen(GxEPD_WHITE);
 			//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
 			//display.display(true);
+
+			displayUpdate(true);
 			display.display();
 			break;
 			
@@ -484,8 +521,8 @@ void loop() {
 	//	SerialUSB.println((uint32_t)((t_stop-t_start)/1000));
 
 
-
-	if(redraw){
+	if(digitalRead(DISP_BUSY) == 0){
+		//if(redraw){
 		counter500ms = 0;
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;
@@ -493,9 +530,10 @@ void loop() {
 		
 		
 		t_start_first = micros();
+		
 		displayUpdate();
 		t_stop_first = micros();
-		}
+	}
 	else{
 		delay(10);
 	}

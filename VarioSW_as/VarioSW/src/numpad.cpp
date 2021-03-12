@@ -16,7 +16,7 @@ int numpad(int initial_number) {
 	printNumpadButton(selected, 1);
 
 	while (1) {
-		buttons.buttonUpdate();
+	//	buttons.buttonUpdate();
 
 
 		if (buttons.getFlag()) {

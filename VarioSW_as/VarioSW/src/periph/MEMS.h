@@ -15,7 +15,7 @@
 #include "Variables.h"
 #include "BMM150_bosch_driver/bmm150.h"
 
-//#include "BME280_bosch_driver/bme280.h" // Honzo toto zmazal
+//#include "bmm150.h"
 
 #include "Wire.h"
 
@@ -65,6 +65,8 @@ void setSeaPressureFromAltitude(int altitude, unsigned int pressure);
 
 //calculate altitude from pressure stored in StatVar.enviromental_data
 float getAltitude();
+
+float getPressureAltitude();
 
 int IMU_FifoBytesToRead();
 

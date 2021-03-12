@@ -311,8 +311,10 @@ int read_si7021(){
 		int rh = 0;
 		rh = Wire.read()<<8;
 		rh += Wire.read();
-		float humidity = (125.0*rh/65536.0)-6.0;
-		enviromental_data.humidity = humidity*100;
+		float humidity = (125.0f*rh/65536.0f)-6.0f;
+		if(humidity <= 0) humidity = 0;
+		else if(humidity >= 100) humidity = 100;
+		enviromental_data.humidity = humidity;
 		//  SerialUSB.print((125.0*rh/65536.0)-6.0);
 		//  SerialUSB.print(',');
 		
@@ -327,7 +329,7 @@ int read_si7021(){
 			rh = 0;
 			rh = Wire.read()<<8;
 			rh += Wire.read();
-			float temperature = (175.72*rh/65536.0)-46.85;
+			float temperature = (175.72f*rh/65536.0f)-46.85f;
 			enviromental_data.temperature = temperature*100;
 			return 1;
 			
@@ -415,6 +417,27 @@ float getAltitude(){
 	
 	
 	float diff = statVar.Psea*100.0f/(enviromental_data.pressure) - 1.3f;
+	float diff2 = diff * diff;
+	
+	//some crazy taylor series magic, bcs aint nobody has time for pow()
+	float power = (1.05099483835522f
+	+ 0.153261726531934f * diff
+	+ -0.0477720927877293f * diff2
+	+ 0.0221763811870283f * diff2 * diff
+	+ -0.0119855962404455f * diff2 * diff2);
+
+	
+	return ((power -1.0f)* (enviromental_data.temperature/100.0f + 273.15f) / 0.0065f);
+	
+	
+	
+}
+
+float getPressureAltitude(){
+
+	
+	
+	float diff = 10132500.0f/(enviromental_data.pressure) - 1.3f;
 	float diff2 = diff * diff;
 	
 	//some crazy taylor series magic, bcs aint nobody has time for pow()

@@ -21,7 +21,12 @@ GxEPD2_EPD::GxEPD2_EPD(int8_t cs, int8_t dc, int8_t rst, int8_t busy, int8_t bus
                        uint16_t w, uint16_t h, GxEPD2::Panel p, bool c, bool pu, bool fpu) :
   WIDTH(w), HEIGHT(h), panel(p), hasColor(c), hasPartialUpdate(pu), hasFastPartialUpdate(fpu),
   _cs(cs), _dc(dc), _rst(rst), _busy(busy), _busy_level(busy_level), _busy_timeout(busy_timeout), _diag_enabled(false),
-  _spi_settings(4000000, MSBFIRST, SPI_MODE0)
+  #ifdef EPAPER_V2
+    _spi_settings(20000000, MSBFIRST, SPI_MODE0)
+	#else
+    _spi_settings(4000000, MSBFIRST, SPI_MODE0)	
+#endif
+
 {
   _initial_write = true;
   _initial_refresh = true;
@@ -108,18 +113,6 @@ void GxEPD2_EPD::_waitWhileBusy(const char* comment, uint16_t busy_time)
         break;
       }
     }
-    if (comment)
-    {
-#if !defined(DISABLE_DIAGNOSTIC_OUTPUT)
-      if (_diag_enabled)
-      {
-        unsigned long elapsed = micros() - start;
-        Serial.print(comment);
-        Serial.print(" : ");
-        Serial.println(elapsed);
-      }
-#endif
-    }
     (void) start;
   }
   else delay(busy_time);
@@ -157,7 +150,7 @@ void GxEPD2_EPD::_writeData(const uint8_t* data, uint16_t n)
   SPI.endTransaction();
 }
 
-void GxEPD2_EPD::_writeDataPGM(const uint8_t* data, uint16_t n)
+void GxEPD2_EPD::_writeDataPGM(const uint8_t* data, uint16_t n, int16_t fill_with_zeroes)
 {
   SPI.beginTransaction(_spi_settings);
   if (_cs >= 0) digitalWrite(_cs, LOW);
@@ -165,7 +158,31 @@ void GxEPD2_EPD::_writeDataPGM(const uint8_t* data, uint16_t n)
   {
     SPI.transfer(pgm_read_byte(&*data++));
   }
+  while (fill_with_zeroes > 0)
+  {
+    SPI.transfer(0x00);
+    fill_with_zeroes--;
+  }
   if (_cs >= 0) digitalWrite(_cs, HIGH);
+  SPI.endTransaction();
+}
+
+void GxEPD2_EPD::_writeDataPGM_sCS(const uint8_t* data, uint16_t n, int16_t fill_with_zeroes)
+{
+  SPI.beginTransaction(_spi_settings);
+  for (uint8_t i = 0; i < n; i++)
+  {
+    if (_cs >= 0) digitalWrite(_cs, LOW);
+    SPI.transfer(pgm_read_byte(&*data++));
+    if (_cs >= 0) digitalWrite(_cs, HIGH);
+  }
+  while (fill_with_zeroes > 0)
+  {
+    if (_cs >= 0) digitalWrite(_cs, LOW);
+    SPI.transfer(0x00);
+    fill_with_zeroes--;
+    if (_cs >= 0) digitalWrite(_cs, HIGH);
+  }
   SPI.endTransaction();
 }
 

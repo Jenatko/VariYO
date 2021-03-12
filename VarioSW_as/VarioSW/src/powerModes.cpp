@@ -14,6 +14,8 @@
 #include "RTCZero.h"
 #include "MAX17055.h"
 
+#include "FlashStorage/FlashStorage.h"
+
 extern SdFile tracklog;
 extern SdFile loggerFile;
 
@@ -118,7 +120,9 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 		display.print("Battery empty");
 	}
 	display.display();
-	eepromWrite(0, statVar);
+	while(digitalRead(DISP_BUSY));
+	//eepromWrite(0, statVar);
+	statVarFlash.write(statVar);
 	USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
 	//USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_RUNSTDBY;
 	SCB->SCR |= 1 << 2;
@@ -331,6 +335,7 @@ void massStorageEna() {
 	display.print("USB mass storage");
 	display.setCursor(20, 120);
 	display.print("push to end");
+
 	display.display();
 	display.powerOff();
 	
@@ -357,8 +362,9 @@ void massStorageEna() {
 
 	
 	display.init(0);
-
-	//	display.update();
+		display.fillScreen(GxEPD_WHITE);
+		display.display(true);
+	
 }
 
 
@@ -477,6 +483,7 @@ void GPS_stopped(void){
 
 
 void disableGPSBckp(){
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	digitalWrite(GPS_BCKP, 0);
 }
 

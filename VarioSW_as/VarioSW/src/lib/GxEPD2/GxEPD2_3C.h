@@ -21,6 +21,7 @@
 #include "epd3c/GxEPD2_420c.h"
 #include "epd3c/GxEPD2_583c.h"
 #include "epd3c/GxEPD2_750c.h"
+#include "epd3c/GxEPD2_750c_Z08.h"
 
 #ifndef ENABLE_GxEPD2_GFX
 // default is off
@@ -115,7 +116,7 @@ class GxEPD2_3C : public Adafruit_GFX
     }
 
     // init method with additional parameters:
-    // initial true for re-init after processor deep sleep wake up, if display power supply was kept
+    // initial false for re-init after processor deep sleep wake up, if display power supply was kept
     // only relevant for b/w displays with fast partial update
     // pulldown_rst_mode true for alternate RST handling to avoid feeding 5V through RST pin
     void init(uint32_t serial_diag_bitrate, bool initial, bool pulldown_rst_mode = false)
@@ -145,6 +146,7 @@ class GxEPD2_3C : public Adafruit_GFX
     {
       epd2.writeImage(_black_buffer, _color_buffer, 0, 0, WIDTH, _page_height);
       epd2.refresh(partial_update_mode);
+      if (!partial_update_mode) epd2.powerOff();
     }
 
     // display part of buffer content to screen, useful for full screen buffer
@@ -417,6 +419,7 @@ class GxEPD2_3C : public Adafruit_GFX
     void refresh(bool partial_update_mode = false) // screen refresh from controller memory to full screen
     {
       epd2.refresh(partial_update_mode);
+      if (!partial_update_mode) epd2.powerOff();
     }
     void refresh(int16_t x, int16_t y, int16_t w, int16_t h) // screen refresh from controller memory, partial screen
     {
