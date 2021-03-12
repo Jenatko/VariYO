@@ -104,7 +104,7 @@ extern double myRealAltitude;
 extern volatile float altChange, vario_lowpassed;
 extern volatile int counter500ms;
 extern int redraw;
-extern volatile int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor;
+extern volatile int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor, debugflag;
 extern float yaw, pitch, roll;
 extern float a_vertical_imu, alt_filter, vario_filter, alt_baro;
 

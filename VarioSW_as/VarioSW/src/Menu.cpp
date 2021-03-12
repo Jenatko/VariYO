@@ -103,9 +103,12 @@ int  menu2_id = MENUID_VARIO;
 #define MENUITEM_DEBUG_32KHZ_TEST 5
 #define MENUITEM_DEBUG_PRINT_ACCEL 6
 #define MENUITEM_DEBUG_BT_PASSTHROUGH 7
+#define MENUITEM_DEBUG_SW_RESET 8
+#define MENUITEM_DEBUG_DEBUGFLAG 9
+#define MENUITEM_DEBUG_CLEARFLAG 10
 
 
-char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel", "BT passthr"};
+char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel", "BT passthr", "SW reset", "debugflag", "clearflag"};
 char menu3_name[15] = "Debug";
 int  menu3_id = MENUID_DEBUG;
 
@@ -547,7 +550,7 @@ void menuSelector(menu *menuPointer, int selected) {
 		//power off
 		else if (selected == MENUITEM_TOPMENU_POWEROFF) {
 			powerOff();
-		//	menu_init();
+			//	menu_init();
 
 
 		}
@@ -763,6 +766,30 @@ void menuSelector(menu *menuPointer, int selected) {
 			}
 			buttons.getButtonPressed();
 		}
+		else if (selected == MENUITEM_DEBUG_SW_RESET){
+			NVIC_SystemReset();
+
+		}
+		else if (selected == MENUITEM_DEBUG_DEBUGFLAG){
+			display.setFont(&FreeMonoBold12pt7b);
+			while (!buttons.getFlag())	{
+				routine();
+				display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
+				display.setCursor(20, 50);
+				display.print(debugflag);
+				
+				display.display(true);
+
+
+			}
+			display.setFont(&FreeMonoBold12pt7b);
+			buttons.getButtonPressed();
+
+		}
+				else if (selected == MENUITEM_DEBUG_CLEARFLAG){
+					debugflag = 0;
+
+				}
 
 	}
 	//datetime menu

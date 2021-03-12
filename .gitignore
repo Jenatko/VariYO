@@ -42,17 +42,11 @@
 
 VarioSW_as/ArduinoCore/Release
 VarioSW_as/VarioSW/Release
-<<<<<<< Updated upstream
-
 VarioSW_as/ArduinoCore/Debug/
 VarioSW_as/VarioSW/Debug/
 
 .vs
+Hardware/PCB/__Previews
+Hardware/PCB/Vario_pcb_2l.PcbDoc.htm
 
 __pycache__
-
-<<<<<<< HEAD
-=======
-__pycache__
-
->>>>>>> 6130049638ae05aeb5c99c8e491e38cb012a2ef9
