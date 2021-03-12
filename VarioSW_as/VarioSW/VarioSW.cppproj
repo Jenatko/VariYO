@@ -298,11 +298,17 @@
             <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\spi</Value>
             <Value>%24(ProjectDir)\..\ArduinoCore\include\libraries\wire</Value>
             <Value>../src</Value>
+            <Value>../src/lib</Value>
+            <Value>../src/periph</Value>
             <Value>../src/lib/GxEPD-master</Value>
             <Value>../src/lib/Adafruit_GFX</Value>
-            <Value>../src/periph</Value>
             <Value>../src/periph/BMI160</Value>
             <Value>../src/periph/BMI160_bosch_driver</Value>
+            <Value>../src/lib/NeoGPS/src</Value>
+            <Value>../src/lib/GxEPD2</Value>
+            <Value>../src/lib/RTCZero</Value>
+            <Value>../src/lib/SdFat</Value>
+            <Value>../src/lib/Compass</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.compiler.optimization.level>Optimize for size (-Os)</armgcccpp.compiler.optimization.level>
@@ -326,8 +332,7 @@
           </ListValues>
         </armgcccpp.linker.libraries.LibrarySearchPaths>
         <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
-        <armgcccpp.linker.memorysettings.ExternalRAM>
-        </armgcccpp.linker.memorysettings.ExternalRAM>
+        <armgcccpp.linker.memorysettings.ExternalRAM />
         <armgcccpp.linker.miscellaneous.LinkerFlags>-Tflash_with_bootloader.ld -Wl,--cref -Os -Wl,--check-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align</armgcccpp.linker.miscellaneous.LinkerFlags>
         <armgcccpp.assembler.general.IncludePaths>
           <ListValues>

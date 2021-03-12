@@ -25,13 +25,13 @@
 #include "kalmanfilter3.h"
 #include "Interrupt_counter.h"
 
-#include "MadgwickAHRS.h"
-#include "elipsoid.h"
+#include <MadgwickAHRS/MadgwickAHRS.h>
+#include "ellipsoid/elipsoid.h"
 #include "compass.h"
 
 #include "logger.h"
 
-#include "FlashStorage.h"
+#include "FlashStorage/FlashStorage.h"
 
 
 #define MENUID_TOPMENU 0x01

@@ -6,14 +6,14 @@
 #include "buzzer.h"
 #include "roundbuff.h"
 #include <BMI160Gen.h>
-#include "kalmanfilter3.h"
+#include "lib/kalmanfilter3.h"
 #include "Variables.h"
 #include "MEMS.h"
 #include "Gauge.h"
 
 
+#include <MadgwickAHRS/MadgwickAHRS.h>
 
-#include <MadgwickAHRS.h>
 
 
 
@@ -110,7 +110,8 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 		alt_baro = getAltitude()*100;
 
-		
+		SerialUSB.println(alt_baro);
+
 		//SerialUSB.println(alt_baro);
 
 	}

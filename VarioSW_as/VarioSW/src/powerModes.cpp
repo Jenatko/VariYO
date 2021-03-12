@@ -14,7 +14,7 @@
 #include "RTCZero.h"
 #include "MAX17055.h"
 
-#include "FlashStorage.h"
+#include "FlashStorage/FlashStorage.h"
 
 extern SdFile tracklog;
 extern SdFile loggerFile;

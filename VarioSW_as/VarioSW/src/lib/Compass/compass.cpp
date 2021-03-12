@@ -15,7 +15,7 @@
 #include <Fonts/FreeMonoBold9pt7b.h>
 
 
-#include "MadgwickAHRS.h"
+#include "MadgwickAHRS/MadgwickAHRS.h"
 
 #define COMPASS_VERT_CENTRE  110
 #define COMPASS_DIAMETER 80
