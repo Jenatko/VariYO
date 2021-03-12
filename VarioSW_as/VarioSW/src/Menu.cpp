@@ -25,7 +25,7 @@
 #include "kalmanfilter3.h"
 #include "Interrupt_counter.h"
 
-#include <MadgwickAHRS/MadgwickAHRS.h>
+#include "MadgwickAHRS/MadgwickAHRS.h"
 #include "ellipsoid/elipsoid.h"
 #include "compass.h"
 
