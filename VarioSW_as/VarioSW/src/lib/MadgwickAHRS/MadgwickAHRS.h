@@ -18,25 +18,26 @@
 
 #include <math.h>
 #include "definitions.h"
+#include "variables.h"
 
 class Madgwick {
-private:
+	private:
 
-volatile float beta = betaDef;								// 2 * proportional gain (Kp)
-volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
-float roll, pitch, yaw;
-char anglesComputed;
+	volatile float beta = betaDef;								// 2 * proportional gain (Kp)
+	volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
+	float roll, pitch, yaw;
+	char anglesComputed;
 
 	static float invSqrt(float x);
 	void computeAngles();
 
-//-------------------------------------------------------------------------------------------
-// Function declarations
+	//-------------------------------------------------------------------------------------------
+	// Function declarations
 
-public:
+	public:
 
-void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
-void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
+	void MadgwickAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
+	void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
 	
 	float getRoll() {
 		if (!anglesComputed) computeAngles();
@@ -64,42 +65,57 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 	}
 	
 	float getVertical(float ax, float ay, float az) {
-	
-			float A = q0*q1 + q2*q3;
-			float B = 0.5f - q1*q1 - q2*q2;
-			float odmocninka = invSqrt(A*A+B*B);
-			float sin_pitch = ( -2.0f * (q1*q3 - q0*q2));
-			float cos_pitch = sqrt(1-sin_pitch*sin_pitch);
+		
+		float A = q0*q1 + q2*q3;
+		float B = 0.5f - q1*q1 - q2*q2;
+		float odmocninka = invSqrt(A*A+B*B);
+		float sin_pitch = ( -2.0f * (q1*q3 - q0*q2));
+		float cos_pitch = sqrt(1-sin_pitch*sin_pitch);
+				if(isnan(sin_pitch)){
+					debugflag |= 0x40;
+					
+					
+				}
+		
+		if(isnan(cos_pitch)){
+			debugflag |= 0x2;
+			
+			
+		}
+		if(isnan(odmocninka)){
+			debugflag |= 0x4;
+			
+		}
 
-			float a_vertical = az* B * odmocninka*cos_pitch - ax * sin_pitch + ay * A * odmocninka *cos_pitch;
-			return a_vertical;
+		float a_vertical = az* B * odmocninka*cos_pitch - ax * sin_pitch + ay * A * odmocninka *cos_pitch;
+		return a_vertical;
 	}
 	
 	/**
-	 * Returns the azimuth in degrees
-	 */
-	float getAzimuth() { 
+	* Returns the azimuth in degrees
+	*/
+	float getAzimuth() {
 		float u[3];
 		//float v[3];
 		float w[3];
-				
+		
 		u[0] = 1 - 2 * (q2*q2 + q3*q3);
 		u[1] =     2 * (q1*q2 + q3*q0);
 		u[2] =     2 * (q1*q3 - q2*q0);
-				
+		
 		//v[0] =     2 * (q1*q2 - q3*q0);
 		//v[1] = 1 - 2 * (q1*q1 + q3*q3);
 		//v[2] =     2 * (q2*q3 + q1*q0);
-				
+		
 		w[0] =     2 * (q1*q3 + q2*q0);
 		w[1] =     2 * (q2*q3 - q1*q0);
 		//w[2] = 1 - 2 * (q1*q1 + q2*q2);
-			
+		
 		float res = 0;
-						
+		
 		if(abs(u[2]) > 0.7f) { // upright
 			res = -atan2(-w[1], -w[0]);
-		} else {
+			} else {
 			res = -atan2(-u[1], -u[0]);
 		}
 		res *= RAD2DEG;

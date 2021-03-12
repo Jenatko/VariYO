@@ -166,9 +166,10 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			SerialUSB.print(",");*/
 				//SerialUSB.println(a_vertical_imu, 3);
 			/*	SerialUSB.print(",");
-		SerialUSB.println(vario_filter);
+			*/
+	//	SerialUSB.println(vario_filter);
 
-		*/
+		
 
 		
 		//yaw = Mahony_filter.getYaw();
@@ -218,6 +219,9 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		buzzerEna(1);
 		else
 		buzzerEna(0);
+	}
+	else{
+		buzzerAltitudeDiff(0);
 	}
 	
 
