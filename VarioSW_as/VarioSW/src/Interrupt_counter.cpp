@@ -12,8 +12,8 @@
 #include "Gauge.h"
 
 
+#include <MadgwickAHRS/MadgwickAHRS.h>
 
-#include <MadgwickAHRS.h>
 
 
 
@@ -110,7 +110,8 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 		alt_baro = getAltitude()*100;
 
-		
+		SerialUSB.println(alt_baro);
+
 		//SerialUSB.println(alt_baro);
 
 	}

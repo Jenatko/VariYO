@@ -31,7 +31,7 @@
 
 #include "logger.h"
 
-#include "FlashStorage.h"
+#include "FlashStorage/FlashStorage.h"
 
 
 #define MENUID_TOPMENU 0x01

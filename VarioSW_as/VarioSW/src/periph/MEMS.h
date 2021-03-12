@@ -15,8 +15,7 @@
 #include "Variables.h"
 #include "BMM150_bosch_driver/bmm150.h"
 
-#include "bmm150.h"
-
+//#include "bmm150.h"
 
 #include "Wire.h"
 
