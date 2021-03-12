@@ -6,7 +6,7 @@ Install instructions:
 Optionally, crate and activate a new virtual environment if you dont want to install into system wide python by running
 ```
 python.exe -m venv env
-.env/Scripts/activate
+./env/Scripts/activate
 ```
 
 Then install the package using pip
