@@ -101,10 +101,9 @@ struct enviroData {
 
 
 extern double myRealAltitude;
-extern volatile float altChange, vario_lowpassed;
-extern volatile int counter500ms;
-extern int redraw;
-extern volatile int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor, debugflag;
+extern volatile float altChange, vario_lowpassed_600samples;
+//extern int redraw;
+extern volatile int ax, ay, az, ax_corr, ay_corr, az_corr, gx, gy, gz, ax_avg, ay_avg, az_avg, gx_avg, gy_avg, gz_avg, mx, my, mz, mx_cor, my_cor, mz_cor, axmax, aymax, azmax, gxmax, gymax, gzmax, axmin, aymin, azmin, gxmin, gymin, gzmin, debugflag;
 extern float yaw, pitch, roll;
 extern float a_vertical_imu, alt_filter, vario_filter, alt_baro;
 
@@ -114,9 +113,10 @@ extern struct tm  var_localtime;
 extern time_t  var_takeofftime;
 extern int var_takeoffalt;
 extern float g_meter;
-extern int ground_level;
+extern int ground_level, ground_level2;
 extern int PerformRoutineInWaitWhileBusy;
 extern int position_updated;
+extern int serialDebugVector;
 
 
 extern float ground_level_interpol;
@@ -133,6 +133,10 @@ extern int maxrise10s;
 extern int minsink10s ;
 
 
+//for debugging, can be moved to their proper scope after
+extern int x1y1, x2y1, x1y2, x2y2, alt11, alt12, alt21, alt22;
+extern float fractx, fracty, x1inter, x2inter, interpolation;
+extern float lat_dr, lon_dr;
 
 
 

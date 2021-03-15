@@ -121,8 +121,13 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	}
 	display.display();
 	while(digitalRead(DISP_BUSY));
-	//eepromWrite(0, statVar);
-	statVarFlash.write(statVar);
+	
+				#ifdef USEINTERNALFLASH
+				statVarFlash.write(statVar);
+				#else
+				eepromWrite(0, statVar);
+				#endif
+	
 	USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_ENABLE;
 	//USB->DEVICE.CTRLA.reg &= ~USB_CTRLA_RUNSTDBY;
 	SCB->SCR |= 1 << 2;

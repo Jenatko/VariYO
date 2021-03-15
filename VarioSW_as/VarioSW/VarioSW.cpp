@@ -76,7 +76,10 @@ SdFat SD;
 
 #include "FlashStorage/FlashStorage.h"
 
+
+#ifdef USEINTERNALFLASH
 FlashStorage(statVarFlash, StaticVariables);
+#endif
 
 
 
@@ -102,7 +105,7 @@ void displayUpdate(bool drawall = false){
 
 
 
-	if(ground_level != 0xffff)	statVar.AGLGauge.value = (alt_filter*0.01f) - ground_level;
+	if(ground_level != 0xffff)	statVar.AGLGauge.value = /*(alt_filter*0.01f) -*/ ground_level;
 	else statVar.AGLGauge.value = NAN;
 	
 	
@@ -114,8 +117,11 @@ void displayUpdate(bool drawall = false){
 	statVar.windGauge.value = wind_speed_mps;
 	statVar.windDirGauge.value = wind_direction;
 	
-	statVar.PressureAltGauge.value = getPressureAltitude();
-		statVar.MagHdgGauge.value = yaw;
+	//statVar.PressureAltGauge.value = getPressureAltitude();
+	//laziness debug!!
+	statVar.PressureAltGauge.value = ground_level2;
+	
+	statVar.MagHdgGauge.value = yaw;
 	
 	if(statVar.ena_vector & ENA_TRACKLOG) statVar.flightTimeGauge.value = (rtc.getEpoch() - var_takeofftime)/60;
 	else statVar.flightTimeGauge.value = NAN;
@@ -146,7 +152,6 @@ void displayUpdate(bool drawall = false){
 
 	
 	display.setFont(&FreeMonoBold12pt7b);
-	if(redraw == 2) display.fillRect(80, 15, 6, 6, GxEPD_BLACK);
 	
 	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
 	
@@ -206,15 +211,18 @@ void displayUpdate(bool drawall = false){
 	display.setFont(&FreeMonoBold12pt7b);
 
 
-	redraw = 0;
+	//redraw = 0;
 	
 }
 
 
 void setup() {
+		#ifdef WAITATSETUPFORSERIAL
+		while(!SerialUSB.available());
+		#endif
 	
 	//while(!SerialUSB.available());
-	SerialUSB.println("Starting setup.");
+
 	
 	rtc.begin();
 	rtc.setTime(0, 0, 0);
@@ -278,10 +286,14 @@ void setup() {
 
 	delay(100);   //wait for EEPROM to power-up
 	
-	// Check this
-	//eepromRead(0, statVar);
+
 	
-	statVar = statVarFlash.read();
+	#ifdef USEINTERNALFLASH
+statVar = statVarFlash.read();
+#else
+eepromRead(0, statVar);
+#endif
+	
 	if(statVar.valid == 0) setVariablesDefault();
 
 
@@ -308,72 +320,103 @@ void setup() {
 	
 
 	menu_init();
-	//while(!SerialUSB.available());
+
 
 
 	analogWrite(DAC, statVar.BuzzerVolume);
 	Wire.begin();
 
 
+	#ifdef SERIALDEBUG
 	SerialUSB.println("Setting up display:");
+	#endif
 
 	display.init(0);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  init");
+	#endif
 
 	display.setFont(&FreeMonoBold12pt7b);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  Font");
+	#endif
 
 	display.setTextColor(GxEPD_BLACK);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  Text Color");
+	#endif
 
 	display.fillScreen(GxEPD_WHITE);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  Fill");
+	#endif
+	
 	display.display();
 
 	
 	display.setRotation(0);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  rotation");
+	#endif
 
 	display.display(true);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  display(true)");
+	#endif
 
 	display.setTextWrap(0);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  text warp");
+	#endif
 
 	display.setCursor(10, 20);
 	display.print("display ok");
 	display.display(true);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  display ok");
+	#endif
 
 	display.setCursor(10, 40);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  Check max17055:");
+	#endif
 
 	if(max17055.checkFunct()){
 		max17055.setResistSensor(0.039);
 		max17055.setCapacity(1200);
 		display.print("max17055 ok");
+		#ifdef SERIALDEBUG
 		SerialUSB.println("    max17055 ok");
+		#endif
 		present_devices |= MAX17055_PRESENT;
 		
 	}
 	else{
 		display.print("max17055 NOK");
+		#ifdef SERIALDEBUG
 		SerialUSB.println("    max17055 NOK");
+		#endif
 
 	}
 	display.display(true);
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  End check max17055k");
+	#endif
 
 
 	display.setCursor(10, 60);
 	if(IMU_init()==0){
 		display.print("BMX160 ok");
 		present_devices |= BMX160_PRESENT;
+		#ifdef SERIALDEBUG
 		SerialUSB.println( MAG_init());
+		#endif
 	}
 	else{
 		display.print("BMX160 NOK");
+		#ifdef SERIALDEBUG
 		SerialUSB.println("  BMX160 NOK");
+		#endif
 
 	}
 	//present_devices += BMX160_PRESENT;
@@ -388,60 +431,83 @@ void setup() {
 	}
 	else{
 		display.print("lps33 NOK");
+		#ifdef SERIALDEBUG
 		SerialUSB.println("lps33 NOK");
+		#endif
 	}
 	display.display(true);
 	
 	
 	display.setCursor(10, 100);
 	if(request_si7021() == 0){
-		display.print("  si7021 ok");
+		display.print("si7021 ok");
 		present_devices |= SI7021_PRESENT;
 	}
 	else{
 		display.print("si7021 NOK");
+		#ifdef SERIALDEBUG
 		SerialUSB.println("  si7021 NOK");
+		#endif
 	}
 	display.display(true);
 	
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  SD check:");
+	#endif
 
 	
 	display.setCursor(10, 120);
 	int ahoj;
 	if(digitalRead(SD_DETECT) == 0){
 		display.print("SD present ");
+		#ifdef SERIALDEBUG
 		SerialUSB.println("    SD present ");
+		#endif
 		present_devices |= SD_PRESENT;
 		
 		ahoj = SD.begin(SD_CS, SD_SCK_MHZ(8));
 		display.print(ahoj);
+		#ifdef SERIALDEBUG
 		SerialUSB.println(ahoj);
+		#endif
 	}
 	else{
 		display.print("no SD card");
+		#ifdef SERIALDEBUG
 		SerialUSB.println("    no SD card");
+		#endif
 
 	}
 	pinMode(SD_DETECT, INPUT);
 	display.display(true);
 	
-	display.setCursor(10, 150);
+	display.setCursor(10, 140);
 	
 	display.print("eeprom used:");
-	display.setCursor(10, 170);
+	display.setCursor(10, 160);
 	display.print(sizeof(statVar));
 	display.print("/");
-		display.print(4096/8/sizeof(char));
+	display.print(4096/8/sizeof(char));
+	
 	display.display(true);
+	
+	display.setCursor(10, 180);
+	display.print(__DATE__);
+	display.display(true);
+	
+	
 	
 	
 
 
 	delay(1000);
+	while(!digitalRead(BUTTON_CENTER));
 	
 	
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  Buzzer");
+	#endif
+	
 
 	buzzerInit();
 
@@ -454,23 +520,23 @@ void setup() {
 	
 	//setVariablesDefault();
 
+	#ifdef SERIALDEBUG
 	SerialUSB.println("  kalman filter");
+	#endif
 
-	kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+
+	kalmanFilter3_configure(statVar.zvariance*1.0f, statVar.accelvariance*1000.0f, 1.0f, alt_baro*1.0f, 0.0f , 0.0f);
 	
-	vario_lowpassed = 0;
+	vario_lowpassed_600samples = 0;
 
 	
 	
-	// 	while(!SerialUSB.available());
-	//
-	// 	for(int i = -201; i < 200; i +=50){
-	// 		SerialUSB.print(i);
-	// 		SerialUSB.print(",");
-	// 		alt_agl_debug((float)i/100, 16.500f);
-	// 	}
 
+	#ifdef SERIALDEBUG
 	SerialUSB.println("Setup done.");
+	#endif
+	
+	debugflag = 0;
 
 
 }
@@ -478,17 +544,13 @@ void setup() {
 
 
 void loop() {
-	
-	static int i_random_hash = 0;
-	//SerialUSB.println(i_random_hash++);
+
 
 	while (buttons.getFlag()){
 		switch (buttons.getButtonPressed()){
 			case PRESS:
 			MenuEntry(&topmenu);
 			display.fillScreen(GxEPD_WHITE);
-			//display.fillRect(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, GxEPD_WHITE);
-			//display.display(true);
 
 			displayUpdate(true);
 			display.display();
@@ -522,8 +584,6 @@ void loop() {
 
 
 	if(digitalRead(DISP_BUSY) == 0){
-		//if(redraw){
-		counter500ms = 0;
 		time_t tempTime = rtc.getEpoch();
 		tempTime += 3600 * statVar.TimeZone;
 		var_localtime = *gmtime(&tempTime);
@@ -537,13 +597,6 @@ void loop() {
 	else{
 		delay(10);
 	}
-	
-	
-	
-	
-	
-	
-
 }
 
 

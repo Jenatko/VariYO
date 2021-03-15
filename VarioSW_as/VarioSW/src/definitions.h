@@ -1,6 +1,9 @@
 
 #define PCB_VER14_PLUS
 #define EPAPER_V2
+#define SERIALDEBUG
+//#define WAITATSETUPFORSERIAL
+//#define USEINTERNALFLASH
 
 #ifdef PCB_VER14_PLUS
 #define POWER_ON 1
