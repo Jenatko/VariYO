@@ -43,6 +43,19 @@ SdFile loggerFile;
 
 int sec_old = 0;
 int lat_last, lon_last, filenotpresent;
+int filesize;
+
+// Some HGT files contain 1201 x 1201 points (3 arc/90m resolution)
+#define HGT_DATA_WIDTH_3	1201ul
+
+// Some HGT files contain 3601 x 3601 points (1 arc/30m resolution)
+#define HGT_DATA_WIDTH_1	3601ul
+
+// Some HGT files contain 3601 x 1801 points (1 arc/30m resolution)
+#define HGT_DATA_WIDTH_1_HALF	1801ul
+
+// number of decimal places in int representation of fix
+#define GPS_COORD_MUL 10000000
 
 
 
@@ -79,18 +92,13 @@ void routine(int OnlyReadGPS){
 		digitalWrite(GPS_CS, 1);
 		if(gps.available()){
 			fix = gps.read();
-			//SerialUSB.println(fix.valid.date);
+			
 			if(fix.valid.time){
-				//adjustTime(fix.dateTime);
 				rtc.setTime(fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
 			}
 			if(fix.valid.date){
 				rtc.setDate(fix.dateTime.date, fix.dateTime.month, fix.dateTime.year);
 			}
-			
-
-			//var_update_tracklog = 1;
-			//var_update_wind = 1;
 			
 			if(fix.valid.location)
 			updateGauge(&statVar.speedGauge, fix.speed_kph());
@@ -104,9 +112,24 @@ void routine(int OnlyReadGPS){
 			
 			
 			
-			redraw = 1;
-			counter500ms = 0;
+
 			position_updated = 1;
+			
+			
+			//debug to determine ranges for gyro and accelerometers
+			axmax = 0;
+			axmin = 0;
+			aymax = 0;
+			aymin = 0;
+			azmax = 0;
+			azmin = 0;
+			gxmax = 0;
+			gxmin = 0;
+			gymax = 0;
+			gymin = 0;
+			gzmax = 0;
+			gzmin = 0;
+			
 		}
 		else{
 			position_updated = 0;
@@ -115,13 +138,13 @@ void routine(int OnlyReadGPS){
 
 		//SerialUSB.println("-----------------");
 		//while(SerialUSB.available()) {      // If anything comes in Serial (USB),
-			//SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-			//digitalWrite(GPS_CS, 0);
-			//fn = SerialUSB.read();
-			//gps.handle(SPI.transfer(fn));
-			//SerialUSB.print(fn);
-			//digitalWrite(GPS_CS, 1);
-//
+		//SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+		//digitalWrite(GPS_CS, 0);
+		//fn = SerialUSB.read();
+		//gps.handle(SPI.transfer(fn));
+		//SerialUSB.print(fn);
+		//digitalWrite(GPS_CS, 1);
+		//
 		//}
 		//SerialUSB.println("-----------------");
 		//delay(50);
@@ -129,16 +152,19 @@ void routine(int OnlyReadGPS){
 		
 	}
 	//update display if GPS is off
+	//not needed anymore since display is refreshing as quickly as possible
+	/*
 	else{
 		int sec = rtc.getSeconds();
 		if( sec != sec_old){
-			redraw = 1;
+			//	redraw = 1;
 			sec_old = sec;
-			counter500ms = 0;
+			
 		}
-		
+
 		position_updated = 0;
 	}
+	*/
 
 	if(OnlyReadGPS == 0){
 		if(position_updated){
@@ -152,8 +178,8 @@ void routine(int OnlyReadGPS){
 		if(statVar.ena_vector & ENA_TRACKLOG){
 			if(maxalt < alt_filter) maxalt = alt_filter;
 			if(minalt > alt_filter) minalt = alt_filter;
-			if(maxrise10s < vario_lowpassed) maxrise10s = vario_lowpassed;
-			if(minsink10s > vario_lowpassed) minsink10s = vario_lowpassed;
+			if(maxrise10s < vario_lowpassed_600samples) maxrise10s = vario_lowpassed_600samples;
+			if(minsink10s > vario_lowpassed_600samples) minsink10s = vario_lowpassed_600samples;
 			
 			
 		}
@@ -262,7 +288,7 @@ void update_tracklog(){
 					tracklog.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n");
 					
 					tracklog.println("<gpx version=\"1.1\" creator=\"mojehustevario\">");
-					tracklog.println("        <note>, temperature, humidity, pressure, alt_pres, vario, g_meter, valid_speed, valid_heading, speed, heading, wind speed, wind direction, circle fit a, circle fit b, circle fit r, yaw, pitch, roll, ground level, ground level interpol, valid date, valid time, </note>");
+					tracklog.println("        <note>, temperature, humidity, pressure, alt_filter, vario, g_meter, valid_speed, valid_heading, speed, heading, wind speed, wind direction, circle fit a, circle fit b, circle fit r, yaw, pitch, roll, ground level, ground level interpol, ground_lvl_skydrop, valid date, valid time, axmax, axmin, aymax, aymin, azmax, azmin, gxmax, gxmin, gymax, gymin, gzmax, gzmin, </note>");
 					tracklog.println("  <trk>");
 					tracklog.println("    <trkseg>");
 
@@ -287,6 +313,12 @@ void update_tracklog(){
 					tracklog.println("</ele>");
 					
 					tracklog.print("        <note>,");
+										tracklog.print(fix.latitude(), 6);
+										tracklog.print(",");
+										tracklog.print(fix.longitude(),6);
+										tracklog.print(",");
+										tracklog.print(fix.altitude(), 1);
+										tracklog.print(",");
 					tracklog.print(enviromental_data.temperature*0.01f, 1);
 					tracklog.print(",");
 					tracklog.print(enviromental_data.humidity, 1);
@@ -328,10 +360,63 @@ void update_tracklog(){
 					tracklog.print(",");
 					tracklog.print(ground_level_interpol);
 					tracklog.print(",");
+					tracklog.print(ground_level2);
+					tracklog.print(",");
 					tracklog.print(fix.valid.date);
 					tracklog.print(",");
 					tracklog.print(fix.valid.time);
 					tracklog.print(",");
+					tracklog.print(axmax);
+					tracklog.print(",");
+					tracklog.print(axmin);
+					tracklog.print(",");
+					tracklog.print(aymax);
+					tracklog.print(",");
+					tracklog.print(aymin);
+					tracklog.print(",");
+					tracklog.print(azmax);
+					tracklog.print(",");
+					tracklog.print(azmin);
+					tracklog.print(",");
+					
+					tracklog.print(gxmax);
+					tracklog.print(",");
+					tracklog.print(gxmin);
+					tracklog.print(",");
+					tracklog.print(gymax);
+					tracklog.print(",");
+					tracklog.print(gymin);
+					tracklog.print(",");
+					tracklog.print(gzmax);
+					tracklog.print(",");
+					tracklog.print(gzmin);
+					tracklog.print(",");
+					tracklog.print(x1y1);
+					tracklog.print(",");
+					tracklog.print(x2y1);
+					tracklog.print(",");
+					tracklog.print(x1y2);
+					tracklog.print(",");
+					tracklog.print(x2y2);
+					tracklog.print(",");
+					tracklog.print(alt11);
+					tracklog.print(",");
+					 tracklog.print(alt12);
+					 tracklog.print(",");
+					 tracklog.print( alt21);
+					  tracklog.print(",");
+					  tracklog.print( alt22);
+					   tracklog.print(",");
+					   					 tracklog.print( fractx);
+					   					 tracklog.print(",");
+					   					 tracklog.print( fracty);
+					   					 tracklog.print(",");
+																   					 tracklog.print( lat_dr);
+																   					 tracklog.print(",");
+																   					 tracklog.print( lon_dr);
+																   					 tracklog.print(",");
+					
+
 					
 					tracklog.println("</note>");
 					
@@ -444,12 +529,15 @@ void alt_agl(){
 	unsigned long time_b;
 	
 	if(fix.valid.location && (present_devices & SD_PRESENT)){
-		int int_lat = (int)fix_lat;
-		int int_lon = (int)fix_lon;
+		int int_lat = fix.latitudeL()/GPS_COORD_MUL;
+		int int_lon = fix.longitudeL()/GPS_COORD_MUL;
 
 		
-		int x1y1, x2y1, x1y2, x2y2, x1, x2, y1, y2;
-		float fractx, fracty, x1inter, x2inter, interpolation;
+	//	int x1y1, x2y1, x1y2, x2y2;
+	//int alt11, alt12, alt21, alt22;		
+	int x1, x2, y1, y2;
+
+		//float fractx, fracty, x1inter, x2inter, interpolation;
 		
 		
 		x1 = floor(((float)fix_lon - int_lon)*1200.0f);
@@ -469,8 +557,6 @@ void alt_agl(){
 		fractx = (((float)fix_lon - int_lon)*1200.0f) - x1;
 		fracty = (1200.0f-((float)fix_lat - int_lat)*1200.0f) - y1;
 		
-
-
 		
 		
 		float temp_lat  = round(1201.0f-((float)fix_lat - int_lat)*1200.0f);
@@ -482,7 +568,7 @@ void alt_agl(){
 		
 
 		
-		char cesta_char2[20];
+		
 		
 
 
@@ -495,14 +581,15 @@ void alt_agl(){
 			if(HeightData.isOpen())	HeightData.close();
 			if((int_lat != lat_last) || (int_lon != lon_last)) filenotpresent == 0;
 			if(filenotpresent == 0){
+				char cesta_char2[20];
 				lat_last = int_lat;
 				lon_last = int_lon;
 				
 				
 				String cesta = ("/HGT/");
-				if(fix.latitude() < 0){
+				if(fix.latitudeL() < 0){
 					cesta.concat("S");
-					int_lat--;
+					int_lat++;
 				}
 				else{
 					cesta.concat("N");
@@ -512,9 +599,9 @@ void alt_agl(){
 				}
 				cesta.concat(String(abs(int_lat)));
 
-				if(fix.longitude() < 0){
+				if(fix.longitudeL() < 0){
 					cesta.concat("W");
-					int_lon--;
+					int_lon++;
 				}
 				else{
 					cesta.concat("E");
@@ -532,12 +619,14 @@ void alt_agl(){
 				HeightData.open(cesta_char2, O_READ);
 				time_b = micros();
 				if(!HeightData.isOpen()) filenotpresent = 1;
+				filesize = HeightData.fileSize();
 			}
 			
 		}
 
 		
 		if(HeightData.isOpen()){
+			
 			ground_level = getAGLfromFile(row, col);
 			x1y1 =  getAGLfromFile(y1, x1);
 			x2y1 =  getAGLfromFile(y1, x2);
@@ -551,6 +640,93 @@ void alt_agl(){
 			ground_level_interpol = interpolation;
 			
 			
+			
+			//skydrop algorithm
+			
+			int32_t lon = fix.longitudeL();
+			int32_t lat = fix.latitudeL();
+			uint16_t num_points_x;
+			uint16_t num_points_y;
+			int16_t alt;
+			
+			if (lon < 0)
+			{
+				// we do not care above degree, only minutes are important
+				// reverse the value, because file goes in opposite direction.
+				lon = (GPS_COORD_MUL - 1) + (lon % GPS_COORD_MUL);   // lon is negative!
+			}
+			if (lat < 0)
+			{
+				// we do not care above degree, only minutes are important
+				// reverse the value, because file goes in opposite direction.
+				lat = (GPS_COORD_MUL - 1) + (lat % GPS_COORD_MUL);   // lat is negative!
+			}
+			switch (filesize)
+			{
+				case HGT_DATA_WIDTH_3 * HGT_DATA_WIDTH_3 * 2:
+				num_points_x = num_points_y = HGT_DATA_WIDTH_3;
+				break;
+				case HGT_DATA_WIDTH_1 * HGT_DATA_WIDTH_1 * 2:
+				num_points_x = num_points_y = HGT_DATA_WIDTH_1;
+				break;
+				case HGT_DATA_WIDTH_1 * HGT_DATA_WIDTH_1_HALF * 2:
+				num_points_x = HGT_DATA_WIDTH_1_HALF;
+				num_points_y = HGT_DATA_WIDTH_1;
+				break;
+				default:
+				ground_level = 0xffff;
+			}
+
+			// "-2" is, because a file has a overlap of 1 point to the next file.
+			uint32_t coord_div_x = GPS_COORD_MUL / (num_points_x - 1);
+			uint32_t coord_div_y = GPS_COORD_MUL / (num_points_y - 1);
+			uint16_t y = (lat % GPS_COORD_MUL) / coord_div_y;
+			uint16_t x = (lon % GPS_COORD_MUL) / coord_div_x;
+
+			uint16_t rd;
+			uint8_t tmp[4];
+			
+			
+
+
+			//seek to position
+			uint32_t pos = ((uint32_t) x + num_points_x * (uint32_t) ((num_points_y - y) - 1)) * 2;
+			
+			HeightData.seekSet(0);
+			HeightData.seekCur(pos);
+			int lsbs = HeightData.read();
+			int msbs = HeightData.read();
+			alt11 = (lsbs << 8)+msbs;
+			lsbs = HeightData.read();
+			msbs = HeightData.read();
+			alt21 = (lsbs << 8)+msbs;
+			
+
+			//seek to opposite position
+			pos -= num_points_x * 2;
+
+			
+			HeightData.seekSet(0);
+			HeightData.seekCur(pos);
+			lsbs = HeightData.read();
+			msbs = HeightData.read();
+			alt12 = (lsbs << 8)+msbs;
+			lsbs = HeightData.read();
+			msbs = HeightData.read();
+			alt22 = (lsbs << 8)+msbs;
+
+
+			//get point displacement
+			/*float*/ lat_dr = ((lat % GPS_COORD_MUL) % coord_div_y) / float(coord_div_y);
+			/*float*/ lon_dr = ((lon % GPS_COORD_MUL) % coord_div_x) / float(coord_div_x);
+
+			//compute height by using bilinear interpolation
+			float alt1 = alt11 + float(alt12 - alt11) * lat_dr;
+			float alt2 = alt21 + float(alt22 - alt21) * lat_dr;
+
+			ground_level2 = alt1 + float(alt2 - alt1) * lon_dr;
+
+
 
 		}
 		else ground_level = 0xffff; //valid location but missing HGT file

@@ -101,7 +101,7 @@ int8_t IMU_init(){
 
 	/* Select the Output data rate, range of Gyroscope sensor */
 	imu.gyro_cfg.odr = BMI160_GYRO_ODR_100HZ;
-	imu.gyro_cfg.range = BMI160_GYRO_RANGE_250_DPS;
+	imu.gyro_cfg.range = BMI160_GYRO_RANGE_1000_DPS;
 	imu.gyro_cfg.bw = BMI160_GYRO_BW_NORMAL_MODE;
 
 	/* Select the power mode of Gyroscope sensor */

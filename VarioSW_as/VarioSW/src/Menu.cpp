@@ -106,9 +106,10 @@ int  menu2_id = MENUID_VARIO;
 #define MENUITEM_DEBUG_SW_RESET 8
 #define MENUITEM_DEBUG_DEBUGFLAG 9
 #define MENUITEM_DEBUG_CLEARFLAG 10
+#define MENUITEM_DEBUG_DEBUGVECTOR 11
 
 
-char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel", "BT passthr", "SW reset", "debugflag", "clearflag"};
+char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel", "BT passthr", "SW reset", "debugflag", "clearflag", "debugvector"};
 char menu3_name[15] = "Debug";
 int  menu3_id = MENUID_DEBUG;
 
@@ -635,8 +636,12 @@ void menuSelector(menu *menuPointer, int selected) {
 			MenuEntry(&datetime_menu);
 		}
 		if (selected == MENUITEM_SETTINGS_SAVE_EEPROM){
-			statVarFlash.write(statVar);
-			//eepromWrite(0, statVar);
+			
+				#ifdef USEINTERNALFLASH
+				statVarFlash.write(statVar);
+				#else
+				eepromWrite(0, statVar);
+				#endif
 		}
 		else if (selected == MENUITEM_SETTINGS_SET_DEFAULT){
 			setVariablesDefault();
@@ -713,11 +718,11 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		else if (selected == MENUITEM_VARIO_ZVAR){
 			statVar.zvariance = numpad(statVar.zvariance);
-			kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+			kalmanFilter3_configure(statVar.zvariance*1.0f, statVar.accelvariance*1000.0f, 1.0f, alt_baro*1.0f, 0.0f , 0.0f);
 		}
 		else if (selected == MENUITEM_VARIO_ACCELVAR){
 			statVar.accelvariance = numpad(statVar.accelvariance);
-			kalmanFilter3_configure(statVar.zvariance, statVar.accelvariance, 1.0, alt_baro, 0.0 , 0.0);
+			kalmanFilter3_configure(statVar.zvariance*1.0f, statVar.accelvariance*1000.0f, 1.0f, alt_baro*1.0f, 0.0f , 0.0f);
 		}
 		
 
@@ -786,10 +791,14 @@ void menuSelector(menu *menuPointer, int selected) {
 			buttons.getButtonPressed();
 
 		}
-				else if (selected == MENUITEM_DEBUG_CLEARFLAG){
-					debugflag = 0;
+		else if (selected == MENUITEM_DEBUG_CLEARFLAG){
+			debugflag = 0;
 
-				}
+		}
+		else if (selected == MENUITEM_DEBUG_DEBUGVECTOR){
+			serialDebugVector = numpad(0);
+
+		}
 
 	}
 	//datetime menu

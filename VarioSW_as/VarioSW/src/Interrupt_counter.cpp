@@ -102,17 +102,11 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 {
 	SPI_IRQ.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));
 	if(present_devices & LPS33_PRESENT){
-		//digitalWrite(SRAM_CS, 0);
+
 		baro_readPressure();
-		
-		//digitalWrite(SRAM_CS, 1);
-		
-		
 		alt_baro = getAltitude()*100;
 
-		SerialUSB.println(alt_baro);
 
-		//SerialUSB.println(alt_baro);
 
 	}
 
@@ -143,49 +137,81 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			mz_cor /= statVar.gainErrorMagZ;
 			
 			
-			
+			/*
 			ax_avg = ((ax_avg<<5)-ax_avg+ax)>>5;
 			ay_avg = ((ay_avg<<5)- ay_avg+ay)>>5;
 			az_avg = ((az_avg<<5)- az_avg+az)>>5;
 			gx_avg = ((gx_avg<<5)- gx_avg+gx)>>5;
 			gy_avg = ((gy_avg<<5)- gy_avg +gy)>>5;
 			gz_avg = ((gz_avg<<5)- gz_avg+gz)>>5;
+			*/
+			
+			if(axmax<ax) 	axmax = ax;
+			if(aymax<ay) 	aymax = ay;
+			if(azmax<az) 	azmax = az;
+			
+			if(axmin>ax) 	axmin = ax;
+			if(aymin>ay) 	axmin = ay;
+			if(axmin>az) 	axmin = az;
+			
+			if(gxmax<gx) 	gxmax = gx;
+			if(gymax<gy) 	gymax = gy;
+			if(gzmax<gz) 	gzmax = gz;
+			
+			if(gxmin>gx) 	gxmin = gx;
+			if(gymin>gy) 	gymin = gy;
+			if(gxmin>gz) 	gzmin = gz;
 			
 			//Mahony_filter.updateIMU(gx/131.2f, gy/131.2f, gz/131.2f, ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
 			//	digitalWrite(SRAM_CS, 0);
-			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*DEG2RAD), gy*(1/131.2f*DEG2RAD), gz*(1/131.2f*DEG2RAD), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
+			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*DEG2RAD*4.0f), gy*(1/131.2f*DEG2RAD*4.0f), gz*(1/131.2f*DEG2RAD*4.0f), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
 			//	digitalWrite(SRAM_CS, 1);
 			a_vertical_imu = Madgwick_filter.getVertical(ax_corr/IMU_BIT_PER_G, ay_corr/IMU_BIT_PER_G, az_corr/IMU_BIT_PER_G);
-			kalmanFilter3_update(alt_baro, (a_vertical_imu*1.0f-1.0f)*980, (float)1/100.0f, &alt_filter, &vario_filter);
-			 vario_lowpassed = (vario_lowpassed * (599)+ vario_filter)*(1.0f/600.0f);
+			kalmanFilter3_update(alt_baro, (a_vertical_imu*1.0f-1.0f)*980.0f, (float)1/100.0f, &alt_filter, &vario_filter);
+			vario_lowpassed_600samples = (vario_lowpassed_600samples * (599)+ vario_filter)*(1.0f/600.0f);
 
 
 		}
-		/*
-			SerialUSB.print(alt_baro);
-			SerialUSB.print(",");*/
-				//SerialUSB.println(a_vertical_imu, 3);
-			/*	SerialUSB.print(",");
-			*/
-	//	SerialUSB.println(vario_filter);
-
-		
-
-		
-		//yaw = Mahony_filter.getYaw();
-		//pitch = Mahony_filter.getPitch();
-		//roll = Mahony_filter.getRoll();
-
-
-		
-		//	digitalWrite(SRAM_CS, 1);
-		
-		//a_vertical_imu = az/16384.0*cos(roll*0.01745329)*cos(pitch*0.01745329) - ax/16384.0*sin(pitch*0.01745329) + ay/16384.0*sin(roll*0.01745329)*cos(pitch*0.01745329);
-		
-		
+			
 		
 	}
 	SPI_IRQ.endTransaction();
+	
+	#ifdef SERIALDEBUG
+	if(serialDebugVector){
+		
+		int moredata = 0;
+		int mask = 1;
+		for(int i = 0; i < 8; i++){
+			if((mask << i) & serialDebugVector){
+				moredata++;
+			}
+		}
+		if(moredata > 1)
+		moredata = 1;
+		else
+		moredata = 0;
+		
+
+		
+		if(serialDebugVector & 1)	SerialUSB.print(alt_baro);
+		if(moredata)				SerialUSB.print(",");
+		if(serialDebugVector & 2)	SerialUSB.print(a_vertical_imu);
+		if(moredata)				SerialUSB.print(",");
+		if(serialDebugVector & 4)	SerialUSB.print(alt_filter);
+		if(moredata)				SerialUSB.print(",");
+		if(serialDebugVector & 8)	SerialUSB.print(vario_filter);
+		if(moredata)				SerialUSB.print(",");
+		if(serialDebugVector & 16)	SerialUSB.print(gy);
+		if(moredata)				SerialUSB.print(",");
+		if(serialDebugVector & 32)	SerialUSB.print(az);
+		if(moredata)				SerialUSB.print(",");
+
+		SerialUSB.print("\r\n");
+	}
+	
+
+	#endif
 	
 	updateGauge(&statVar.varioGauge, vario_filter*0.01f);
 	updateGauge(&statVar.varioAvgGauge, vario_filter*0.01f);
@@ -235,11 +261,6 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	
 	
 	counter_incremented_every_ISR++;
-	counter500ms++;
-	if (counter500ms > 30){
-		 redraw = 2;
-	//counter500ms = 0;	
-	}
 
 	if(counter_incremented_every_ISR%20 == 0){
 		//Mag_print_angles();
