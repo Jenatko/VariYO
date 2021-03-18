@@ -11,6 +11,7 @@
 
 #include "lib/CircleFit/circle.h"
 #include "lib/CircleFit/data.h"
+#include "definitions.h"
 
 
 #ifndef VARIABLES_H_
@@ -21,20 +22,15 @@
 
 
 typedef struct Gauge{
-	float value;
-	uint16_t settings;
-	//uint8_t decimals;
-	uint8_t size_X;
-	uint8_t size_Y;
-	uint8_t offset_X;
-	uint8_t offset_Y;
-	//uint8_t frame;
-	//uint8_t font;
-	//uint8_t ena;
-	//uint8_t showPlusSign;
-	char name_shown[10];
-	char units[4];
-	uint16_t averaging;
+	float value[NUM_DESKTOPS];
+	uint16_t settings[NUM_DESKTOPS];
+	uint8_t size_X[NUM_DESKTOPS];
+	uint8_t size_Y[NUM_DESKTOPS];
+	uint8_t offset_X[NUM_DESKTOPS];
+	uint8_t offset_Y[NUM_DESKTOPS];
+	char name_shown[NUM_DESKTOPS][10];
+	char units[NUM_DESKTOPS][4];
+	uint16_t averaging[NUM_DESKTOPS];
 } Gauge;
 
 
@@ -98,7 +94,7 @@ struct enviroData {
 };
 
 
-
+extern int active_desktop ;
 
 extern double myRealAltitude;
 extern volatile float altChange, vario_lowpassed_600samples;

@@ -99,7 +99,7 @@ void counterInit() { // Set up the generic clock (GCLK4) used to clock timers
 
 
 void TC4_Handler()                              // Interrupt Service Routine (ISR) for timer TC4
-{
+{	
 	SPI_IRQ.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));
 	if(present_devices & LPS33_PRESENT){
 
@@ -161,8 +161,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 			if(gxmin>gx) 	gxmin = gx;
 			if(gymin>gy) 	gymin = gy;
 			if(gxmin>gz) 	gzmin = gz;
-			
-			//Mahony_filter.updateIMU(gx/131.2f, gy/131.2f, gz/131.2f, ax_corr/16384.0f, ay_corr/16384.0f, az_corr/16384.0f);
+
 			//	digitalWrite(SRAM_CS, 0);
 			Madgwick_filter.MadgwickAHRSupdate(gx*(1/131.2f*DEG2RAD*4.0f), gy*(1/131.2f*DEG2RAD*4.0f), gz*(1/131.2f*DEG2RAD*4.0f), ax_corr/*/16384.0f*/, ay_corr/*/16384.0f*/, az_corr/*/16384.0f*/, (float)mx_cor, (float)my_cor, (float)mz_cor);
 			//	digitalWrite(SRAM_CS, 1);
@@ -212,7 +211,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 	
 
 	#endif
-	
+
 	updateGauge(&statVar.varioGauge, vario_filter*0.01f);
 	updateGauge(&statVar.varioAvgGauge, vario_filter*0.01f);
 	if (fix.speed_kph() != 0)
@@ -266,8 +265,6 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		//Mag_print_angles();
 		//	print_mag();
 	}
-
-
 	
 	//clear interrupt flags
 	REG_TC4_INTFLAG = TC_INTFLAG_MC1;

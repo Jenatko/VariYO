@@ -1,9 +1,10 @@
 
 #define PCB_VER14_PLUS
 #define EPAPER_V2
-#define SERIALDEBUG
+//#define SERIALDEBUG
 //#define WAITATSETUPFORSERIAL
-//#define USEINTERNALFLASH
+//#define USEEEPROM
+#define NUM_DESKTOPS 3
 
 #ifdef PCB_VER14_PLUS
 #define POWER_ON 1

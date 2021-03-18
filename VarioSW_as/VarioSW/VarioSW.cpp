@@ -44,6 +44,9 @@
 
 #include "Gauge.h"
 
+#include "statvar.h"
+
+
 
 #define ENABLE_GxEPD2_GFX 0
 
@@ -77,9 +80,7 @@ SdFat SD;
 #include "FlashStorage/FlashStorage.h"
 
 
-#ifdef USEINTERNALFLASH
-FlashStorage(statVarFlash, StaticVariables);
-#endif
+
 
 
 
@@ -93,6 +94,7 @@ volatile int counter_incremented_every_ISR = 0;
 void draw_antenna(int x_oirg, int y_orig);
 void draw_floppy(int x_orig, int y_orig);
 
+int full_refresh = 0;
 
 
 
@@ -105,38 +107,39 @@ void displayUpdate(bool drawall = false){
 
 
 
-	if(ground_level != 0xffff)	statVar.AGLGauge.value = /*(alt_filter*0.01f) -*/ ground_level;
-	else statVar.AGLGauge.value = NAN;
+	if(ground_level != 0xffff)	statVar.AGLGauge.value[active_desktop] = /*(alt_filter*0.01f) -*/ ground_level;
+	else statVar.AGLGauge.value[active_desktop] = NAN;
 	
 	
-	statVar.altitudeGauge.value = (alt_filter*0.01f);
-	statVar.tempGauge.value = enviromental_data.temperature*0.01f;
-	statVar.humidGauge.value = enviromental_data.humidity;
+	statVar.altitudeGauge.value[active_desktop] = (alt_filter*0.01f);
+	statVar.tempGauge.value[active_desktop] = enviromental_data.temperature*0.01f;
+	statVar.humidGauge.value[active_desktop] = enviromental_data.humidity;
 	
 	
-	statVar.windGauge.value = wind_speed_mps;
-	statVar.windDirGauge.value = wind_direction;
+	statVar.windGauge.value[active_desktop] = wind_speed_mps;
+	statVar.windDirGauge.value[active_desktop] = wind_direction;
 	
-	//statVar.PressureAltGauge.value = getPressureAltitude();
-	//laziness debug!!
-	statVar.PressureAltGauge.value = ground_level2;
+	statVar.PressureAltGauge.value[active_desktop] = getPressureAltitude();
+
 	
-	statVar.MagHdgGauge.value = yaw;
+	statVar.MagHdgGauge.value[active_desktop] = yaw;
 	
-	if(statVar.ena_vector & ENA_TRACKLOG) statVar.flightTimeGauge.value = (rtc.getEpoch() - var_takeofftime)/60;
-	else statVar.flightTimeGauge.value = NAN;
+	if(statVar.ena_vector & ENA_TRACKLOG) statVar.flightTimeGauge.value[active_desktop] = (rtc.getEpoch() - var_takeofftime)/60;
+	else statVar.flightTimeGauge.value[active_desktop] = NAN;
 	//statVar.altAboveTakeoffGauge = ;
 	//statVar.glideRatioGauge = ;
-	if(statVar.ena_vector & ENA_TRACKLOG) statVar.altAboveTakeoffGauge.value = alt_filter*0.01f - var_takeoffalt*0.01f;
-	else statVar.altAboveTakeoffGauge.value = NAN;
+	if(statVar.ena_vector & ENA_TRACKLOG) statVar.altAboveTakeoffGauge.value[active_desktop] = alt_filter*0.01f - var_takeoffalt*0.01f;
+	else statVar.altAboveTakeoffGauge.value[active_desktop] = NAN;
 
 	digitalWrite(SRAM_CS, 0);
 	
-	if(drawall)
-	printGauges();
+	if(full_refresh){
+		printGauges();
+	}
 	else
 	printGauges_values();
 	
+
 	
 	digitalWrite(SRAM_CS, 1);
 	
@@ -156,8 +159,12 @@ void displayUpdate(bool drawall = false){
 	//	display.updateWindow(0, 0, GxEPD_WIDTH, GxEPD_HEIGHT, true);
 	
 	//display.partiallyUpdateScreen();
+	if(full_refresh)	display.display();
 
-	display.display(true);
+	else 	display.display(true);
+
+	
+	full_refresh = 0;
 
 	
 	display.fillScreen(GxEPD_WHITE);
@@ -217,9 +224,9 @@ void displayUpdate(bool drawall = false){
 
 
 void setup() {
-		#ifdef WAITATSETUPFORSERIAL
-		while(!SerialUSB.available());
-		#endif
+	#ifdef WAITATSETUPFORSERIAL
+	while(!SerialUSB.available());
+	#endif
 	
 	//while(!SerialUSB.available());
 
@@ -288,15 +295,10 @@ void setup() {
 	
 
 	
-	#ifdef USEINTERNALFLASH
-statVar = statVarFlash.read();
-#else
-eepromRead(0, statVar);
-#endif
+
+
+
 	
-	if(statVar.valid == 0) setVariablesDefault();
-
-
 	//BT_off();
 
 	
@@ -470,6 +472,7 @@ eepromRead(0, statVar);
 		#ifdef SERIALDEBUG
 		SerialUSB.println(ahoj);
 		#endif
+		
 	}
 	else{
 		display.print("no SD card");
@@ -480,6 +483,9 @@ eepromRead(0, statVar);
 	}
 	pinMode(SD_DETECT, INPUT);
 	display.display(true);
+	
+load_statvar();
+
 	
 	display.setCursor(10, 140);
 	
@@ -552,8 +558,9 @@ void loop() {
 			MenuEntry(&topmenu);
 			display.fillScreen(GxEPD_WHITE);
 
-			displayUpdate(true);
-			display.display();
+			//	displayUpdate(true);
+			//	display.display();
+			full_refresh = 1;
 			break;
 			
 			case DOWN:
@@ -571,6 +578,21 @@ void loop() {
 				statVar.BuzzerVolume = 255;
 				
 			}
+			break;
+			case LEFT:
+			active_desktop--;
+			if(active_desktop<0){
+				active_desktop = NUM_DESKTOPS - 1;
+				
+			}
+			break;
+			case RIGHT:
+			active_desktop++;
+			if(active_desktop>NUM_DESKTOPS-1){
+				active_desktop = 0;
+				
+			}
+			
 			buzzerSetVolume(statVar.BuzzerVolume);
 			break;
 		}

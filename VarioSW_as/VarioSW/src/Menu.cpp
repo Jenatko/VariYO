@@ -31,7 +31,9 @@
 
 #include "logger.h"
 
-#include "FlashStorage/FlashStorage.h"
+
+
+#include "statvar.h"
 
 
 #define MENUID_TOPMENU 0x01
@@ -637,11 +639,7 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		if (selected == MENUITEM_SETTINGS_SAVE_EEPROM){
 			
-				#ifdef USEINTERNALFLASH
-				statVarFlash.write(statVar);
-				#else
-				eepromWrite(0, statVar);
-				#endif
+			save_statvar();
 		}
 		else if (selected == MENUITEM_SETTINGS_SET_DEFAULT){
 			setVariablesDefault();
@@ -894,14 +892,14 @@ void menuSelector(menu *menuPointer, int selected) {
 	if (menuPointer->menu_id == MENUID_GAUGE) {
 		//enable
 		if (selected == MENUITEM_GAUGE_ENABLE){
-			if ((gaugepointer->settings & GAUGE_ENA) == 0)
+			if ((gaugepointer->settings[active_desktop] & GAUGE_ENA) == 0)
 			{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_ENABLE], "Enabled", 15);
-				gaugepointer->settings  |= GAUGE_ENA;
+				gaugepointer->settings[active_desktop]  |= GAUGE_ENA;
 			}
 			else{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_ENABLE], "Disabled", 15);
-				gaugepointer->settings &= ~GAUGE_ENA;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_ENA;
 			}
 
 		}
@@ -916,35 +914,35 @@ void menuSelector(menu *menuPointer, int selected) {
 					switch(buttons.getButtonPressed())
 					{
 						case UP:
-						gaugepointer->offset_Y -=5;
-						if (gaugepointer->offset_Y >220)
+						gaugepointer->offset_Y[active_desktop] -=5;
+						if (gaugepointer->offset_Y[active_desktop] >220)
 						{
-							gaugepointer->offset_Y =0;
+							gaugepointer->offset_Y[active_desktop] =0;
 						}
 						
 						break;
 
 						case DOWN:
-						gaugepointer->offset_Y +=5;
-						if (gaugepointer->offset_Y >200)
+						gaugepointer->offset_Y[active_desktop] +=5;
+						if (gaugepointer->offset_Y[active_desktop] >200)
 						{
-							gaugepointer->offset_Y =200;
+							gaugepointer->offset_Y[active_desktop] =200;
 						}
 						break;
 
 						case LEFT:
-						gaugepointer->offset_X -=5;
-						if (gaugepointer->offset_X >220)
+						gaugepointer->offset_X[active_desktop] -=5;
+						if (gaugepointer->offset_X[active_desktop] >220)
 						{
-							gaugepointer->offset_X =0;
+							gaugepointer->offset_X[active_desktop] =0;
 						}
 						break;
 
 						case RIGHT:
-						gaugepointer->offset_X +=5;
-						if (gaugepointer->offset_X >200)
+						gaugepointer->offset_X[active_desktop] +=5;
+						if (gaugepointer->offset_X[active_desktop] >200)
 						{
-							gaugepointer->offset_X =200;
+							gaugepointer->offset_X[active_desktop] =200;
 						}
 						break;
 						case PRESS:
@@ -971,35 +969,35 @@ void menuSelector(menu *menuPointer, int selected) {
 					switch(buttons.getButtonPressed())
 					{
 						case UP:
-						gaugepointer->size_Y -=5;
-						if (gaugepointer->size_Y <0)
+						gaugepointer->size_Y[active_desktop] -=5;
+						if (gaugepointer->size_Y[active_desktop] <0)
 						{
-							gaugepointer->size_Y =0;
+							gaugepointer->size_Y[active_desktop] =0;
 						}
 						
 						break;
 
 						case DOWN:
-						gaugepointer->size_Y +=5;
-						if (gaugepointer->size_Y >200)
+						gaugepointer->size_Y[active_desktop] +=5;
+						if (gaugepointer->size_Y[active_desktop] >200)
 						{
-							gaugepointer->size_Y =200;
+							gaugepointer->size_Y[active_desktop] =200;
 						}
 						break;
 
 						case LEFT:
-						gaugepointer->size_X -=5;
-						if (gaugepointer->size_X <0)
+						gaugepointer->size_X[active_desktop] -=5;
+						if (gaugepointer->size_X[active_desktop] <0)
 						{
-							gaugepointer->size_X =0;
+							gaugepointer->size_X[active_desktop] =0;
 						}
 						break;
 
 						case RIGHT:
-						gaugepointer->size_X +=5;
-						if (gaugepointer->size_X >200)
+						gaugepointer->size_X[active_desktop] +=5;
+						if (gaugepointer->size_X[active_desktop] >200)
 						{
-							gaugepointer->size_X =200;
+							gaugepointer->size_X[active_desktop] =200;
 						}
 						break;
 						case PRESS:
@@ -1017,31 +1015,31 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		//frame
 		else if (selected == MENUITEM_GAUGE_FRAME){
-			if (gaugepointer->settings & GAUGE_FRAME)
+			if (gaugepointer->settings[active_desktop] & GAUGE_FRAME)
 			{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FRAME], "Frame off", 15);
-				gaugepointer->settings &= ~GAUGE_FRAME;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_FRAME;
 			}
 			else{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FRAME], "Frame on", 15);
-				gaugepointer->settings |= GAUGE_FRAME;
+				gaugepointer->settings[active_desktop] |= GAUGE_FRAME;
 			}
 
 		}
 		//decimals
 		else if (selected == MENUITEM_GAUGE_DECIMALS){
-			int number = numpad((gaugepointer->settings & GAUGE_DIGITS_MASK)>>2);
+			int number = numpad((gaugepointer->settings[active_desktop] & GAUGE_DIGITS_MASK)>>2);
 			if(number > 7)
 			number = 7;
 			else if(number < 0)
 			number = 0;
-			gaugepointer->settings &= ~GAUGE_DIGITS_MASK;
-			gaugepointer->settings |= 4*number;
+			gaugepointer->settings[active_desktop] &= ~GAUGE_DIGITS_MASK;
+			gaugepointer->settings[active_desktop] |= 4*number;
 
 		}
 		//name
 		else if (selected == MENUITEM_GAUGE_NAME){
-			keypad(gaugepointer->name_shown, 10);
+			keypad(gaugepointer->name_shown[active_desktop], 10);
 
 		}
 		
@@ -1050,67 +1048,67 @@ void menuSelector(menu *menuPointer, int selected) {
 			
 			//strncpy(gaugepointer->units, keypad(3), 4);
 
-			keypad(gaugepointer->units, 3);
+			keypad(gaugepointer->units[active_desktop], 3);
 
 
 		}
 		//font
 		else if (selected == MENUITEM_GAUGE_FONT){
-			if ((gaugepointer->settings & GAUGE_FONT_MASK) == GAUGE_FONT_3)  //12 18 24
+			if ((gaugepointer->settings[active_desktop] & GAUGE_FONT_MASK) == GAUGE_FONT_3)  //12 18 24
 			{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 9", 15);
-				gaugepointer->settings &= ~GAUGE_FONT_MASK;
-				gaugepointer->settings |= GAUGE_FONT_0;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings[active_desktop] |= GAUGE_FONT_0;
 			}
-			else if((gaugepointer->settings & GAUGE_FONT_MASK) == GAUGE_FONT_0){
+			else if((gaugepointer->settings[active_desktop] & GAUGE_FONT_MASK) == GAUGE_FONT_0){
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 12", 15);
-				gaugepointer->settings &= ~GAUGE_FONT_MASK;
-				gaugepointer->settings |= GAUGE_FONT_1;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings[active_desktop] |= GAUGE_FONT_1;
 			}
-			else if((gaugepointer->settings & GAUGE_FONT_MASK) == GAUGE_FONT_1){
+			else if((gaugepointer->settings[active_desktop] & GAUGE_FONT_MASK) == GAUGE_FONT_1){
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 18", 15);
-				gaugepointer->settings &= ~GAUGE_FONT_MASK;
-				gaugepointer->settings |= GAUGE_FONT_2;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings[active_desktop] |= GAUGE_FONT_2;
 			}
 			else{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 24", 15);
-				gaugepointer->settings &= ~GAUGE_FONT_MASK;
-				gaugepointer->settings |= GAUGE_FONT_3;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_FONT_MASK;
+				gaugepointer->settings[active_desktop] |= GAUGE_FONT_3;
 			}
 
 
 		}
 		//showing plus sign
 		else if (selected == MENUITEM_GAUGE_PLUS_SIGN){
-			if (gaugepointer->settings & GAUGE_SHOW_PLUS_SIGN)
+			if (gaugepointer->settings[active_desktop] & GAUGE_SHOW_PLUS_SIGN)
 			{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "not showing +", 15);
-				gaugepointer->settings &= ~GAUGE_SHOW_PLUS_SIGN;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_SHOW_PLUS_SIGN;
 			}
 			else{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "showing + sgn", 15);
-				gaugepointer->settings |= GAUGE_SHOW_PLUS_SIGN;
+				gaugepointer->settings[active_desktop] |= GAUGE_SHOW_PLUS_SIGN;
 			}
 
 		}
 		//fixed decimals vs fixed number of digits
 		else if (selected == MENUITEM_GAUGE_FIXED_DECIMALS){
-			if (gaugepointer->settings & GAUGE_VALIDS)
+			if (gaugepointer->settings[active_desktop] & GAUGE_VALIDS)
 			{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FIXED_DECIMALS], "fixed decimal", 15);
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_DECIMALS], "no. decimals", 15);
-				gaugepointer->settings &= ~GAUGE_VALIDS;
+				gaugepointer->settings[active_desktop] &= ~GAUGE_VALIDS;
 			}
 			else{
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_FIXED_DECIMALS], "fixed digits", 15);
 				strncpy(gauge_menu_list[MENUITEM_GAUGE_DECIMALS], "no. digits", 15);
-				gaugepointer->settings |= GAUGE_VALIDS;
+				gaugepointer->settings[active_desktop] |= GAUGE_VALIDS;
 			}
 
 		}
 		
 		else if (selected == MENUITEM_GAUGE_AVERAGING){
-			gaugepointer->averaging = numpad(gaugepointer->averaging);
+			gaugepointer->averaging[active_desktop] = numpad(gaugepointer->averaging[active_desktop]);
 
 		}
 		
@@ -1123,22 +1121,22 @@ void menuSelector(menu *menuPointer, int selected) {
 }
 
 void setGaugeMenu(Gauge *gaugePointer){
-	if (gaugepointer->settings & GAUGE_ENA) strncpy(gauge_menu_list[MENUITEM_GAUGE_ENABLE], "Enabled", 15);
+	if (gaugepointer->settings[active_desktop] & GAUGE_ENA) strncpy(gauge_menu_list[MENUITEM_GAUGE_ENABLE], "Enabled", 15);
 	else strncpy(gauge_menu_list[MENUITEM_GAUGE_ENABLE], "Disabled", 15);
 
-	if (gaugepointer->settings & GAUGE_FRAME) strncpy(gauge_menu_list[MENUITEM_GAUGE_FRAME], "Frame on", 15);
+	if (gaugepointer->settings[active_desktop] & GAUGE_FRAME) strncpy(gauge_menu_list[MENUITEM_GAUGE_FRAME], "Frame on", 15);
 	else strncpy(gauge_menu_list[MENUITEM_GAUGE_FRAME], "Frame off", 15);
 
-	if ((gaugepointer->settings & GAUGE_FONT_MASK) == 0) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 9", 15);
-	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 1) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 12", 15);
-	else if ((gaugepointer->settings & GAUGE_FONT_MASK) == 2) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 18", 15);
+	if ((gaugepointer->settings[active_desktop] & GAUGE_FONT_MASK) == 0) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 9", 15);
+	else if ((gaugepointer->settings[active_desktop] & GAUGE_FONT_MASK) == 1) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 12", 15);
+	else if ((gaugepointer->settings[active_desktop] & GAUGE_FONT_MASK) == 2) strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 18", 15);
 	else strncpy(gauge_menu_list[MENUITEM_GAUGE_FONT], "font size 24", 15);
 	
 
-	if (gaugepointer->settings & GAUGE_SHOW_PLUS_SIGN)	strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "showing + sgn", 15);
+	if (gaugepointer->settings[active_desktop] & GAUGE_SHOW_PLUS_SIGN)	strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "showing + sgn", 15);
 	else strncpy(gauge_menu_list[MENUITEM_GAUGE_PLUS_SIGN], "not showing +", 15);
 	
-	if(gaugepointer->settings & GAUGE_VALIDS){
+	if(gaugepointer->settings[active_desktop] & GAUGE_VALIDS){
 		strncpy(gauge_menu_list[MENUITEM_GAUGE_FIXED_DECIMALS], "fixed digits", 15);
 		strncpy(gauge_menu_list[MENUITEM_GAUGE_DECIMALS], "no. digits", 15);
 	}

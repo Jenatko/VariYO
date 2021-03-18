@@ -155,14 +155,14 @@ void routine(int OnlyReadGPS){
 	//not needed anymore since display is refreshing as quickly as possible
 	/*
 	else{
-		int sec = rtc.getSeconds();
-		if( sec != sec_old){
-			//	redraw = 1;
-			sec_old = sec;
-			
-		}
+	int sec = rtc.getSeconds();
+	if( sec != sec_old){
+	//	redraw = 1;
+	sec_old = sec;
+	
+	}
 
-		position_updated = 0;
+	position_updated = 0;
 	}
 	*/
 
@@ -196,8 +196,8 @@ void routine(int OnlyReadGPS){
 			battery_SOC = max17055.getSOC();
 			battery_voltage = max17055.getAverageVoltage();
 			
-			if(battery_voltage < 3){
-				powerOff(1);
+			if(battery_voltage < 3.4){
+				powerOff(1, 0);
 				
 			}
 		}
@@ -237,8 +237,6 @@ void redrawRoutine(){
 
 
 void update_tracklog(){
-	
-
 	if (present_devices & SD_PRESENT)	{
 		if((statVar.ena_vector & ENA_TRACKLOG) || tracklog_stat == TRACKLOG_FILE_OPEN){
 			if (tracklog_stat == TRACKLOG_FILE_CLOSED){
@@ -288,7 +286,7 @@ void update_tracklog(){
 					tracklog.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n");
 					
 					tracklog.println("<gpx version=\"1.1\" creator=\"mojehustevario\">");
-					tracklog.println("        <note>, temperature, humidity, pressure, alt_filter, vario, g_meter, valid_speed, valid_heading, speed, heading, wind speed, wind direction, circle fit a, circle fit b, circle fit r, yaw, pitch, roll, ground level, ground level interpol, ground_lvl_skydrop, valid date, valid time, axmax, axmin, aymax, aymin, azmax, azmin, gxmax, gxmin, gymax, gymin, gzmax, gzmin, </note>");
+					tracklog.println("        <note>,latitude,longitude,gps_altitude,temperature, humidity, pressure, alt_filter, vario, g_meter, valid_speed, valid_heading, speed, heading, wind speed, wind direction, circle fit a, circle fit b, circle fit r, yaw, pitch, roll, ground level, ground level interpol, ground_lvl_skydrop, valid date, valid time, axmax, axmin, aymax, aymin, azmax, azmin, gxmax, gxmin, gymax, gymin, gzmax, gzmin,x1y1,x2y1,x1y2,x2y2,alt11, alt12, alt21,alt22,fractx,fracty,lat_dr,lon_dr</note>");
 					tracklog.println("  <trk>");
 					tracklog.println("    <trkseg>");
 
@@ -313,12 +311,12 @@ void update_tracklog(){
 					tracklog.println("</ele>");
 					
 					tracklog.print("        <note>,");
-										tracklog.print(fix.latitude(), 6);
-										tracklog.print(",");
-										tracklog.print(fix.longitude(),6);
-										tracklog.print(",");
-										tracklog.print(fix.altitude(), 1);
-										tracklog.print(",");
+					tracklog.print(fix.latitude(), 6);
+					tracklog.print(",");
+					tracklog.print(fix.longitude(),6);
+					tracklog.print(",");
+					tracklog.print(fix.altitude(), 1);
+					tracklog.print(",");
 					tracklog.print(enviromental_data.temperature*0.01f, 1);
 					tracklog.print(",");
 					tracklog.print(enviromental_data.humidity, 1);
@@ -401,20 +399,20 @@ void update_tracklog(){
 					tracklog.print(",");
 					tracklog.print(alt11);
 					tracklog.print(",");
-					 tracklog.print(alt12);
-					 tracklog.print(",");
-					 tracklog.print( alt21);
-					  tracklog.print(",");
-					  tracklog.print( alt22);
-					   tracklog.print(",");
-					   					 tracklog.print( fractx);
-					   					 tracklog.print(",");
-					   					 tracklog.print( fracty);
-					   					 tracklog.print(",");
-																   					 tracklog.print( lat_dr);
-																   					 tracklog.print(",");
-																   					 tracklog.print( lon_dr);
-																   					 tracklog.print(",");
+					tracklog.print(alt12);
+					tracklog.print(",");
+					tracklog.print( alt21);
+					tracklog.print(",");
+					tracklog.print( alt22);
+					tracklog.print(",");
+					tracklog.print( fractx);
+					tracklog.print(",");
+					tracklog.print( fracty);
+					tracklog.print(",");
+					tracklog.print( lat_dr);
+					tracklog.print(",");
+					tracklog.print( lon_dr);
+					tracklog.print(",");
 					
 
 					
@@ -474,12 +472,8 @@ void update_tracklog(){
 					//	SerialUSB.println("closing file");
 				}
 			}
-			
-			
-			
 		}
 	}
-	
 }
 
 void update_wind(){
@@ -533,9 +527,9 @@ void alt_agl(){
 		int int_lon = fix.longitudeL()/GPS_COORD_MUL;
 
 		
-	//	int x1y1, x2y1, x1y2, x2y2;
-	//int alt11, alt12, alt21, alt22;		
-	int x1, x2, y1, y2;
+		//	int x1y1, x2y1, x1y2, x2y2;
+		//int alt11, alt12, alt21, alt22;
+		int x1, x2, y1, y2;
 
 		//float fractx, fracty, x1inter, x2inter, interpolation;
 		
