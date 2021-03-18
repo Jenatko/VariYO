@@ -27,8 +27,8 @@ void save_statvar(){
 	#ifdef USEEEPROM
 	eepromWrite(0, statVar);
 	#else
-	int sdfail = save_statvar_SD(statVar);
-	if(sdfail)	statVarFlash.write(statVar);
+	save_statvar_SD(statVar);
+	statVarFlash.write(statVar);
 	#endif
 	
 }
