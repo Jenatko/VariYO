@@ -757,7 +757,7 @@ void menuSelector(menu *menuPointer, int selected) {
 
 		}
 		else if (selected == MENUITEM_DEBUG_BT_PASSTHROUGH){
-			
+			/*
 			while(!buttons.getFlag()){
 				if (SerialUSB.available()) {      // If anything comes in Serial (USB),
 					Serial.write(SerialUSB.read());   // read it and send it out Serial1 (pins 0 & 1)
@@ -768,6 +768,7 @@ void menuSelector(menu *menuPointer, int selected) {
 				}
 			}
 			buttons.getButtonPressed();
+			*/
 		}
 		else if (selected == MENUITEM_DEBUG_SW_RESET){
 			NVIC_SystemReset();

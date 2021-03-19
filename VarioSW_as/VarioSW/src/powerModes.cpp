@@ -137,10 +137,10 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	// pinMode(BUTTON_UP, OUTPUT);
 	// pinMode(BUTTON_DOWN, OUTPUT);
 	// pinMode(BUTTON_CENTER, INPUT_PULLUP);
-	
+	reinitializePins();
 	allLow();
 	if(GPS_BckpPwr) gpsBckpTimer();
-	else	digitalWrite(GPS_BCKP, 0);
+	else		digitalWrite(GPS_BCKP, 0);
 	SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 	
 	REG_EIC_INTENCLR = EIC_INTENCLR_EXTINT9;
@@ -174,7 +174,7 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 
 	reinitializePins();
 
-	BT_off();
+	//BT_off();
 	
 	
 	pinMode(SD_DETECT, INPUT_PULLUP);
@@ -281,7 +281,7 @@ void reinitializePins() {
 	pinMode(POWER_ENA, INPUT_PULLDOWN);
 	//digitalWrite(POWER_ENA, 0);
 	delay(150);
-	Serial.begin(115200);
+//	Serial.begin(115200);
 	pinMode(POWER_ENA, OUTPUT);
 	digitalWrite(POWER_ENA, POWER_ON);
 	digitalWrite(EEPROM_CS, 1);
@@ -507,4 +507,5 @@ void BT_off(void){
 	Serial.write("$$$");
 	delay(50);
 	Serial.write("O,0");
+	
 }
