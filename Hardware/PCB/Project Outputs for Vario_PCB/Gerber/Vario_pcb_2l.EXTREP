@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------------------
-Gerber File Extension Report For: Vario_pcb_2l.GBR   19/01/2020  13:12:17
+Gerber File Extension Report For: Vario_pcb_2l.GBR   26.6.2021  21:33:04
 ------------------------------------------------------------------------------------------
 
 
@@ -9,8 +9,10 @@ Layer Extension     Layer Description
 .GTL                Top Layer                               
 .GBL                Bottom Layer                            
 .GTO                Top Overlay                             
+.GTP                Top Paste                               
 .GTS                Top Solder                              
 .GBS                Bottom Solder                           
+.GBP                Bottom Paste                            
 .GBO                Bottom Overlay                          
 .GM2                Mechanical 2                            
 ------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------------------------------------------------------
-NCDrill File Report For: Vario_pcb_2l.PcbDoc   19/01/2020  13:12:21
+NCDrill File Report For: Vario_pcb_2l.PcbDoc   26.6.2021  21:33:05
 ----------------------------------------------------------------------------------------------------------------------------------
 
 Layer Pair : Top Layer to Bottom Layer
@@ -8,10 +8,10 @@ ASCII RoundHoles File : Vario_pcb_2l.TXT
 Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
 ----------------------------------------------------------------------------------------------------------------------------------
 T1      12mil (0.3mm)                                             Round             2         PTH        0.03inch (0.80mm)
-T2      14mil (0.35mm)                                            Round             271       PTH        33.26inch (844.72mm)
+T2      14mil (0.35mm)                                            Round             248       PTH        28.64inch (727.40mm)
 T3      16mil (0.4mm)                                             Round             22        PTH        4.31inch (109.59mm)
-T4      20mil (0.5mm)                                             Round             37        PTH        5.25inch (133.42mm)
-T5      24mil (0.6mm)                                             Round             6         PTH        1.47inch (37.34mm)
+T4      20mil (0.5mm)                                             Round             37        PTH        4.58inch (116.21mm)
+T5      24mil (0.6mm)                                             Round             3         PTH        0.12inch (3.03mm)
 T6      79mil (2mm)                                               Round             1         PTH        0.00inch (0.00mm)
 T7      91mil (2.3mm)                                             Round             5         PTH        4.82inch (122.54mm)
 T8      30mil (0.75mm)                                            Round             1         NPTH       0.00inch (0.00mm)
@@ -19,6 +19,6 @@ T9      41mil (1.05mm)                                            Round         
 T10     59mil (1.5mm)                                             Round             2         NPTH       0.39inch (10.00mm)
 T11     79mil (2mm)                                               Round             1         NPTH       0.00inch (0.00mm)
 ----------------------------------------------------------------------------------------------------------------------------------
-Totals                                                                              349
+Totals                                                                              323
 
-Total Processing Time (hh:mm:ss) : 00:00:00
+Total Processing Time (hh:mm:ss) : 00:00:01
