@@ -107,7 +107,7 @@ void displayUpdate(bool drawall = false){
 
 
 
-	if(ground_level != 0xffff)	statVar.AGLGauge.value[active_desktop] = /*(alt_filter*0.01f) -*/ ground_level;
+	if(ground_level != 0xffff)	statVar.AGLGauge.value[active_desktop] = (alt_filter*0.01f) - ground_level;
 	else statVar.AGLGauge.value[active_desktop] = NAN;
 	
 	
@@ -407,7 +407,8 @@ void setup() {
 
 
 	display.setCursor(10, 60);
-	if(IMU_init()==0){
+	int errorcode = IMU_init();
+	if(errorcode==0){
 		display.print("BMX160 ok");
 		present_devices |= BMX160_PRESENT;
 		#ifdef SERIALDEBUG
@@ -415,7 +416,8 @@ void setup() {
 		#endif
 	}
 	else{
-		display.print("BMX160 NOK");
+		display.print("BMX160 NOK ");
+		display.print(errorcode);
 		#ifdef SERIALDEBUG
 		SerialUSB.println("  BMX160 NOK");
 		#endif
@@ -578,6 +580,7 @@ void loop() {
 				statVar.BuzzerVolume = 255;
 				
 			}
+			buzzerSetVolume(statVar.BuzzerVolume);
 			break;
 			case LEFT:
 			active_desktop--;

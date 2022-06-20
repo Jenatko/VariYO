@@ -109,9 +109,10 @@ int  menu2_id = MENUID_VARIO;
 #define MENUITEM_DEBUG_DEBUGFLAG 9
 #define MENUITEM_DEBUG_CLEARFLAG 10
 #define MENUITEM_DEBUG_DEBUGVECTOR 11
+#define MENUITEM_DEBUG_USB_I2C 12
 
 
-char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel", "BT passthr", "SW reset", "debugflag", "clearflag", "debugvector"};
+char menu3_list[][15] = {"BMX160", "LPS33,SI7021", "MAX17055", "GPS", "print EEPROM", "32kHz test", "Print accel", "BT passthr", "SW reset", "debugflag", "clearflag", "debugvector", "usb i2c"};
 char menu3_name[15] = "Debug";
 int  menu3_id = MENUID_DEBUG;
 
@@ -759,13 +760,13 @@ void menuSelector(menu *menuPointer, int selected) {
 		else if (selected == MENUITEM_DEBUG_BT_PASSTHROUGH){
 			/*
 			while(!buttons.getFlag()){
-				if (SerialUSB.available()) {      // If anything comes in Serial (USB),
-					Serial.write(SerialUSB.read());   // read it and send it out Serial1 (pins 0 & 1)
-				}
+			if (SerialUSB.available()) {      // If anything comes in Serial (USB),
+			Serial.write(SerialUSB.read());   // read it and send it out Serial1 (pins 0 & 1)
+			}
 
-				if (Serial.available()) {     // If anything comes in Serial1 (pins 0 & 1)
-					SerialUSB.write(Serial.read());   // read it and send it out Serial (USB)
-				}
+			if (Serial.available()) {     // If anything comes in Serial1 (pins 0 & 1)
+			SerialUSB.write(Serial.read());   // read it and send it out Serial (USB)
+			}
 			}
 			buttons.getButtonPressed();
 			*/
@@ -796,6 +797,20 @@ void menuSelector(menu *menuPointer, int selected) {
 		}
 		else if (selected == MENUITEM_DEBUG_DEBUGVECTOR){
 			serialDebugVector = numpad(0);
+
+		}
+		else if (selected == MENUITEM_DEBUG_USB_I2C){
+			pinMode(PIN_USB_DM, OUTPUT);
+			pinMode(PIN_USB_DP, OUTPUT);
+			
+			while (!buttons.getFlag())	{
+				digitalWrite(PIN_USB_DM, 1);
+				digitalWrite(PIN_USB_DP, 1);
+				delay(50);
+				digitalWrite(PIN_USB_DM, 0);
+				digitalWrite(PIN_USB_DP, 0);
+				delay(50);
+			}	
 
 		}
 

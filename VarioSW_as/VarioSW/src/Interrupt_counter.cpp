@@ -195,7 +195,7 @@ void TC4_Handler()                              // Interrupt Service Routine (IS
 		
 		if(serialDebugVector & 1)	SerialUSB.print(alt_baro);
 		if(moredata)				SerialUSB.print(",");
-		if(serialDebugVector & 2)	SerialUSB.print(a_vertical_imu);
+		if(serialDebugVector & 2)	SerialUSB.print(a_vertical_imu, 5);
 		if(moredata)				SerialUSB.print(",");
 		if(serialDebugVector & 4)	SerialUSB.print(alt_filter);
 		if(moredata)				SerialUSB.print(",");

@@ -203,8 +203,20 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 	display.display(true);
 	display.setTextWrap(0);
 	
-	if(present_devices | BMX160_PRESENT)
-	IMU_init();
+	
+	digitalWrite(IMU_CS, 0);
+	delay(10);
+	digitalWrite(IMU_CS, 1);
+	delay(10);
+	
+	
+	if(present_devices | BMX160_PRESENT){
+		display.setCursor(10, 60);
+			display.print(IMU_init());
+
+	}
+		display.display(true);
+		delay(1000);
 
 	if(present_devices | LPS33_PRESENT)
 	lps33_init();
@@ -238,7 +250,8 @@ void powerOff(int lowVoltage, int GPS_BckpPwr) {
 
 void allLow() {
 	
-	//SPI.end();
+	SPI.end();
+	SPI_IRQ.end();
 
 	digitalWrite(SD_RST, 0);
 	
@@ -258,12 +271,15 @@ void allLow() {
 	digitalWrite(MOSI_PROG, 0);
 	digitalWrite(SCK_PROG, 0);
 	
+	
 	pinMode(MISO_IRQ, OUTPUT);
 	pinMode(MOSI_IRQ, OUTPUT);
 	pinMode(SCK_IRQ, OUTPUT);
+	
 	digitalWrite(MISO_IRQ, 0);
 	digitalWrite(MOSI_IRQ, 0);
 	digitalWrite(SCK_IRQ, 0);
+	
 	digitalWrite(POWER_ENA, POWER_OFF);
 	digitalWrite(HEAT, 0);
 	
@@ -311,6 +327,7 @@ void reinitializePins() {
 	pinPeripheral(SCK_PROG, PIO_SERCOM);
 
 	SPI.begin();
+	//SPI_IRQ.begin();
 
 
 

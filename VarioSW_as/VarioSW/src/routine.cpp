@@ -117,18 +117,18 @@ void routine(int OnlyReadGPS){
 			
 			
 			//debug to determine ranges for gyro and accelerometers
-			axmax = 0;
-			axmin = 0;
-			aymax = 0;
-			aymin = 0;
-			azmax = 0;
-			azmin = 0;
-			gxmax = 0;
-			gxmin = 0;
-			gymax = 0;
-			gymin = 0;
-			gzmax = 0;
-			gzmin = 0;
+			axmax = ax;
+			axmin = ax;
+			aymax = ay;
+			aymin = ay;
+			azmax = az;
+			azmin = az;
+			gxmax = gx;
+			gxmin = gx;
+			gymax = gy;
+			gymin = gy;
+			gzmax = gz;
+			gzmin = gz;
 			
 		}
 		else{
@@ -672,8 +672,8 @@ void alt_agl(){
 			}
 
 			// "-2" is, because a file has a overlap of 1 point to the next file.
-			uint32_t coord_div_x = GPS_COORD_MUL / (num_points_x - 1);
-			uint32_t coord_div_y = GPS_COORD_MUL / (num_points_y - 1);
+			uint32_t coord_div_x = GPS_COORD_MUL / (num_points_x - 2);
+			uint32_t coord_div_y = GPS_COORD_MUL / (num_points_y - 2);
 			uint16_t y = (lat % GPS_COORD_MUL) / coord_div_y;
 			uint16_t x = (lon % GPS_COORD_MUL) / coord_div_x;
 

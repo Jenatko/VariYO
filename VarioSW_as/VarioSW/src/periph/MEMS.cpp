@@ -81,7 +81,7 @@ void delayWrapper(uint32_t period){
 int8_t IMU_init(){
 	SPI_IRQ.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));
 	imu.id = IMU_CS;
-	imu.interface = BMI160_SPI_INTF;
+	imu.intf = BMI160_SPI_INTF;
 	imu.read = read_sensor;
 	imu.write = write_sensor;
 	imu.delay_ms = delayWrapper;
@@ -93,7 +93,11 @@ int8_t IMU_init(){
 	/* Select the Output data rate, range of accelerometer sensor */
 	imu.accel_cfg.odr = BMI160_ACCEL_ODR_100HZ;
 	imu.accel_cfg.range = BMI160_ACCEL_RANGE_4G;
-	imu.accel_cfg.bw = BMI160_ACCEL_BW_NORMAL_AVG4;
+	imu.accel_cfg.bw = 
+	//BMI160_ACCEL_BW_RES_AVG16 
+	 BMI160_ACCEL_BW_NORMAL_AVG4 
+	//BMI160_ACCEL_BW_OSR4_AVG1   
+	 ;
 
 	/* Select the power mode of accelerometer sensor */
 	imu.accel_cfg.power = BMI160_ACCEL_NORMAL_MODE;
@@ -109,12 +113,15 @@ int8_t IMU_init(){
 
 	/* Set the sensor configuration */
 	rslt |= bmi160_set_sens_conf(&imu);
+
+	
 	MAG_init();
 
 	fifo_frame.length = 0;
 	imu.fifo = &fifo_frame;
 	rslt |= bmi160_set_fifo_config(0xff,	BMI160_DISABLE, &imu);
 	rslt |= bmi160_set_fifo_config( BMI160_FIFO_AUX |BMI160_FIFO_ACCEL | BMI160_FIFO_GYRO | BMI160_FIFO_HEADER,	BMI160_ENABLE, &imu);
+	
 	SPI_IRQ.endTransaction();
 	return rslt;
 
