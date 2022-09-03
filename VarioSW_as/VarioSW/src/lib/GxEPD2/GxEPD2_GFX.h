@@ -12,13 +12,22 @@
 #ifndef _GxEPD2_GFX_H_
 #define _GxEPD2_GFX_H_
 
+// uncomment next line to use class GFX of library GFX_Root instead of Adafruit_GFX
+//#include <GFX.h>
+
+#if defined(_GFX_H_)
+#define GxEPD2_GFX_ROOT_CLASS GFX
+#else
 #include <Adafruit_GFX.h>
+#define GxEPD2_GFX_ROOT_CLASS Adafruit_GFX
+#endif
+
 #include <GxEPD2_EPD.h>
 
-class GxEPD2_GFX : public Adafruit_GFX
+class GxEPD2_GFX : public GxEPD2_GFX_ROOT_CLASS
 {
   public:
-    GxEPD2_GFX(GxEPD2_EPD& _epd2, int16_t w, int16_t h) : Adafruit_GFX(w, h), epd2(_epd2) {};
+    GxEPD2_GFX(GxEPD2_EPD& _epd2, int16_t w, int16_t h) : GxEPD2_GFX_ROOT_CLASS(w, h), epd2(_epd2) {};
     virtual uint16_t pages() = 0;
     virtual uint16_t pageHeight() = 0;
     virtual bool mirror(bool m) = 0;
@@ -28,7 +37,7 @@ class GxEPD2_GFX : public Adafruit_GFX
     // this can be used to avoid the repeated initial full refresh on displays with fast partial update
     // NOTE: garbage will result on fast partial update displays, if initial full update is omitted after power loss
     // pulldown_rst_mode true for alternate RST handling to avoid feeding 5V through RST pin
-    virtual void init(uint32_t serial_diag_bitrate, bool initial, bool pulldown_rst_mode = false) = 0;
+    virtual void init(uint32_t serial_diag_bitrate, bool initial, uint16_t reset_duration = 20, bool pulldown_rst_mode = false) = 0;
     virtual void fillScreen(uint16_t color) = 0; // 0x0 black, >0x0 white, to buffer
     // display buffer content to screen, useful for full screen buffer
     virtual void display(bool partial_update_mode = false) = 0;

@@ -584,19 +584,13 @@
     <Compile Include="src\lib\FlashStorage\FlashStorage.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\lib\GxEPD2\epd\GxEPD2_154_D67.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\lib\GxEPD2\epd\GxEPD2_154_D67.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\lib\GxEPD2\GxEPD2.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\lib\GxEPD2\GxEPD2_154.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\lib\GxEPD2\GxEPD2_154.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\lib\GxEPD2\GxEPD2_154_D67.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\lib\GxEPD2\GxEPD2_154_D67.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lib\GxEPD2\GxEPD2_BW.h">
