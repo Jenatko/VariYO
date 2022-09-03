@@ -52,7 +52,7 @@ if(len(sys.argv) != 3):
 
 flag_found = False
 print("Looking for ports.")
-for i in range(port_start, 20):
+for i in range(port_start, 40):
     COM0 = "COM"+repr(i)
     print("\tConnecting to port {:s}...".format(COM0), end='')
     try:
@@ -67,26 +67,30 @@ for i in range(port_start, 20):
         break
 print("Done.")
 
+time.sleep(2)
+
 if not flag_found:
     print('No open port found. Aborting.')
     exit(-1)
 
-flag = False
-print("Connecting to port {:s}...".format(COM1), end='')
-for k in range(2, 100):
-  try:
-    ser = serial.Serial(COM1, 1200)
-    ser.close()
-    flag = True
-    print("Success.")
-    break
-  except:
-    print(".", end='')
-    time.sleep(0.1)
+print("Looking for programming port.")
+for i in range(port_start, 30):
+    COM1 = "COM"+repr(i)
+    print("\tConnecting to port {:s}...".format(COM1), end='')
+    try:
+      ser = serial.Serial(COM1, 1200)
+      ser.close()
+    except Exception as ex:
+      print("Not this one.")
+    else:
+        flag_found = True
+        print("Found open port: ", COM0)
+        break
+print("Done.")
+
+time.sleep(2)
  
-COM = COM0
-if flag:
-    COM = COM1
+COM = COM1
     
     
  

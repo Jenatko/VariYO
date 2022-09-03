@@ -82,7 +82,7 @@ class SerialPlotter(QtWidgets.QWidget):
 
         flag_found = False
         print("Looking for ports.")
-        for i in range(2, 20):
+        for i in range(2, 30):
             COM0 = "COM" + repr(i)
             print("\tConnecting to port {:s}...".format(COM0), end='')
             try:
